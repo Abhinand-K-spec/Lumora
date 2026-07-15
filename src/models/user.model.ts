@@ -1,3 +1,59 @@
 import {Schema, model} from 'mongoose';
+import {userRole} from '../shared/enums/UserRole.js';
+import type {IUser} from '../interfaces/IUser.js';
+import { accountStatus } from '../shared/enums/accountStatus.js';
 
 
+const userSchema = new Schema<IUser>(
+    {
+        name:{
+            type:String,
+            required:true,
+            trim:true,
+        },
+
+        email:{
+            type:String,
+            required:true,
+            unique:true,
+            trim:true,
+        },
+
+        password:{
+            type:String,
+            required:true
+        },
+
+        phone:{
+            type:String,
+            required:true,
+            trim:true
+        },
+
+        profilePhoto:{
+            type:String,
+            default:'',
+        },
+
+        role:{
+            type:String,
+            enum:Object.values(userRole),
+            default:userRole.USER,
+            required:true
+        },
+
+        accountStatus:{
+            type:String,
+            enum:Object.values(accountStatus),
+            defaul:accountStatus.Active
+        }
+
+    },
+
+    {
+        timestamps:true
+    }
+)
+
+
+export default userSchema;
