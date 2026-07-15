@@ -32,7 +32,7 @@ const userSchema = new Schema<IUser>(
 
         profilePhoto:{
             type:String,
-            default:'',
+            default:null,
         },
 
         role:{
