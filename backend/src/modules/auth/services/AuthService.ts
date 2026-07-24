@@ -8,6 +8,7 @@ import { accountStatus } from "../../../shared/enums/accountStatus.js";
 import type { LoginUserDto } from "../dto/LoginUserDto.js";
 import type { LoginUserResponseDto } from "../dto/LoginUserResponseDto.js";
 import { AppError } from "../../../shared/errors/AppError.js";
+import { UserMapper } from "../dto/UserMapper.js";
 
 
 export class AuthService implements IAuthService{
@@ -40,13 +41,13 @@ export class AuthService implements IAuthService{
         const user = await this._userRepository.findByEmail(data.email);
 
         if(!user){
-            throw new AppError(409,'Invalid email');
+            throw new AppError(409,'Invalid email or password');
         }
 
         const passwordValid = await this._passwordService.comparePassword(data.password,user.password);
 
         if(!passwordValid){
-            throw new AppError(409,'Wrong password');
+            throw new AppError(409,'Invalid email or password');
         }
 
         const accessToken = this._tokenService.generateAccessToken({id:user._id.toString(),role:user.role});
@@ -57,12 +58,7 @@ export class AuthService implements IAuthService{
         return {
             accessToken,
             refreshToken,
-            user:{
-                id : user._id.toString(),
-                name :user.name,
-                email:user.email,
-                role:user.role,
-            }
+            user:UserMapper.toLoginResponseUser(user)
         }
     }
 
