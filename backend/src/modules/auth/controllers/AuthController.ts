@@ -6,7 +6,7 @@ import type { LoginUserDto } from '../dto/LoginUserDto.js';
 
 export class AuthController{
     constructor(
-        private readonly authService : IAuthService
+        private readonly _authService : IAuthService
     ){}
 
     
@@ -14,7 +14,7 @@ export class AuthController{
         try {
             const data:RegisterUserDto = req.body;
 
-            const response = await this.authService.register(data);
+            const response = await this._authService.register(data);
 
 
             res.status(201).json({
@@ -33,7 +33,7 @@ export class AuthController{
         try {
             const data:LoginUserDto = req.body;
 
-            const response = await this.authService.login(data);
+            const response = await this._authService.login(data);
 
 
             res.cookie("accessToken", response.accessToken, {

@@ -12,21 +12,21 @@ import { AppError } from "../../../shared/errors/AppError.js";
 
 export class AuthService implements IAuthService{
     constructor(
-        private readonly userRepository:IUserRepository,
-        private readonly passwordService:PasswordService,
-        private readonly tokenService:TokenService
+        private readonly _userRepository:IUserRepository,
+        private readonly _passwordService:PasswordService,
+        private readonly _tokenService:TokenService
     ){}
 
     async register(data:RegisterUserDto):Promise<void>{
-        const existing = await this.userRepository.findByEmail(data.email);
+        const existing = await this._userRepository.findByEmail(data.email);
 
         if(existing){
             throw new AppError(409,'User already exists');
         }
 
-        const hashedPassword = await this.passwordService.hashPassword(data.password);
+        const hashedPassword = await this._passwordService.hashPassword(data.password);
 
-        await this.userRepository.create({
+        await this._userRepository.create({
             name:data.name,
             email:data.email,
             password:hashedPassword,
@@ -37,22 +37,22 @@ export class AuthService implements IAuthService{
 
 
     async login(data: LoginUserDto): Promise<LoginUserResponseDto> {
-        const user = await this.userRepository.findByEmail(data.email);
+        const user = await this._userRepository.findByEmail(data.email);
 
         if(!user){
             throw new AppError(409,'Invalid email');
         }
 
-        const passwordValid = await this.passwordService.comparePassword(data.password,user.password);
+        const passwordValid = await this._passwordService.comparePassword(data.password,user.password);
 
         if(!passwordValid){
             throw new AppError(409,'Wrong password');
         }
 
-        const accessToken = this.tokenService.generateAccessToken({id:user._id.toString(),role:user.role});
-        const refreshToken = this.tokenService.generateRefreshToken({id:user._id,role:user.role});
+        const accessToken = this._tokenService.generateAccessToken({id:user._id.toString(),role:user.role});
+        const refreshToken = this._tokenService.generateRefreshToken({id:user._id,role:user.role});
 
-        await this.userRepository.updateRefreshToken(user._id.toString(),refreshToken);
+        await this._userRepository.updateRefreshToken(user._id.toString(),refreshToken);
 
         return {
             accessToken,

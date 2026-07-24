@@ -4,6 +4,7 @@ import authRoutes from './modules/auth/routes/auth.routes.js';
 import cors from 'cors';
 import { AppError } from './shared/errors/AppError.js';
 import cookieParser from 'cookie-parser';
+import appRoutes from './modules/app/routes/app.routes.js';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
   });
 
 app.use('/api/auth',authRoutes);
+app.use('/api/app',appRoutes);
 
 
 app.use((req:Request,res:Response)=>{
