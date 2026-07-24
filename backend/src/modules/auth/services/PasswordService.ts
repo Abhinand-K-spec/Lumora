@@ -8,6 +8,6 @@ export class PasswordService{
     }
 
     async comparePassword(password:string,hashedPassword:string):Promise<boolean>{
-        return await compare(password,hashedPassword);
+        return await bcrypt.compare(password,hashedPassword);
     }
 }

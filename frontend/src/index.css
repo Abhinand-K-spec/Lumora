@@ -8,7 +8,7 @@ body{
 }
 
 
-@theme {
+@theme{
   --font-heading: "Noto Serif", serif;
   --font-body: "Hanken Grotesk", sans-serif;
 
@@ -37,5 +37,24 @@ body{
 
 
 #register_logo{
-  width: 50vh;
+  width: 40vh;
+}
+
+[data-sonner-toast] {
+  background: #D8B06A !important;
+  color: #101522 !important;
+  border: 1px solid #000 !important;
+  border-radius: 12px !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  border-left: 10px solid #0b933d !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  border-left: 10px solid #a90a0a !important;
+}
+
+[data-sonner-toast] [data-title] {
+  font-weight: 600;
 }

@@ -26,7 +26,6 @@ const userSchema = new Schema<IUser>(
 
         phone:{
             type:String,
-            required:true,
             trim:true
         },
 

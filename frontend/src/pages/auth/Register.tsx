@@ -10,6 +10,7 @@ const Register = () => {
             <RegisterHero/>
             <RegisterForm/>
         </div>
+          
     </div>
   )
 }

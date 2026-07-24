@@ -1,7 +1,9 @@
 import express, { urlencoded } from 'express';
 import type {Request, Response, NextFunction} from 'express';
 import authRoutes from './modules/auth/routes/auth.routes.js';
-
+import cors from 'cors';
+import { AppError } from './shared/errors/AppError.js';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -9,6 +11,17 @@ app.use(express.json());
 
 app.use(express.urlencoded({extended:true}));
 
+app.use(cookieParser());
+
+app.use(cors({
+    origin:'http://localhost:5173',
+    credentials:true,
+}));
+
+app.use((req, res, next) => {
+    console.log(req.method, req.url);
+    next();
+  });
 
 app.use('/api/auth',authRoutes);
 
@@ -21,16 +34,21 @@ app.use((req:Request,res:Response)=>{
 });
 
 
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err);
 
-app.use((err:Error,req:Request,res:Response,next:NextFunction)=>{
-    console.log(err);
+    if (err instanceof AppError) {
+        return res.status(err.statusCode).json({
+            success: false,
+            message: err.message,
+        });
+    }
 
-
-    res.status(500).json({
-        success:false,
-        message:err.message
-    })
-})
+    return res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+    });
+});
 
 
 
