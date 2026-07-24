@@ -1,5 +1,5 @@
-import type { IUser } from "../../../interfaces/IUser.js"; 
+import type { LoginUserResponseDto } from "../../auth/dto/LoginUserResponseDto.js";
 
 export interface IAppService {
-    getCurrentUser(userId: string): Promise<IUser | null>;
+    getCurrentUser(userId: string): Promise<LoginUserResponseDto["user"]>;
 }

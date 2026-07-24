@@ -1,6 +1,7 @@
 import type { IAppService } from "../interfaces/IAppService.js";
 import type { IUserRepository } from "../../../repositories/IUserRepository.js";
 import { AppError } from "../../../shared/errors/AppError.js";
+import { UserMapper } from "../../auth/dto/UserMapper.js";
 
 export class AppService implements IAppService {
     constructor(
@@ -14,6 +15,6 @@ export class AppService implements IAppService {
             throw new AppError(404, "User not found");
         }
 
-        return user;
+        return UserMapper.toLoginResponseUser(user);
     }
 }
