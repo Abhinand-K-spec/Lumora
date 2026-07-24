@@ -8,4 +8,23 @@ const api = axios.create({
   },
 });
 
+api.interceptors.response.use(
+  (response) => {
+      return response;
+  },
+
+  async (error) => {
+    const originalRequest = error.config;
+
+    if(error.response?.status===401 && !originalRequest._retry){
+      originalRequest._retry = true;
+
+      await api.post('/auth/refresh');
+
+      return api(originalRequest);
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
