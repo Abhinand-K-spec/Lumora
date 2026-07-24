@@ -1,4 +1,4 @@
-import {  useState, type ReactNode } from "react";
+import {  useEffect, useState, type ReactNode } from "react";
 import { AuthContext } from "./AuthContext";
 import type { LoginFormData } from "../schemas/auth/loginSchema";
 import authService from "../services/authService";
@@ -13,6 +13,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User|null>(null);
+  const [loading, setLoading] = useState(true);
 
 
   // login function
@@ -29,11 +30,43 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   }
 
 
+  //getUser function
+  const getCurrentUser = async()=>{
+    try {
+        const response = await authService.getCurrentUser();
+
+        setUser(response.data.user);
+
+        setIsAuthenticated(true);
+
+    } catch (error) {
+
+        console.error(error);
+        setUser(null);
+        setIsAuthenticated(false);
+
+
+    }finally{
+        setLoading(false);
+    }
+  }
+
+
+  useEffect(()=>{
+    const initializeauth = async()=>{
+        await getCurrentUser();
+    };
+    initializeauth();
+  },[])
+
+
 //logout function 
 
-const logout = ()=>{
-  setIsAuthenticated(false);
-  setUser(null);
+const logout = async()=>{
+
+    await authService.logout();
+    setIsAuthenticated(false);
+    setUser(null);
 }
 
   return (
@@ -41,6 +74,7 @@ const logout = ()=>{
       value={{
         user,
         isAuthenticated,
+        loading,
         login,
         logout
       }}

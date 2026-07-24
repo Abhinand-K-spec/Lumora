@@ -11,6 +11,14 @@ const authService = {
         const response = await api.post('/auth/login',data);
 
         return response.data;
+    },
+
+    logout(){
+        return api.get('/auth/logout');
+    },
+
+    getCurrentUser(){
+        return api.get('/app/me')
     }
 };
 
