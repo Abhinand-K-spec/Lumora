@@ -50,7 +50,7 @@ export class AuthService implements IAuthService{
         }
 
         const accessToken = this._tokenService.generateAccessToken({id:user._id.toString(),role:user.role});
-        const refreshToken = this._tokenService.generateRefreshToken({id:user._id,role:user.role});
+        const refreshToken = this._tokenService.generateRefreshToken({id:user._id.toString(),role:user.role});
 
         await this._userRepository.updateRefreshToken(user._id.toString(),refreshToken);
 
@@ -67,5 +67,25 @@ export class AuthService implements IAuthService{
     }
 
 
+    async refresh(refreshToken: string): Promise<string> {
+
+        const payload = this._tokenService.verifyRefreshToken(refreshToken);
+
+        const user = await this._userRepository.findById(payload.id);
+
+        if(!user){
+            throw new AppError(404,'User not found');
+        }
+
+        if(user.refreshToken!==refreshToken){
+            throw new AppError(401,'Refresh token is invalid');
+        }
+
+        const accessToken = this._tokenService.generateAccessToken({
+            id:user._id.toString(),
+            role:user.role,
+        })
+        return accessToken;
+    }
 
 }

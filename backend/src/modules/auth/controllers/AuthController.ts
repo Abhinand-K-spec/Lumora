@@ -2,6 +2,8 @@ import type {Request, Response, NextFunction} from 'express';
 import type { IAuthService } from '../interfaces/IAuthService.js';
 import type { RegisterUserDto } from '../dto/RegisterUserDto.js';
 import type { LoginUserDto } from '../dto/LoginUserDto.js';
+import { AuthService } from '../services/AuthService.js';
+import { AppError } from '../../../shared/errors/AppError.js';
 
 
 export class AuthController{
@@ -27,6 +29,37 @@ export class AuthController{
         }
     }
 
+
+
+    async refresh(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try {
+
+            const refreshToken = req.cookies.refreshToken;
+
+            if(!refreshToken){
+                throw new AppError(401,'Refresh token is missing');
+            }
+
+            
+            const accessToken = await this._authService.refresh(refreshToken);
+
+            res.cookie("accessToken", accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 15 * 60 * 1000,
+            });
+
+            res.status(200).json({
+                success: true,
+                message: "Access token refreshed successfully",
+            });
+
+            
+        }catch(error) {
+                next(error);
+        }
+    }
 
 
     async login(req:Request,res:Response, next:NextFunction):Promise<void>{
