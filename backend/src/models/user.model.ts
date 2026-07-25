@@ -28,6 +28,10 @@ const userSchema = new Schema<IUser>(
             type:String,
             trim:true
         },
+        isEmailVerified:{
+            type:Boolean,
+            default:false,
+        },
 
         profilePhoto:{
             type:String,

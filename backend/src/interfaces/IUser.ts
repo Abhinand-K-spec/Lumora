@@ -14,4 +14,5 @@ export interface IUser{
     updatedAt:Date;
     createdAt:Date;
     accountStatus:string;
+    isEmailVerified:boolean;
 }
