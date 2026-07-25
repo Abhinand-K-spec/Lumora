@@ -9,13 +9,17 @@ import type { LoginUserDto } from "../dto/LoginUserDto.js";
 import type { LoginUserResponseDto } from "../dto/LoginUserResponseDto.js";
 import { AppError } from "../../../shared/errors/AppError.js";
 import { UserMapper } from "../dto/UserMapper.js";
+import type { IEmailService } from "../interfaces/IEmailService.js";
+import { generateOTP } from "../../../utils/otp.util.js";
 
 
 export class AuthService implements IAuthService{
     constructor(
         private readonly _userRepository:IUserRepository,
         private readonly _passwordService:PasswordService,
-        private readonly _tokenService:TokenService
+        private readonly _tokenService:TokenService,
+        private readonly _emailService:IEmailService
+
     ){}
 
     async register(data:RegisterUserDto):Promise<void>{
@@ -24,6 +28,10 @@ export class AuthService implements IAuthService{
         if(existing){
             throw new AppError(409,'User already exists');
         }
+
+        const otp = generateOTP();
+
+        const otpExpire = new Date( Date.now() + 10*60*1000 )
 
         const hashedPassword = await this._passwordService.hashPassword(data.password);
 
