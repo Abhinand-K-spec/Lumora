@@ -3,6 +3,7 @@ import type { LoginUserDto } from "../dto/LoginUserDto.js";
 import type { LoginUserResponseDto } from "../dto/LoginUserResponseDto.js";
 import type{ RegisterUserDto } from "../dto/RegisterUserDto.js";
 import type { ResendOtpDto } from "../dto/ResendOTPDto.js";
+import type { ResetPasswordDto } from "../dto/ResetPasswordDto.js";
 import type { VerifyEmailDto } from "../dto/VerifyEmailDto.js";
 
 
@@ -14,4 +15,5 @@ export interface IAuthService {
     verifyEmail(data: VerifyEmailDto):Promise<void>;
     resendOtp(data:ResendOtpDto):Promise<void>;
     forgotPassword(data:ForgotPasswordDto):Promise<void>;
+    resetPassword(data: ResetPasswordDto): Promise<void>;
 }

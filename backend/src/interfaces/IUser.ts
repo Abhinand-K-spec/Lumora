@@ -7,7 +7,7 @@ export interface IUser{
     phone:string;
     bio:string;
     profilePhoto?:string;
-    refreshToken?:string;
+    refreshToken?:string | null;
     role:userRole;
     name:string;
     password:string;

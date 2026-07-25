@@ -16,6 +16,7 @@ import type { VerifyEmailDto } from "../dto/VerifyEmailDto.js";
 import type { ResendOtpDto } from "../dto/ResendOTPDto.js";
 import type { ForgotPasswordDto } from "../dto/ForgotPasswordDto.js";
 import { passwordResetEmail } from "../templates/email/passwordReset.email.js";
+import type { ResetPasswordDto } from "../dto/ResetPasswordDto.js";
 
 
 export class AuthService implements IAuthService{
@@ -250,6 +251,43 @@ export class AuthService implements IAuthService{
             html
         );
 
+
+    }
+
+
+    async resetPassword(data: ResetPasswordDto): Promise<void> {
+        
+        const user = await this._userRepository.findByEmail(data.email);
+
+        if (!user) {
+            throw new AppError(404, "User not found");
+        }
+
+        if (!user.passwordResetOtp) {throw new AppError(400,"No reset OTP found.");
+        }
+
+        if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
+            throw new AppError(400,"OTP has expired");
+        }
+
+        const isOtpValid =await this._passwordService.comparePassword(data.otp,user.passwordResetOtp);
+
+        if (!isOtpValid) {
+            throw new AppError(400,"Invalid OTP");
+        }
+
+        const hashedPassword = await this._passwordService.hashPassword(data.newPassword);
+
+
+        await this._userRepository.update(
+            user._id.toString(),
+            {
+                password: hashedPassword,
+                passwordResetOtp: null,
+                passwordResetOtpExpiry: null,
+                refreshToken: null
+            }
+        );
 
     }
 
