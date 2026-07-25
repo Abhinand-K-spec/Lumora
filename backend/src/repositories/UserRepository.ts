@@ -3,7 +3,7 @@ import type { IUser } from "../interfaces/IUser.js";
 import type { IUserRepository } from "./IUserRepository.js";
 
 export class UserRepository implements IUserRepository{
-    async create(user:IUser):Promise <IUser>{
+    async create(user: Partial<IUser>):Promise <IUser>{
         return await User.create(user);
     }
 
@@ -21,17 +21,18 @@ export class UserRepository implements IUserRepository{
         });
     }
 
-    async delete(id: string): Promise<boolean> {
-        const result = User.deleteOne({id});
+    async deleteById(id: string): Promise<boolean> {
+        const result = await User.deleteOne({ _id:id });
         return !!result;
     }
 
     async exists(email: string): Promise<boolean> {
-        const user = User.find({email});
+        const user = await User.findOne({ email });
+
         return !!user;
     }
 
     async updateRefreshToken(id: string, refreshToken: string): Promise<IUser | null> {
-        return await User.findByIdAndUpdate(id,{refreshToken,new :true})
+        return await User.findByIdAndUpdate(id,{refreshToken},{new :true})
     }
 }

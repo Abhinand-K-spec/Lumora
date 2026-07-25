@@ -32,7 +32,15 @@ const userSchema = new Schema<IUser>(
             type:Boolean,
             default:false,
         },
-
+        emailVerificationOtp: {
+            type: String,
+            default: null,
+        },
+        
+        emailVerificationOtpExpires: {
+            type: Date,
+            default: null,
+        },
         profilePhoto:{
             type:String,
             default:null,

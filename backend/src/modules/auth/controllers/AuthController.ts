@@ -97,6 +97,25 @@ export class AuthController{
     }
 
 
+
+    async verifyEmail(req: Request,res: Response) {
+        await this._authService.verifyEmail(req.body);
+    
+        res.status(200).json({
+            success: true,
+            message: "Email verified successfully."
+        });
+    }
+
+
+    async resendOtp(req: Request,res: Response) {
+        await this._authService.resendOtp(req.body);
+    
+        res.status(200).json({
+            success: true,
+            message: "OTP sent successfully."
+        });
+    }
     
 
 }

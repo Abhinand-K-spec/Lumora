@@ -6,7 +6,7 @@ export interface IUserRepository {
     findById(id : string) : Promise <IUser | null>;
     findByEmail(email:string) : Promise <IUser | null>;
     update(id:string, data:Partial<IUser>) : Promise<IUser | null>;
-    delete(id:string) : Promise<boolean>;
+    deleteById(id:string) : Promise<boolean>;
     exists(email:string) : Promise<boolean>;
     updateRefreshToken(id:string, refreshToken:string):Promise<IUser|null>;
 }

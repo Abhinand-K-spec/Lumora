@@ -1,6 +1,7 @@
 import type { IUserRepository } from "../../../repositories/IUserRepository.js";
 import { PasswordService } from "./PasswordService.js";
 import { TokenService } from "./TokenService.js";
+import { OTPService } from './OTPService.js';
 import type { IAuthService } from "../interfaces/IAuthService.js";
 import type { RegisterUserDto } from "../dto/RegisterUserDto.js";
 import { userRole } from "../../../shared/enums/UserRole.js";
@@ -10,7 +11,9 @@ import type { LoginUserResponseDto } from "../dto/LoginUserResponseDto.js";
 import { AppError } from "../../../shared/errors/AppError.js";
 import { UserMapper } from "../dto/UserMapper.js";
 import type { IEmailService } from "../interfaces/IEmailService.js";
-import { generateOTP } from "../../../utils/otp.util.js";
+import { verificationEmail } from "../templates/email/verification.email.js";
+import type { VerifyEmailDto } from "../dto/VerifyEmailDto.js";
+import type { ResendOtpDto } from "../dto/ResendOTPDto.js";
 
 
 export class AuthService implements IAuthService{
@@ -18,7 +21,8 @@ export class AuthService implements IAuthService{
         private readonly _userRepository:IUserRepository,
         private readonly _passwordService:PasswordService,
         private readonly _tokenService:TokenService,
-        private readonly _emailService:IEmailService
+        private readonly _emailService:IEmailService,
+        private readonly _otpService:OTPService
 
     ){}
 
@@ -29,9 +33,12 @@ export class AuthService implements IAuthService{
             throw new AppError(409,'User already exists');
         }
 
-        const otp = generateOTP();
+        const otp = this._otpService.generateOTP();
 
-        const otpExpire = new Date( Date.now() + 10*60*1000 )
+        const hashedOtp = await this._passwordService.hashPassword(otp);
+
+
+        const otpExpiry = this._otpService.getOTPExpiry();
 
         const hashedPassword = await this._passwordService.hashPassword(data.password);
 
@@ -41,7 +48,19 @@ export class AuthService implements IAuthService{
             password:hashedPassword,
             role:userRole.USER,
             accountStatus:accountStatus.Active,
-        })
+
+            isEmailVerified: false,
+            emailVerificationOtp: hashedOtp,
+            emailVerificationOtpExpires: otpExpiry,
+        });
+
+        const html = verificationEmail(data.name,otp);
+
+        await this._emailService.sendEmail(
+            data.email,
+            "Verify your Lumora Account",
+            html
+        );
     }
 
 
@@ -91,5 +110,98 @@ export class AuthService implements IAuthService{
         })
         return accessToken;
     }
+
+    async verifyEmail(data: VerifyEmailDto): Promise<void> {
+        
+        const user = await this._userRepository.findByEmail(data.email);
+
+        if(!user){
+            throw new AppError(401,'User not found');
+        }
+
+        if (user.isEmailVerified) {
+            throw new AppError(
+                400,
+                "Email is already verified"
+            );
+        }
+
+        if (
+            !user.emailVerificationOtpExpires ||
+            user.emailVerificationOtpExpires < new Date()
+        ) {
+            throw new AppError(
+                400,
+                "OTP has expired"
+            );
+        }
+
+        if (!user.emailVerificationOtp) {
+            throw new AppError(
+                400,
+                "No OTP found. Please request a new OTP."
+            );
+        }
+
+
+        const isOtpValid = await this._passwordService.comparePassword(
+            data.otp,
+            user.emailVerificationOtp
+        );
+
+        if (!isOtpValid) {
+            throw new AppError(
+                400,
+                "Invalid OTP"
+            );
+        }
+    }
+
+
+    async resendOtp(data: ResendOtpDto): Promise<void> {
+
+        const user = await this._userRepository.findByEmail(data.email); 
+
+        if (!user) {
+            throw new AppError(404, "User not found");
+        }
+
+        if (user.isEmailVerified) {
+            throw new AppError(
+                400,
+                "Email is already verified."
+            );
+        }
+
+
+        const otp = this._otpService.generateOTP();
+
+        const hashedOtp = await this._passwordService.hashPassword(
+            otp
+        );
+
+        const otpExpiry = this._otpService.getOTPExpiry();
+
+        await this._userRepository.update(
+            user._id.toString(),
+            {
+                emailVerificationOtp: hashedOtp,
+                emailVerificationOtpExpires: otpExpiry
+            }
+        );
+
+        const html = verificationEmail(
+            user.name,
+            otp
+        );
+        
+        await this._emailService.sendEmail(
+            user.email,
+            "Verify your Lumora Account",
+            html
+        );
+    }
+
+
 
 }
