@@ -16,4 +16,5 @@ export interface IAuthService {
     resendOtp(data:ResendOtpDto):Promise<void>;
     forgotPassword(data:ForgotPasswordDto):Promise<void>;
     resetPassword(data: ResetPasswordDto): Promise<void>;
+    logout(userId:string):Promise<void>;
 }

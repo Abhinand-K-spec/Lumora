@@ -291,4 +291,20 @@ export class AuthService implements IAuthService{
 
     }
 
+    async logout(userId: string): Promise<void> {
+        
+        const user = this._userRepository.findById(userId);
+
+        if(!user){
+            throw new AppError(404,'User not found');
+        }
+
+        await this._userRepository.update(
+            userId,
+            {
+                refreshToken: null
+            }
+        );
+    }
+
 }

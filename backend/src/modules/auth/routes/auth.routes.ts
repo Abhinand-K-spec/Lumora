@@ -32,6 +32,6 @@ router.post( "/verify-email",authController.verifyEmail.bind(authController));
 router.post("/resend-otp",authController.resendOtp.bind(authController));
 router.post('/forgot-password',authController.forgotPassword.bind(authController));
 router.post('/reset-password',authController.resetPassword.bind(authController));
-
+router.post('/logout',authController.logout.bind(authController));
 
 export default router;
