@@ -60,6 +60,14 @@ const userSchema = new Schema<IUser>(
         },
         refreshToken:{
             type:String
+        },
+
+        passwordResetOtp:{
+            type:String
+        },
+
+        passwordResetOtpExpiry:{
+            type:Date
         }
 
     },

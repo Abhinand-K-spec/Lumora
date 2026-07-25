@@ -15,6 +15,8 @@ export interface IUser{
     createdAt:Date;
     accountStatus:string;
     isEmailVerified:boolean;
-    emailVerificationOtp:string;
-    emailVerificationOtpExpires:Date;
+    emailVerificationOtp?:string|null;
+    emailVerificationOtpExpires?:Date|null;
+    passwordResetOtp?:string |null;
+    passwordResetOtpExpiry?:Date | null;
 }

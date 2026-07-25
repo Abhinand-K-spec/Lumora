@@ -14,6 +14,8 @@ import type { IEmailService } from "../interfaces/IEmailService.js";
 import { verificationEmail } from "../templates/email/verification.email.js";
 import type { VerifyEmailDto } from "../dto/VerifyEmailDto.js";
 import type { ResendOtpDto } from "../dto/ResendOTPDto.js";
+import type { ForgotPasswordDto } from "../dto/ForgotPasswordDto.js";
+import { passwordResetEmail } from "../templates/email/passwordReset.email.js";
 
 
 export class AuthService implements IAuthService{
@@ -155,6 +157,16 @@ export class AuthService implements IAuthService{
                 "Invalid OTP"
             );
         }
+
+
+        await this._userRepository.update(
+            user._id.toString(),
+            {
+                isEmailVerified: true,
+                emailVerificationOtp: null,
+                emailVerificationOtpExpires: null
+            }
+        );
     }
 
 
@@ -203,5 +215,42 @@ export class AuthService implements IAuthService{
     }
 
 
+    async forgotPassword(data: ForgotPasswordDto): Promise<void> {
+        
+        const user = await this._userRepository.findByEmail(data.email);
+
+        if(!user){
+            throw new AppError(404,'User not found');
+        }
+
+
+        const otp = this._otpService.generateOTP();
+
+        const hashedOtp = await this._passwordService.hashPassword(otp);
+
+        const otpExpiry = this._otpService.getOTPExpiry();
+
+
+        await this._userRepository.update(
+            user._id.toString(),
+            {
+                passwordResetOtp: hashedOtp,
+                passwordResetOtpExpiry: otpExpiry
+            }
+        );
+
+        const html = passwordResetEmail(
+            user.name,
+            otp
+        );
+        
+        await this._emailService.sendEmail(
+            user.email,
+            "Reset Your Lumora Password",
+            html
+        );
+
+
+    }
 
 }

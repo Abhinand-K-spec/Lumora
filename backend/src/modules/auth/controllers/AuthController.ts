@@ -118,4 +118,14 @@ export class AuthController{
     }
     
 
+    async forgotPassword(req:Request,res:Response){
+        
+        await this._authService.forgotPassword(req.body);
+    
+        res.status(200).json({
+            success:true,
+            message:"Password reset OTP sent successfully."
+        });
+    }
+
 }

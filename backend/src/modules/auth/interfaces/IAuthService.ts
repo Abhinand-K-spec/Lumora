@@ -1,3 +1,4 @@
+import type { ForgotPasswordDto } from "../dto/ForgotPasswordDto.js";
 import type { LoginUserDto } from "../dto/LoginUserDto.js";
 import type { LoginUserResponseDto } from "../dto/LoginUserResponseDto.js";
 import type{ RegisterUserDto } from "../dto/RegisterUserDto.js";
@@ -12,4 +13,5 @@ export interface IAuthService {
     refresh(accessToken:string):Promise<string>;
     verifyEmail(data: VerifyEmailDto):Promise<void>;
     resendOtp(data:ResendOtpDto):Promise<void>;
+    forgotPassword(data:ForgotPasswordDto):Promise<void>;
 }
