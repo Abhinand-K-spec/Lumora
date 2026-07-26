@@ -28,11 +28,11 @@ const authService = {
     },
 
     resendOtp:async(data:ResendOtpRequest)=>{
-        const response = await api.post('auth/resendOtp',data);
+        const response = await api.post('/auth/resendOtp',data);
         return response.data;
     },
 
-    resetPasword:async(data:ResetPasswordRequest)=>{
+    resetPassword:async(data:ResetPasswordRequest)=>{
         const response = await api.post('/auth/resetPassword',data);
         return response.data;
     },

@@ -65,7 +65,7 @@ const ResetPasswordPage = () => {
             
             setLoading(true);
 
-            await authService.resetPasword({email,otp,newPassword:password});
+            await authService.resetPassword({email,otp,newPassword:password});
 
             toast.success("Password updated successfully.");
 
