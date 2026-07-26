@@ -1,4 +1,5 @@
 import api from '../api/axios';
+import type {  ResendOtpRequest, VerifyEmailRequest } from '../types/auth';
 
 const authService = {
     register:async(data:unknown)=>{
@@ -19,6 +20,16 @@ const authService = {
 
     getCurrentUser(){
         return api.get('/app/me')
+    },
+
+    verifyEmail:async(data:VerifyEmailRequest)=>{
+        const response = await api.post('/auth/verifyEmail',data);
+        return response.data;
+    },
+
+    resendOtp:async(data:ResendOtpRequest)=>{
+        const response = await api.post('auth/resendOtp',data);
+        return response.data;
     }
 };
 

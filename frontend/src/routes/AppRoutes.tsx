@@ -4,6 +4,7 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import Home from '../pages/home/Home';
 import ProtectedRoute from './ProtectedRoute';
+import VerifyEmailPage from '../pages/auth/VerifyEmail';
 
 
 const AppRoutes = () => {
@@ -12,6 +13,7 @@ const AppRoutes = () => {
         <Routes>
             <Route path='/login' element={<Login/>}/>
             <Route path='/register' element={<Register/>}/>
+            <Route path='/verifyEmail' element={<VerifyEmailPage/>}/>
 
             <Route element={<ProtectedRoute/>}>
                 <Route path='/' element={<Home/>}/>
