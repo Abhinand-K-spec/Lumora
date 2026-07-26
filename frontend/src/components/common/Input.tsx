@@ -5,12 +5,14 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   icon?: ReactNode;
   error?: string;
+  children?: ReactNode;
 }
 
 const Input = ({
   label,
   icon,
   error,
+  children,
   className = "",
   type,
   ...props
@@ -74,11 +76,13 @@ const Input = ({
         )}
       </div>
 
-      {error && (
-        <p className="mt-1 text-xs font-medium text-red-400">
-          {error}
-        </p>
-      )}
+      {error ? (
+          <p className="mt-1 text-xs font-medium text-red-400">
+            {error}
+          </p>
+        ) : (
+          children
+        )};
     </div>
   );
 };
