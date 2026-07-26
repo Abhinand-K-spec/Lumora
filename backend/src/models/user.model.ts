@@ -56,7 +56,7 @@ const userSchema = new Schema<IUser>(
         accountStatus:{
             type:String,
             enum:Object.values(accountStatus),
-            defaul:accountStatus.Active
+            default:accountStatus.Active
         },
         refreshToken:{
             type:String

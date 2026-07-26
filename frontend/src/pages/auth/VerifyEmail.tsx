@@ -38,9 +38,9 @@ const VerifyEmailPage = () => {
             }else{
                 setLoading(true);
 
-                await authService.verifyEmail({email,otp:otpValue});
+                await authService.verifyResetOtp({email,otp:otpValue});
 
-                navigate('/resetPassword');
+                navigate('/resetPassword', { state: { email, otp: otpValue } });
             }
 
         } catch (error) {

@@ -14,8 +14,8 @@ const authService = {
         return response.data;
     },
 
-    logout(){
-        return api.get('/auth/logout');
+    logout() {
+        return api.post('/auth/logout');
     },
 
     getCurrentUser(){

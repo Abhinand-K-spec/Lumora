@@ -5,6 +5,9 @@ import cors from 'cors';
 import { AppError } from './shared/errors/AppError.js';
 import cookieParser from 'cookie-parser';
 import appRoutes from './modules/app/routes/app.routes.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 

@@ -256,28 +256,34 @@ export class AuthService implements IAuthService{
 
 
     async resetPassword(data: ResetPasswordDto): Promise<void> {
-
         const user = await this._userRepository.findByEmail(data.email);
-    
         if (!user) {
             throw new AppError(404, "User not found");
         }
     
-        const hashedPassword =
-            await this._passwordService.hashPassword(
-                data.newPassword
-            );
+        if (!user.passwordResetOtp) {
+            throw new AppError(400, "No reset OTP found.");
+        }
     
-        await this._userRepository.update(
-            user._id.toString(),
-            {
-                password: hashedPassword,
-                passwordResetOtp: null,
-                passwordResetOtpExpiry: null,
-                refreshToken: null
-            }
-        );
+        if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
+            throw new AppError(400, "OTP has expired");
+        }
+    
+        const isOtpValid = await this._passwordService.comparePassword(data.otp, user.passwordResetOtp);
+        if (!isOtpValid) {
+            throw new AppError(400, "Invalid OTP");
+        }
+    
+        const hashedPassword = await this._passwordService.hashPassword(data.newPassword);
+    
+        await this._userRepository.update(user._id.toString(), {
+            password: hashedPassword,
+            passwordResetOtp: null,
+            passwordResetOtpExpiry: null,
+            refreshToken: null
+        });
     }
+    
 
     async verifyResetOtp(data: VerifyEmailDto): Promise<void> {
 
@@ -311,7 +317,7 @@ export class AuthService implements IAuthService{
 
     async logout(userId: string): Promise<void> {
         
-        const user = this._userRepository.findById(userId);
+        const user = await this._userRepository.findById(userId);
 
         if(!user){
             throw new AppError(404,'User not found');

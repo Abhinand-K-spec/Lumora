@@ -139,15 +139,20 @@ export class AuthController{
     }
 
 
-    async logout(req:Request,res:Response){
-
-        await this._authService.logout(req.user!.id);
-
-        res.status(200).json({
-            success:true,
-            message:"Logged out successfully"
-        })
+    async logout(req: Request, res: Response) {
+        try {
+            await this._authService.logout(req.user!.id);
+            res.clearCookie("accessToken");
+            res.clearCookie("refreshToken");
+            res.status(200).json({
+                success: true,
+                message: "Logged out successfully"
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: "Logout failed" });
+        }
     }
+    
 
     async verifyResetOtp(req:Request,res:Response){
         await this._authService.verifyResetOtp(req.body);

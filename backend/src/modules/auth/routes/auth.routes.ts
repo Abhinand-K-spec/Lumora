@@ -33,6 +33,6 @@ router.post("/resendOtp",authController.resendOtp.bind(authController));
 router.post('/forgotPassword',authController.forgotPassword.bind(authController));
 router.post('/verifyResendOtp',authController.verifyResetOtp.bind(authController));
 router.post('/resetPassword',authController.resetPassword.bind(authController));
-router.post('/logout',authController.logout.bind(authController));
+router.post('/logout', authController.logout.bind(authController));
 
 export default router;
