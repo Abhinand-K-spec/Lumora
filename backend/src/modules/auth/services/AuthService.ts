@@ -59,7 +59,7 @@ export class AuthService implements IAuthService{
 
         const html = verificationEmail(data.name,otp);
 
-        await this._emailService.sendEmail(
+        this._emailService.sendEmail(
             data.email,
             "Verify your Lumora Account",
             html
@@ -256,29 +256,18 @@ export class AuthService implements IAuthService{
 
 
     async resetPassword(data: ResetPasswordDto): Promise<void> {
-        
-        const user = await this._userRepository.findByEmail(data.email);
 
+        const user = await this._userRepository.findByEmail(data.email);
+    
         if (!user) {
             throw new AppError(404, "User not found");
         }
-
-        if (!user.passwordResetOtp) {throw new AppError(400,"No reset OTP found.");
-        }
-
-        if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
-            throw new AppError(400,"OTP has expired");
-        }
-
-        const isOtpValid =await this._passwordService.comparePassword(data.otp,user.passwordResetOtp);
-
-        if (!isOtpValid) {
-            throw new AppError(400,"Invalid OTP");
-        }
-
-        const hashedPassword = await this._passwordService.hashPassword(data.newPassword);
-
-
+    
+        const hashedPassword =
+            await this._passwordService.hashPassword(
+                data.newPassword
+            );
+    
         await this._userRepository.update(
             user._id.toString(),
             {
@@ -288,7 +277,36 @@ export class AuthService implements IAuthService{
                 refreshToken: null
             }
         );
+    }
 
+    async verifyResetOtp(data: VerifyEmailDto): Promise<void> {
+
+        const user = await this._userRepository.findByEmail(data.email);
+    
+        if (!user) {
+            throw new AppError(404, "User not found");
+        }
+    
+        if (!user.passwordResetOtp) {
+            throw new AppError(400, "No reset OTP found.");
+        }
+    
+        if (
+            !user.passwordResetOtpExpiry ||
+            user.passwordResetOtpExpiry < new Date()
+        ) {
+            throw new AppError(400, "OTP has expired");
+        }
+    
+        const isOtpValid =
+            await this._passwordService.comparePassword(
+                data.otp,
+                user.passwordResetOtp
+            );
+    
+        if (!isOtpValid) {
+            throw new AppError(400, "Invalid OTP");
+        }
     }
 
     async logout(userId: string): Promise<void> {

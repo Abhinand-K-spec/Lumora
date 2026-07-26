@@ -29,11 +29,19 @@ const VerifyEmailPage = () => {
         }
 
         try {
-            setLoading(true);
+            if(state?.purpose==='register'){
+                setLoading(true);
 
-            await authService.verifyEmail({email,otp:otpValue});
+                await authService.verifyEmail({email,otp:otpValue});
 
-            navigate('/');
+                navigate('/');
+            }else{
+                setLoading(true);
+
+                await authService.verifyEmail({email,otp:otpValue});
+
+                navigate('/resetPassword');
+            }
 
         } catch (error) {
             toast.error("verification failed");

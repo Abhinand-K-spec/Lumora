@@ -82,7 +82,7 @@ const Input = ({
           </p>
         ) : (
           children
-        )};
+        )}
     </div>
   );
 };

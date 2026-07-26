@@ -36,7 +36,8 @@ const RegisterForm = () => {
         try {
             const response = await authService.register(data);
             toast.success(response.message);
-            navigate('/dashboard');
+            console.log(response.data);
+            navigate('/verifyEmail',{state:{email:data.email,purpose:"register"},});
         } catch (error) {
             if(axios.isAxiosError(error)){
                 toast.error(error.response?.data?.message)

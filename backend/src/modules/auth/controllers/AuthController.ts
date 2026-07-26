@@ -21,7 +21,7 @@ export class AuthController{
 
             res.status(201).json({
                 success: true,
-                message: 'User registered successfully',
+                message: 'OTP send to the mail',
                 data:response
             })
         } catch (error) {
@@ -146,6 +146,15 @@ export class AuthController{
         res.status(200).json({
             success:true,
             message:"Logged out successfully"
+        })
+    }
+
+    async verifyResetOtp(req:Request,res:Response){
+        await this._authService.verifyResetOtp(req.body);
+
+        res.status(200).json({
+            success:true,
+            message:'OTP verified',
         })
     }
 

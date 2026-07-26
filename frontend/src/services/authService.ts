@@ -1,5 +1,5 @@
 import api from '../api/axios';
-import type {  ResendOtpRequest, ResetPasswordRequest, VerifyEmailRequest } from '../types/auth';
+import type {  ForgotPasswordRequest, ResendOtpRequest, ResetPasswordRequest, VerifyEmailRequest } from '../types/auth';
 
 const authService = {
     register:async(data:unknown)=>{
@@ -34,6 +34,16 @@ const authService = {
 
     resetPasword:async(data:ResetPasswordRequest)=>{
         const response = await api.post('/auth/resetPassword',data);
+        return response.data;
+    },
+
+    verifyResetOtp:async(data:VerifyEmailRequest)=>{
+        const response = await api.post('/auth/verifyResendOtp',data);
+        return response.data;
+    },
+
+    forgetPassword:async(data:ForgotPasswordRequest)=>{
+        const response = await api.post('/auth/forgotPassword',data);
         return response.data;
     }
 };
