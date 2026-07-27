@@ -45,6 +45,14 @@ const authService = {
     forgetPassword:async(data:ForgotPasswordRequest)=>{
         const response = await api.post('/auth/forgotPassword',data);
         return response.data;
+    },
+    
+    adminGetCurrentUser() {
+        return api.get('/admin/me');
+    },
+    
+    adminRefresh() {
+        return api.post('/admin/auth/refresh');
     }
 };
 

@@ -1,5 +1,4 @@
-
-import { Routes, Route} from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import Home from '../pages/home/Home';
@@ -7,20 +6,34 @@ import ProtectedRoute from './ProtectedRoute';
 import VerifyEmailPage from '../pages/auth/VerifyEmail';
 import ResetPasswordPage from '../pages/auth/ResetPassword';
 import ForgetPassword from '../pages/auth/ForgetPassword';
-
+import PublicRoute from './PublicRoutes';
+import AdminLogin from '../pages/auth/AdminLogin';
+import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminRoute from './AdminRoute';
+import AdminPublicRoute from './AdminPublicRoute';
 
 const AppRoutes = () => {
   return (
     <div>
         <Routes>
-            <Route path='/login' element={<Login/>}/>
-            <Route path='/register' element={<Register/>}/>
-            <Route path='/verifyEmail' element={<VerifyEmailPage/>}/>
-            <Route path='/resetPassword' element={<ResetPasswordPage/>}/>
-            <Route path='/forgotPassword' element={<ForgetPassword/>}/>
+            <Route element={<PublicRoute/>}>
+              <Route path='/login' element={<Login/>}/>
+              <Route path='/register' element={<Register/>}/>
+            </Route>
+
+            <Route element={<AdminPublicRoute/>}>
+              <Route path='/admin/login' element={<AdminLogin/>}/>
+            </Route>
+              <Route path='/verifyEmail' element={<VerifyEmailPage/>}/>
+              <Route path='/resetPassword' element={<ResetPasswordPage/>}/>
+              <Route path='/forgotPassword' element={<ForgetPassword/>}/>
 
             <Route element={<ProtectedRoute/>}>
                 <Route path='/' element={<Home/>}/>
+            </Route>
+
+            <Route element={<AdminRoute/>}>
+                <Route path='/admin/dashboard' element={<AdminDashboard/>}/>
             </Route>
             
         </Routes>
@@ -28,4 +41,4 @@ const AppRoutes = () => {
   )
 }
 
-export default AppRoutes
+export default AppRoutes;

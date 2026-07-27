@@ -54,7 +54,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(()=>{
     const initializeauth = async()=>{
-        await getCurrentUser();
+        if (!window.location.pathname.startsWith('/admin')) {
+            await getCurrentUser();
+        } else {
+            setLoading(false);
+        }
     };
     initializeauth();
   },[])

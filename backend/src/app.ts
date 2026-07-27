@@ -1,10 +1,12 @@
 import express, { urlencoded } from 'express';
 import type {Request, Response, NextFunction} from 'express';
-import authRoutes from './modules/user/auth/routes/auth.routes.js';
+import authRoutes from './modules/auth/user/routes/auth.routes.js';
+import adminAuthRoutes from './modules/auth/admin/routes/auth.routes.js';
+
 import cors from 'cors';
 import { AppError } from './shared/errors/AppError.js';
 import cookieParser from 'cookie-parser';
-import appRoutes from './modules/app/routes/app.routes.js';
+import appRoutes from './modules/dashboard/routes/app.routes.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -28,7 +30,9 @@ app.use((req, res, next) => {
   });
 
 app.use('/api/auth',authRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/app',appRoutes);
+
 
 
 app.use((req:Request,res:Response)=>{

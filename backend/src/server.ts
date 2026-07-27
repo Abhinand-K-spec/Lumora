@@ -1,4 +1,4 @@
-import { connectDB } from './config/database.js';
+import { connectDB } from './shared/config/database.js';
 import app from './app.js';
 
 

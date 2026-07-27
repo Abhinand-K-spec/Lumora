@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const api = axios.create({
+const adminApi = axios.create({
   baseURL: "http://localhost:3000/api",
   withCredentials: true,
   headers: {
@@ -8,7 +8,7 @@ const api = axios.create({
   },
 });
 
-api.interceptors.response.use(
+adminApi.interceptors.response.use(
   (response) => {
     return response;
   },
@@ -17,21 +17,17 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (
-        originalRequest.url === "/auth/refresh" ||
-        originalRequest.url === "/auth/login" ||
-        originalRequest.url === "/auth/register"
-      ) {
+      if (originalRequest.url === "/admin/auth/refresh" || originalRequest.url === "/admin/auth/login") {
         return Promise.reject(error);
       }
       originalRequest._retry = true;
 
-      await api.post('/auth/refresh');
+      await adminApi.post('/admin/auth/refresh');
 
-      return api(originalRequest);
+      return adminApi(originalRequest);
     }
     return Promise.reject(error);
   }
 );
 
-export default api;
+export default adminApi;
