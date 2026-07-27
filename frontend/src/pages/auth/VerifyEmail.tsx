@@ -33,8 +33,9 @@ const VerifyEmailPage = () => {
                 setLoading(true);
 
                 await authService.verifyEmail({email,otp:otpValue});
+                toast.success('Email verified successfully, please log in to continue');
 
-                navigate('/');
+                navigate('/login');
             }else{
                 setLoading(true);
 

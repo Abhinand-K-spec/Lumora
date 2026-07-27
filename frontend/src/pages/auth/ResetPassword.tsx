@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import logo from "../../assets/logos/Logo_only.png";
 import Input from "../../components/common/Input";
 import authService from "../../services/authService";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 
 const ResetPasswordPage = () => {
@@ -56,6 +57,15 @@ const ResetPasswordPage = () => {
     }, [checks]);
 
 
+    useEffect(() => {
+        if (!email || !otp) {
+            toast.error("Invalid access. Please request a password reset first.");
+            navigate("/forgotPassword");
+        }
+    }, [email, otp, navigate]);
+    
+
+
 
 
 
@@ -73,10 +83,11 @@ const ResetPasswordPage = () => {
 
         } catch (error) {
 
-            toast.error(
-                error.response?.data?.message ??
-                "Failed to update password."
-            );
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message ?? "Failed to update password.");
+            } else {
+                toast.error("Failed to update password.");
+            }
         }finally{
             setLoading(false);
         }

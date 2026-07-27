@@ -8,6 +8,7 @@ import { TokenService } from '../services/TokenService.js';
 import { UserRepository } from '../../../repositories/UserRepository.js';
 import { OTPService } from '../services/OTPService.js';
 import { EmailService } from '../services/EmailService.js';
+import { authenticate } from '../../../middlewares/auth.middleware.js';
 
 const router = Router();
 
@@ -33,6 +34,6 @@ router.post("/resendOtp",authController.resendOtp.bind(authController));
 router.post('/forgotPassword',authController.forgotPassword.bind(authController));
 router.post('/verifyResendOtp',authController.verifyResetOtp.bind(authController));
 router.post('/resetPassword',authController.resetPassword.bind(authController));
-router.post('/logout', authController.logout.bind(authController));
+router.post('/logout', authenticate, authController.logout.bind(authController));
 
 export default router;

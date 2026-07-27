@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import axios from "axios";
 
 import logo from "../../assets/logos/Logo_only.png";
 import Input from "../../components/common/Input";
@@ -31,10 +32,11 @@ const ForgotPasswordPage = () => {
 
         } catch (error) {
 
-            toast.error(
-                error.response?.data?.message ??
-                "Failed to send OTP."
-            );
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message ?? "Failed to send OTP.");
+            } else {
+                toast.error("Failed to send OTP.");
+            }
 
         } finally {
 
