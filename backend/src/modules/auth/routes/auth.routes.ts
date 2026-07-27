@@ -5,10 +5,10 @@ import { AuthController } from '../controllers/AuthController.js';
 import { AuthService } from '../services/AuthService.js';
 import { PasswordService } from '../services/PasswordService.js';
 import { TokenService } from '../services/TokenService.js';
-import { UserRepository } from '../../../repositories/UserRepository.js';
+import { UserRepository } from '../../../../repositories/UserRepository.js';
 import { OTPService } from '../services/OTPService.js';
 import { EmailService } from '../services/EmailService.js';
-import { authenticate } from '../../../middlewares/auth.middleware.js';
+import { authenticate } from '../../../../middlewares/auth.middleware.js';
 
 const router = Router();
 

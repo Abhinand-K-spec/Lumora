@@ -1,7 +1,7 @@
 import type { IAppService } from "../interfaces/IAppService.js";
 import type { IUserRepository } from "../../../repositories/IUserRepository.js";
 import { AppError } from "../../../shared/errors/AppError.js";
-import { UserMapper } from "../../auth/dto/UserMapper.js";
+import { UserMapper } from "../../user/auth/dto/UserMapper.js";
 
 export class AppService implements IAppService {
     constructor(

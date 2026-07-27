@@ -1,14 +1,14 @@
-import type { IUserRepository } from "../../../repositories/IUserRepository.js";
+import type { IUserRepository } from "../../../../repositories/IUserRepository.js";
 import { PasswordService } from "./PasswordService.js";
 import { TokenService } from "./TokenService.js";
 import { OTPService } from './OTPService.js';
 import type { IAuthService } from "../interfaces/IAuthService.js";
 import type { RegisterUserDto } from "../dto/RegisterUserDto.js";
-import { userRole } from "../../../shared/enums/UserRole.js";
-import { accountStatus } from "../../../shared/enums/accountStatus.js";
+import { userRole } from "../../../../shared/enums/UserRole.js";
+import { accountStatus } from "../../../../shared/enums/accountStatus.js";
 import type { LoginUserDto } from "../dto/LoginUserDto.js";
 import type { LoginUserResponseDto } from "../dto/LoginUserResponseDto.js";
-import { AppError } from "../../../shared/errors/AppError.js";
+import { AppError } from "../../../../shared/errors/AppError.js";
 import { UserMapper } from "../dto/UserMapper.js";
 import type { IEmailService } from "../interfaces/IEmailService.js";
 import { verificationEmail } from "../templates/email/verification.email.js";

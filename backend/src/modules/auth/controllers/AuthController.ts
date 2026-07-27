@@ -3,7 +3,7 @@ import type { IAuthService } from '../interfaces/IAuthService.js';
 import type { RegisterUserDto } from '../dto/RegisterUserDto.js';
 import type { LoginUserDto } from '../dto/LoginUserDto.js';
 import { AuthService } from '../services/AuthService.js';
-import { AppError } from '../../../shared/errors/AppError.js';
+import { AppError } from '../../../../shared/errors/AppError.js';
 
 
 export class AuthController{

@@ -1,6 +1,6 @@
 import express, { urlencoded } from 'express';
 import type {Request, Response, NextFunction} from 'express';
-import authRoutes from './modules/auth/routes/auth.routes.js';
+import authRoutes from './modules/user/auth/routes/auth.routes.js';
 import cors from 'cors';
 import { AppError } from './shared/errors/AppError.js';
 import cookieParser from 'cookie-parser';
