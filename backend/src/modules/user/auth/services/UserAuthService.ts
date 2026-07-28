@@ -1,7 +1,7 @@
 import type { IUserRepository } from "../../repositories/IUserRepository.js";
-import { PasswordService } from "./PasswordService.js";
-import { TokenService } from "./TokenService.js";
-import { OTPService } from './OTPService.js';
+import type { IPasswordService } from "../interfaces/IPasswordService.js";
+import type { ITokenService } from "../interfaces/ITokenService.js";
+import type { IOTPService } from "../interfaces/IOTPService.js";
 import type { IUserAuthService } from "../interfaces/IUserAuthService.js";
 import type { RegisterUserDto } from "../dto/RegisterUserDto.js";
 import { userRole } from "../../../../shared/enums/UserRole.js";
@@ -21,10 +21,10 @@ import type { ResetPasswordDto } from "../dto/ResetPasswordDto.js";
 export class UserAuthService implements IUserAuthService {
     constructor(
         private readonly _userRepository: IUserRepository,
-        private readonly _passwordService: PasswordService,
-        private readonly _tokenService: TokenService,
+        private readonly _passwordService: IPasswordService,
+        private readonly _tokenService: ITokenService,
         private readonly _emailService: IEmailService,
-        private readonly _otpService: OTPService
+        private readonly _otpService: IOTPService
     ) {}
 
     async register(data: RegisterUserDto): Promise<void> {

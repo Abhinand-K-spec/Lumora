@@ -1,10 +1,11 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
 import dotenv from "dotenv";
 import type { AuthPayload } from "../types/authPayload.js";
+import type { ITokenService } from "../interfaces/ITokenService.js";
 
 dotenv.config();
 
-export class TokenService {
+export class TokenService implements ITokenService {
     private readonly accessSecret = process.env.JWT_ACCESS_SECRET!;
     private readonly refreshSecret = process.env.JWT_REFRESH_SECRET!;
 

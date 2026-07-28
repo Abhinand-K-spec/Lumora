@@ -119,6 +119,7 @@ const LoginForm = () => {
         {/* Google Login */}
         <button
           type="button"
+          onClick={() => window.location.href = 'http://localhost:3000/api/auth/google'}
           className="
             flex
             w-full

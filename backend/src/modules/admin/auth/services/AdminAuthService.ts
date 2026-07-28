@@ -1,6 +1,6 @@
 import type { IAdminRepository } from "../../repositories/IAdminRepository.js";
-import { PasswordService } from "../../../user/auth/services/PasswordService.js";
-import { TokenService } from "../../../user/auth/services/TokenService.js";
+import type { IPasswordService } from "../../../user/auth/interfaces/IPasswordService.js";
+import type { ITokenService } from "../../../user/auth/interfaces/ITokenService.js";
 import type { IAdminAuthService } from "../interfaces/IAdminAuthService.js";
 import type { LoginAdminDto } from "../dto/LoginAdminDto.js";
 import type { LoginAdminResponseDto } from "../dto/LoginAdminResponseDto.js";
@@ -11,8 +11,8 @@ import { userRole } from "../../../../shared/enums/UserRole.js";
 export class AdminAuthService implements IAdminAuthService {
     constructor(
         private readonly _adminRepository: IAdminRepository,
-        private readonly _passwordService: PasswordService,
-        private readonly _tokenService: TokenService
+        private readonly _passwordService: IPasswordService,
+        private readonly _tokenService: ITokenService
     ) {}
 
     async login(data: LoginAdminDto): Promise<LoginAdminResponseDto> {

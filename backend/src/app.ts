@@ -1,6 +1,7 @@
 import express, { urlencoded } from 'express';
 import type {Request, Response, NextFunction} from 'express';
 import authRoutes from './modules/user/auth/routes/auth.routes.js';
+import photographerAuthRoutes from './modules/photographer/auth/routes/auth.routes.js';
 import adminAuthRoutes from './modules/admin/auth/routes/auth.routes.js';
 
 import cors from 'cors';
@@ -30,6 +31,7 @@ app.use((req, res, next) => {
   });
 
 app.use('/api/auth',authRoutes);
+app.use('/api/photographer/auth', photographerAuthRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/app',appRoutes);
 

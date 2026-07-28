@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 
 const RegisterForm = () => {
-    const {register,control,handleSubmit,formState: { errors },} = useForm<RegisterFormData>({
+    const {register,control,handleSubmit,getValues,formState: { errors },} = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
           name: "",
@@ -89,6 +89,10 @@ const RegisterForm = () => {
           </div>
           <button
             type="button"
+            onClick={() => {
+              const role = getValues('role') || 'USER';
+              window.location.href = `http://localhost:3000/api/auth/google?role=${role}`;
+            }}
             className="
             flex
             w-full

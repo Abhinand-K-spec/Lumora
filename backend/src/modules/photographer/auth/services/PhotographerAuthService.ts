@@ -1,7 +1,7 @@
 import type { IPhotographerRepository } from "../../repositories/IPhotographerRepository.js";
-import { PasswordService } from "../../../user/auth/services/PasswordService.js";
-import { TokenService } from "../../../user/auth/services/TokenService.js";
-import { OTPService } from "../../../user/auth/services/OTPService.js";
+import type { IPasswordService } from "../../../user/auth/interfaces/IPasswordService.js";
+import type { ITokenService } from "../../../user/auth/interfaces/ITokenService.js";
+import type { IOTPService } from "../../../user/auth/interfaces/IOTPService.js";
 import type { RegisterUserDto } from "../../../user/auth/dto/RegisterUserDto.js";
 import { userRole } from "../../../../shared/enums/UserRole.js";
 import { accountStatus } from "../../../../shared/enums/accountStatus.js";
@@ -21,10 +21,10 @@ import type { IPhotographerAuthService } from "../interfaces/IPhotographerAuthSe
 export class PhotographerAuthService implements IPhotographerAuthService {
     constructor(
         private readonly _photographerRepository: IPhotographerRepository,
-        private readonly _passwordService: PasswordService,
-        private readonly _tokenService: TokenService,
+        private readonly _passwordService: IPasswordService,
+        private readonly _tokenService: ITokenService,
         private readonly _emailService: IEmailService,
-        private readonly _otpService: OTPService
+        private readonly _otpService: IOTPService
     ) {}
 
     async register(data: RegisterUserDto): Promise<void> {

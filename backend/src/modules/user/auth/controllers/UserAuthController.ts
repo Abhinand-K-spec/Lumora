@@ -1,12 +1,20 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { IUserAuthService } from '../interfaces/IUserAuthService.js';
+import type { IGoogleAuthService } from '../interfaces/IGoogleAuthService.js';
+import type { IUserRepository } from '../../repositories/IUserRepository.js';
+import type { IPhotographerRepository } from '../../../photographer/repositories/IPhotographerRepository.js';
+import type { ITokenService } from '../interfaces/ITokenService.js';
 import type { RegisterUserDto } from '../dto/RegisterUserDto.js';
 import type { LoginUserDto } from '../dto/LoginUserDto.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
 
 export class UserAuthController {
     constructor(
-        private readonly _authService: IUserAuthService
+        private readonly _authService: IUserAuthService,
+        private readonly _googleAuthService: IGoogleAuthService,
+        private readonly _userRepository: IUserRepository,
+        private readonly _photographerRepository: IPhotographerRepository,
+        private readonly _tokenService: ITokenService
     ) {}
 
     async register(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -160,6 +168,101 @@ export class UserAuthController {
                 success: true,
                 message: "Logged out successfully"
             });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
+    public googleLogin(req: Request, res: Response): void {
+        const { role } = req.query;
+        const state = typeof role === 'string' ? role : 'USER';
+        const url = this._googleAuthService.getGoogleAuthUrl(state);
+    
+        res.redirect(url);
+    }
+    
+    public async googleCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { code, state } = req.query;
+            if (typeof code !== 'string') {
+                throw new AppError(400, 'Google authorization code is required');
+            }
+
+            const googleUser = await this._googleAuthService.verifyGoogleUser(code);
+            const email = googleUser.email;
+            const name = googleUser.name;
+            const googleId = googleUser.googleId;
+            const requestedRole = (typeof state === 'string' && state === 'PHOTOGRAPHER') ? 'PHOTOGRAPHER' : 'USER';
+
+            let user: any = null;
+            let role: string = 'USER';
+
+            // Check standard users
+            user = await this._userRepository.findByEmail(email);
+            if (user) {
+                role = 'USER';
+            } else {
+                // Check photographers
+                user = await this._photographerRepository.findByEmail(email);
+                if (user) {
+                    role = 'PHOTOGRAPHER';
+                }
+            }
+
+            // Register if not found
+            if (!user) {
+                role = requestedRole;
+                if (role === 'PHOTOGRAPHER') {
+                    user = await this._photographerRepository.create({
+                        name,
+                        email,
+                        password: '', // OAuth users don't need a local password
+                        googleId,
+                        role: 'PHOTOGRAPHER',
+                        isVerified: true,
+                        status: 'ACTIVE'
+                    } as any);
+                } else {
+                    user = await this._userRepository.create({
+                        name,
+                        email,
+                        password: '',
+                        googleId,
+                        role: 'USER',
+                        isVerified: true,
+                        status: 'ACTIVE'
+                    } as any);
+                }
+            }
+
+            // Generate JWT payload and tokens
+            const tokenPayload = {
+                id: user._id.toString(),
+                email: user.email,
+                role: role
+            };
+
+            const accessToken = this._tokenService.generateAccessToken(tokenPayload);
+            const refreshToken = this._tokenService.generateRefreshToken(tokenPayload);
+
+            res.cookie("accessToken", accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 15 * 60 * 1000,
+            });
+
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+
+            // Redirect back to frontend
+            const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+            res.redirect(clientUrl);
         } catch (error) {
             next(error);
         }

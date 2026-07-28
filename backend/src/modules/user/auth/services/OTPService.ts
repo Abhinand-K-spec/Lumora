@@ -1,4 +1,6 @@
-export class OTPService {
+import type { IOTPService } from '../interfaces/IOTPService.js';
+
+export class OTPService implements IOTPService {
 
     generateOTP(): string {
         return Math.floor(

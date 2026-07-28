@@ -1,6 +1,8 @@
 import  { OAuth2Client } from "google-auth-library";
 import  type { TokenPayload } from "google-auth-library";
 
+import type { IGoogleAuthService } from "../interfaces/IGoogleAuthService.js";
+
 export interface GoogleUser {
     googleId: string;
     email: string;
@@ -8,7 +10,7 @@ export interface GoogleUser {
     emailVerified: boolean;
 }
 
-export class GoogleAuthService {
+export class GoogleAuthService implements IGoogleAuthService {
     private readonly client: OAuth2Client;
 
     constructor() {
@@ -19,8 +21,8 @@ export class GoogleAuthService {
         );
     }
 
-    public getGoogleAuthUrl(): string {
-        return this.client.generateAuthUrl({
+    public getGoogleAuthUrl(state?: string): string {
+        const opts: any = {
             access_type: "offline",
             prompt: "consent",
             scope: [
@@ -28,7 +30,11 @@ export class GoogleAuthService {
                 "email",
                 "profile"
             ]
-        });
+        };
+        if (state !== undefined) {
+            opts.state = state;
+        }
+        return this.client.generateAuthUrl(opts);
     }
 
     public async verifyGoogleUser(code: string): Promise<GoogleUser> {
