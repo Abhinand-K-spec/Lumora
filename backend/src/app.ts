@@ -1,12 +1,12 @@
 import express, { urlencoded } from 'express';
 import type {Request, Response, NextFunction} from 'express';
-import authRoutes from './modules/auth/user/routes/auth.routes.js';
-import adminAuthRoutes from './modules/auth/admin/routes/auth.routes.js';
+import authRoutes from './modules/user/auth/routes/auth.routes.js';
+import adminAuthRoutes from './modules/admin/auth/routes/auth.routes.js';
 
 import cors from 'cors';
 import { AppError } from './shared/errors/AppError.js';
 import cookieParser from 'cookie-parser';
-import appRoutes from './modules/dashboard/routes/app.routes.js';
+import appRoutes from './modules/user/routes/user.routes.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -20,7 +20,7 @@ app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 
 app.use(cors({
-    origin:'http://localhost:5173',
+    origin: process.env.CLIENT_URL,
     credentials:true,
 }));
 

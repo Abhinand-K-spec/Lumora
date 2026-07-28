@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 
 const api = axios.create({
   baseURL: "http://localhost:3000/api",
@@ -16,6 +17,8 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (
         originalRequest.url === "/auth/refresh" ||
@@ -29,6 +32,10 @@ api.interceptors.response.use(
       await api.post('/auth/refresh');
 
       return api(originalRequest);
+    }
+    if (axios.isAxiosError(error) && !error.response) {
+      toast.error("Unable to connect to the server.");
+      return Promise.reject(error);
     }
     return Promise.reject(error);
   }

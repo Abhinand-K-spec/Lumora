@@ -1,5 +1,5 @@
 import type { Response,Request,NextFunction } from "express";
-import { TokenService } from "../../modules/auth/user/services/TokenService.js";
+import { TokenService } from "../../modules/user/auth/services/TokenService.js";
 import { AppError } from "../errors/AppError.js";
 
 
