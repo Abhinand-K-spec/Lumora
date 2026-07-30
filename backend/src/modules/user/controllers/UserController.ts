@@ -1,5 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type { IUserService } from "../interfaces/IUserService.js";
+import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
+import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
 
 export class UserController {
     constructor(
@@ -15,18 +17,18 @@ export class UserController {
             const userId = req.user?.id
 
             if (!userId) {
-                res.status(401).json({
+                res.status(HttpStatus.UNAUTHORIZED).json({
                     success: false,
-                    message: "Unauthorized",
+                    message: AUTH_MESSAGES.UNAUTHORIZED,
                 });
                 return;
             }
 
             const user = await this.userService.getCurrentUser(userId);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Current user fetched successfully",
+                message:AUTH_MESSAGES.CURRENT_USER_FETCHED,
                 data: {
                     user,
                 },
