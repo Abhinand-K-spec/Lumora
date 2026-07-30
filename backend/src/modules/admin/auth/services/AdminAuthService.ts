@@ -7,6 +7,8 @@ import type { LoginAdminResponseDto } from "../dto/LoginAdminResponseDto.js";
 import { AppError } from "../../../../shared/errors/AppError.js";
 import { AdminMapper } from "../dto/AdminMapper.js";
 import { userRole } from "../../../../shared/enums/UserRole.js";
+import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
+import { AUTH_MESSAGES } from "../../../../shared/constants/message.constant.js";
 
 export class AdminAuthService implements IAdminAuthService {
     constructor(
@@ -25,7 +27,7 @@ export class AdminAuthService implements IAdminAuthService {
         const passwordValid = await this._passwordService.comparePassword(data.password, admin.password);
 
         if (!passwordValid) {
-            throw new AppError(401, 'Invalid email or password');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
         const accessToken = this._tokenService.generateAccessToken({ id: admin._id.toString(), role: userRole.ADMIN });
@@ -44,17 +46,17 @@ export class AdminAuthService implements IAdminAuthService {
         const payload = this._tokenService.verifyRefreshToken(refreshToken);
 
         if (payload.role !== userRole.ADMIN) {
-            throw new AppError(403, 'Forbidden');
+            throw new AppError(HttpStatus.FORBIDDEN, AUTH_MESSAGES.FORBIDEN);
         }
 
         const admin = await this._adminRepository.findById(payload.id);
 
         if (!admin) {
-            throw new AppError(404, 'Admin not found');
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.ADMIN_NOT_FOUND);
         }
 
         if (admin.refreshToken !== refreshToken) {
-            throw new AppError(401, 'Refresh token is invalid');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_REFRESH_TOKEN);
         }
 
         const accessToken = this._tokenService.generateAccessToken({
@@ -69,7 +71,7 @@ export class AdminAuthService implements IAdminAuthService {
         const admin = await this._adminRepository.findById(id);
 
         if (!admin) {
-            throw new AppError(404, 'Admin not found');
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.ADMIN_NOT_FOUND);
         }
 
         await this._adminRepository.updateRefreshToken(id, null);
@@ -79,7 +81,7 @@ export class AdminAuthService implements IAdminAuthService {
         const admin = await this._adminRepository.findById(id);
 
         if (!admin) {
-            throw new AppError(404, 'Admin not found');
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.ADMIN_NOT_FOUND);
         }
 
         return AdminMapper.toLoginResponseAdmin(admin);

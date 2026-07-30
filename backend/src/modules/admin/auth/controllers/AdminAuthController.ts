@@ -4,6 +4,8 @@ import type { LoginAdminDto } from '../dto/LoginAdminDto.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
 import { userRole } from '../../../../shared/enums/UserRole.js';
 import { CookieUtil } from '../../../../shared/utils/cookie.util.js';
+import { HttpStatus } from '../../../../shared/enums/HTTP.status.code.js';
+import { AUTH_MESSAGES } from '../../../../shared/constants/message.constant.js';
 
 export class AdminAuthController {
     constructor(
@@ -17,9 +19,9 @@ export class AdminAuthController {
 
             CookieUtil.setAuthCookies(res,response.accessToken,response.refreshToken);
             
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: 'Successfully logged in as admin',
+                message: AUTH_MESSAGES.ADMIN_LOGIN_SUCCESS,
                 data: {
                     admin: response.admin
                 }
@@ -34,16 +36,16 @@ export class AdminAuthController {
             const refreshToken = req.cookies.refreshToken;
 
             if (!refreshToken) {
-                throw new AppError(401, 'Refresh token is missing');
+                throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.ACCESS_TOKEN_MISSING);
             }
 
             const accessToken = await this._authService.refresh(refreshToken);
 
             CookieUtil.setAccessToken(res,accessToken)
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Access token refreshed successfully",
+                message: AUTH_MESSAGES.ACCESS_TOKEN_REFRESHED,
             });
         } catch (error) {
             next(error);
@@ -53,16 +55,17 @@ export class AdminAuthController {
     async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             if (!req.user) {
-                throw new AppError(401, "Unauthorized");
+                throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
             }
             await this._authService.logout(req.user.id);
 
             CookieUtil.clearAuthCookies(res);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Logged out successfully"
+                message: AUTH_MESSAGES.LOGOUT_SUCCESS
             });
+
         } catch (error) {
             next(error);
         }
@@ -71,13 +74,13 @@ export class AdminAuthController {
     async getCurrentAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             if (!req.user || req.user.role !== userRole.ADMIN) {
-                throw new AppError(403, "Forbidden");
+                throw new AppError(HttpStatus.FORBIDDEN, "Forbidden");
             }
             const admin = await this._authService.getAdminById(req.user.id);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Current admin fetched successfully",
+                message: AUTH_MESSAGES.CURRENT_ADMIN_FETCHED,
                 admin
             });
         } catch (error) {

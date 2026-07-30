@@ -15,4 +15,14 @@ export const AUTH_MESSAGES = {
     ACCESS_TOKEN_REFRESHED: "Access token refreshed successfully.",
 
     CURRENT_ADMIN_FETCHED: "Current admin fetched successfully.",
+
+    ACCESS_TOKEN_MISSING: 'Access token is missing',
+    UNAUTHORIZED: 'Unauthorized',
+
+    INVALID_CREDENTIALS :'Please enter the valid credentials',
+    INVALID_REFRESH_TOKEN : 'Invalid refresh token',
+
+    FORBIDEN: 'Forbidden',
+    ADMIN_NOT_FOUND : 'Admin not found',
+
 } as const;
