@@ -3,6 +3,7 @@ import type {Request, Response, NextFunction} from 'express';
 import authRoutes from './modules/user/auth/routes/auth.routes.js';
 import photographerAuthRoutes from './modules/photographer/auth/routes/auth.routes.js';
 import adminAuthRoutes from './modules/admin/auth/routes/auth.routes.js';
+import userManagementRoutes from './modules/admin/userManagement/routes/user.management.route.js';
 
 import cors from 'cors';
 import { AppError } from './shared/errors/AppError.js';
@@ -34,6 +35,7 @@ app.use('/api/auth',authRoutes);
 app.use('/api/photographer/auth', photographerAuthRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/app',appRoutes);
+app.use('/api/admin/userManagement',userManagementRoutes)
 
 
 

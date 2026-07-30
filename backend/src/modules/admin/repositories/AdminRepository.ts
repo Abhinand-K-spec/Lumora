@@ -1,6 +1,8 @@
 import type { IAdminRepository } from "./IAdminRepository.js";
 import type { IAdmin } from "../../../shared/models/admin.model.js";
 import { Admin } from "../../../shared/models/admin.model.js";
+import User from "../../../shared/models/user.model.js";
+import type { IUser } from "../../../shared/interfaces/IUser.js";
 
 
 export class AdminRepository implements IAdminRepository {
@@ -39,5 +41,10 @@ export class AdminRepository implements IAdminRepository {
 
     async delete(id: string): Promise<void> {
         await Admin.findByIdAndDelete(id);
+    }
+
+    async getUsers():Promise<IUser[]>{
+        const users = await User.find()
+        return users;
     }
 }
