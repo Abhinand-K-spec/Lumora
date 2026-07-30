@@ -54,7 +54,7 @@ export class PhotographerAuthController {
 
             const accessToken = await this._authService.refresh(refreshToken);
 
-            CookieUtil.setAccessToken(res,refreshToken);
+            CookieUtil.setAccessToken(res,accessToken);
 
             res.status(200).json({
                 success: true,
@@ -139,7 +139,7 @@ export class PhotographerAuthController {
             await this._authService.logout(req.user.id);
 
             CookieUtil.clearAuthCookies(res);
-            
+
             res.status(200).json({
                 success: true,
                 message: "Logged out successfully"

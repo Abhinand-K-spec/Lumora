@@ -7,6 +7,7 @@ import type { ITokenService } from '../interfaces/ITokenService.js';
 import type { RegisterUserDto } from '../dto/RegisterUserDto.js';
 import type { LoginUserDto } from '../dto/LoginUserDto.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
+import { CookieUtil } from '../../../../shared/utils/cookie.util.js';
 
 export class UserAuthController {
     constructor(
@@ -37,19 +38,7 @@ export class UserAuthController {
             const data: LoginUserDto = req.body;
             const response = await this._authService.login(data);
 
-            res.cookie("accessToken", response.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 15 * 60 * 1000,
-            });
-
-            res.cookie("refreshToken", response.refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
+            CookieUtil.setAuthCookies(res, response.accessToken, response.refreshToken);
 
             res.status(200).json({
                 success: true,
@@ -73,12 +62,7 @@ export class UserAuthController {
 
             const accessToken = await this._authService.refresh(refreshToken);
 
-            res.cookie("accessToken", accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 15 * 60 * 1000,
-            });
+            CookieUtil.setAccessToken(res,accessToken);
 
             res.status(200).json({
                 success: true,
@@ -162,8 +146,8 @@ export class UserAuthController {
 
             await this._authService.logout(req.user.id);
 
-            res.clearCookie("accessToken");
-            res.clearCookie("refreshToken");
+            CookieUtil.clearAuthCookies(res);
+
             res.status(200).json({
                 success: true,
                 message: "Logged out successfully"
@@ -217,7 +201,7 @@ export class UserAuthController {
                     user = await this._photographerRepository.create({
                         name,
                         email,
-                        password: '', // OAuth users don't need a local password
+                        password: '',
                         googleId,
                         role: 'PHOTOGRAPHER',
                         isVerified: true,
@@ -246,19 +230,7 @@ export class UserAuthController {
             const accessToken = this._tokenService.generateAccessToken(tokenPayload);
             const refreshToken = this._tokenService.generateRefreshToken(tokenPayload);
 
-            res.cookie("accessToken", accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 15 * 60 * 1000,
-            });
-
-            res.cookie("refreshToken", refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
+            CookieUtil.setAuthCookies(res,accessToken, refreshToken);
 
             // Redirect back to frontend
             const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
