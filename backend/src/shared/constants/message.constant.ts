@@ -30,4 +30,6 @@ export const AUTH_MESSAGES = {
     ADMIN_NOT_FOUND : 'Admin not found',
     USER_NOT_FOUND: 'User not found',
 
+    USER_ALREADY_LOGGED : 'User already exists',
+
 } as const;

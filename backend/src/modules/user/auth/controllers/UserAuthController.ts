@@ -8,6 +8,10 @@ import type { RegisterUserDto } from '../dto/RegisterUserDto.js';
 import type { LoginUserDto } from '../dto/LoginUserDto.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
 import { CookieUtil } from '../../../../shared/utils/cookie.util.js';
+import { HttpStatus } from '../../../../shared/enums/HTTP.status.code.js';
+import { AUTH_MESSAGES } from '../../../../shared/constants/message.constant.js';
+import { userRole } from '../../../../shared/enums/UserRole.js';
+import { accountStatus } from '../../../../shared/enums/accountStatus.js';
 
 export class UserAuthController {
     constructor(
@@ -23,9 +27,9 @@ export class UserAuthController {
             const data: RegisterUserDto = req.body;
             await this._authService.register(data);
 
-            res.status(201).json({
+            res.status(HttpStatus.CREATED).json({
                 success: true,
-                message: 'OTP send to the mail',
+                message: AUTH_MESSAGES.OTP_SENT,
                 data: null
             });
         } catch (error) {
@@ -40,9 +44,9 @@ export class UserAuthController {
 
             CookieUtil.setAuthCookies(res, response.accessToken, response.refreshToken);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: 'Successfully logged in',
+                message: AUTH_MESSAGES.LOGIN_SUCCESS,
                 data: {
                     user: response.user
                 }
@@ -57,16 +61,16 @@ export class UserAuthController {
             const refreshToken = req.cookies.refreshToken;
 
             if (!refreshToken) {
-                throw new AppError(401, 'Refresh token is missing');
+                throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_REFRESH_TOKEN);
             }
 
             const accessToken = await this._authService.refresh(refreshToken);
 
             CookieUtil.setAccessToken(res,accessToken);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Access token refreshed successfully",
+                message: AUTH_MESSAGES.ACCESS_TOKEN_REFRESHED,
             });
         } catch (error) {
             next(error);
@@ -77,9 +81,9 @@ export class UserAuthController {
         try {
             await this._authService.verifyEmail(req.body);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Email verified successfully."
+                message: AUTH_MESSAGES.EMAIL_VERIFIED
             });
         } catch (error) {
             next(error);
@@ -90,9 +94,9 @@ export class UserAuthController {
         try {
             await this._authService.resendOtp(req.body);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "OTP sent successfully."
+                message: AUTH_MESSAGES.OTP_SENT
             });
         } catch (error) {
             next(error);
@@ -103,9 +107,9 @@ export class UserAuthController {
         try {
             await this._authService.forgotPassword(req.body);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Password reset OTP sent successfully."
+                message: AUTH_MESSAGES.PASSWORD_RESET_OTP_SENT
             });
         } catch (error) {
             next(error);
@@ -116,9 +120,9 @@ export class UserAuthController {
         try {
             await this._authService.resetPassword(req.body);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Password reset successfully."
+                message:AUTH_MESSAGES.PASSWORD_RESET_SUCCESS
             });
         } catch (error) {
             next(error);
@@ -129,9 +133,9 @@ export class UserAuthController {
         try {
             await this._authService.verifyResetOtp(req.body);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: 'OTP verified',
+                message: AUTH_MESSAGES.OTP_VERIFIED,
             });
         } catch (error) {
             next(error);
@@ -141,16 +145,16 @@ export class UserAuthController {
     async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             if (!req.user) {
-                throw new AppError(401, "Unauthorized");
+                throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
             }
 
             await this._authService.logout(req.user.id);
 
             CookieUtil.clearAuthCookies(res);
 
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
                 success: true,
-                message: "Logged out successfully"
+                message: AUTH_MESSAGES.LOGOUT_SUCCESS
             });
         } catch (error) {
             next(error);
@@ -160,7 +164,7 @@ export class UserAuthController {
 
     public googleLogin(req: Request, res: Response): void {
         const { role } = req.query;
-        const state = typeof role === 'string' ? role : 'USER';
+        const state = typeof role === 'string' ? role : userRole.USER;
         const url = this._googleAuthService.getGoogleAuthUrl(state);
     
         res.redirect(url);
@@ -170,42 +174,42 @@ export class UserAuthController {
         try {
             const { code, state } = req.query;
             if (typeof code !== 'string') {
-                throw new AppError(400, 'Google authorization code is required');
+                throw new AppError(HttpStatus.BAD_REQUEST, 'Google authorization code is required');
             }
 
             const googleUser = await this._googleAuthService.verifyGoogleUser(code);
             const email = googleUser.email;
             const name = googleUser.name;
             const googleId = googleUser.googleId;
-            const requestedRole = (typeof state === 'string' && state === 'PHOTOGRAPHER') ? 'PHOTOGRAPHER' : 'USER';
+            const requestedRole = (typeof state === 'string' && state === userRole.PHOTOGRAPHER) ? userRole.PHOTOGRAPHER : userRole.USER;
 
             let user: any = null;
-            let role: string = 'USER';
+            let role: string = userRole.USER;
 
             // Check standard users
             user = await this._userRepository.findByEmail(email);
             if (user) {
-                role = 'USER';
+                role = userRole.USER;
             } else {
                 // Check photographers
                 user = await this._photographerRepository.findByEmail(email);
                 if (user) {
-                    role = 'PHOTOGRAPHER';
+                    role = userRole.PHOTOGRAPHER;
                 }
             }
 
             // Register if not found
             if (!user) {
                 role = requestedRole;
-                if (role === 'PHOTOGRAPHER') {
+                if (role === userRole.PHOTOGRAPHER) {
                     user = await this._photographerRepository.create({
                         name,
                         email,
                         password: '',
                         googleId,
-                        role: 'PHOTOGRAPHER',
+                        role: userRole.PHOTOGRAPHER,
                         isVerified: true,
-                        status: 'ACTIVE'
+                        status: accountStatus.Active
                     } as any);
                 } else {
                     user = await this._userRepository.create({
@@ -213,9 +217,9 @@ export class UserAuthController {
                         email,
                         password: '',
                         googleId,
-                        role: 'USER',
+                        role: userRole.USER,
                         isVerified: true,
-                        status: 'ACTIVE'
+                        status: accountStatus.Active
                     } as any);
                 }
             }

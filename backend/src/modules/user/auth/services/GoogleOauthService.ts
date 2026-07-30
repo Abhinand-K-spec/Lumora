@@ -2,6 +2,8 @@ import  { OAuth2Client } from "google-auth-library";
 import  type { TokenPayload } from "google-auth-library";
 
 import type { IGoogleAuthService } from "../interfaces/IGoogleAuthService.js";
+import { AppError } from "../../../../shared/errors/AppError.js";
+import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
 
 export interface GoogleUser {
     googleId: string;
@@ -41,7 +43,7 @@ export class GoogleAuthService implements IGoogleAuthService {
         const { tokens } = await this.client.getToken(code);
 
         if (!tokens.id_token) {
-            throw new Error("Google ID token not found.");
+            throw new AppError(HttpStatus.BAD_REQUEST,"Google ID token not found.");
         }
 
         const ticket = await this.client.verifyIdToken({
@@ -52,7 +54,7 @@ export class GoogleAuthService implements IGoogleAuthService {
         const payload = ticket.getPayload();
 
         if (!payload) {
-            throw new Error("Unable to retrieve Google user.");
+            throw new AppError(HttpStatus.BAD_REQUEST,"Unable to retrieve Google user.");
         }
 
         return this.mapPayload(payload);

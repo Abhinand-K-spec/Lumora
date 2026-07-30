@@ -17,6 +17,8 @@ import type { ResendOtpDto } from "../dto/ResendOTPDto.js";
 import type { ForgotPasswordDto } from "../dto/ForgotPasswordDto.js";
 import { passwordResetEmail } from "../templates/email/passwordReset.email.js";
 import type { ResetPasswordDto } from "../dto/ResetPasswordDto.js";
+import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
+import { AUTH_MESSAGES } from "../../../../shared/constants/message.constant.js";
 
 export class UserAuthService implements IUserAuthService {
     constructor(
@@ -31,7 +33,7 @@ export class UserAuthService implements IUserAuthService {
         const existing = await this._userRepository.findByEmail(data.email);
 
         if (existing) {
-            throw new AppError(409, 'User already exists');
+            throw new AppError(HttpStatus.CONFLICT, AUTH_MESSAGES.USER_ALREADY_LOGGED);
         }
 
         const otp = this._otpService.generateOTP();
@@ -62,13 +64,13 @@ export class UserAuthService implements IUserAuthService {
         const user = await this._userRepository.findByEmail(data.email);
 
         if (!user) {
-            throw new AppError(409, 'Invalid email or password');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
         const passwordValid = await this._passwordService.comparePassword(data.password, user.password);
 
         if (!passwordValid) {
-            throw new AppError(409, 'Invalid email or password');
+            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
         const accessToken = this._tokenService.generateAccessToken({ id: user._id.toString(), role: user.role });
@@ -88,11 +90,11 @@ export class UserAuthService implements IUserAuthService {
         const user = await this._userRepository.findById(payload.id);
 
         if (!user) {
-            throw new AppError(404, 'User not found');
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         if (user.refreshToken !== refreshToken) {
-            throw new AppError(401, 'Refresh token is invalid');
+            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.INVALID_REFRESH_TOKEN);
         }
 
         const accessToken = this._tokenService.generateAccessToken({
@@ -106,25 +108,25 @@ export class UserAuthService implements IUserAuthService {
         const user = await this._userRepository.findByEmail(data.email);
 
         if (!user) {
-            throw new AppError(401, 'User not found');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         if (user.isEmailVerified) {
-            throw new AppError(400, "Email is already verified");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
         }
 
         if (!user.emailVerificationOtpExpires || user.emailVerificationOtpExpires < new Date()) {
-            throw new AppError(400, "OTP has expired");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
         }
 
         if (!user.emailVerificationOtp) {
-            throw new AppError(400, "No OTP found. Please request a new OTP.");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.NO_OTP);
         }
 
         const isOtpValid = await this._passwordService.comparePassword(data.otp, user.emailVerificationOtp);
 
         if (!isOtpValid) {
-            throw new AppError(400, "Invalid OTP");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
         }
 
         await this._userRepository.update(
@@ -141,11 +143,11 @@ export class UserAuthService implements IUserAuthService {
         const user = await this._userRepository.findByEmail(data.email); 
 
         if (!user) {
-            throw new AppError(404, "User not found");
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         if (user.isEmailVerified) {
-            throw new AppError(400, "Email is already verified.");
+            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
         }
 
         const otp = this._otpService.generateOTP();
@@ -172,7 +174,7 @@ export class UserAuthService implements IUserAuthService {
         const user = await this._userRepository.findByEmail(data.email);
 
         if (!user) {
-            throw new AppError(404, 'User not found');
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         const otp = this._otpService.generateOTP();
@@ -198,20 +200,20 @@ export class UserAuthService implements IUserAuthService {
     async resetPassword(data: ResetPasswordDto): Promise<void> {
         const user = await this._userRepository.findByEmail(data.email);
         if (!user) {
-            throw new AppError(404, "User not found");
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
     
         if (!user.passwordResetOtp) {
-            throw new AppError(400, "No reset OTP found.");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.NO_OTP);
         }
     
         if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
-            throw new AppError(400, "OTP has expired");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
         }
     
         const isOtpValid = await this._passwordService.comparePassword(data.otp, user.passwordResetOtp);
         if (!isOtpValid) {
-            throw new AppError(400, "Invalid OTP");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
         }
     
         const hashedPassword = await this._passwordService.hashPassword(data.newPassword);
@@ -228,21 +230,21 @@ export class UserAuthService implements IUserAuthService {
         const user = await this._userRepository.findByEmail(data.email);
     
         if (!user) {
-            throw new AppError(404, "User not found");
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
     
         if (!user.passwordResetOtp) {
-            throw new AppError(400, "No reset OTP found.");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.NO_OTP);
         }
     
         if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
-            throw new AppError(400, "OTP has expired");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
         }
     
         const isOtpValid = await this._passwordService.comparePassword(data.otp, user.passwordResetOtp);
     
         if (!isOtpValid) {
-            throw new AppError(400, "Invalid OTP");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
         }
     }
 
@@ -250,7 +252,7 @@ export class UserAuthService implements IUserAuthService {
         const user = await this._userRepository.findById(userId);
 
         if (!user) {
-            throw new AppError(404, 'User not found');
+            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         await this._userRepository.update(
