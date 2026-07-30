@@ -3,6 +3,7 @@ import type { IPhotographerAuthService } from '../interfaces/IPhotographerAuthSe
 import type { RegisterUserDto } from '../../../user/auth/dto/RegisterUserDto.js';
 import type { LoginUserDto } from '../../../user/auth/dto/LoginUserDto.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
+import { CookieUtil } from '../../../../shared/utils/cookie.util.js';
 
 export class PhotographerAuthController {
     constructor(
@@ -29,19 +30,7 @@ export class PhotographerAuthController {
             const data: LoginUserDto = req.body;
             const response = await this._authService.login(data);
 
-            res.cookie("accessToken", response.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 15 * 60 * 1000,
-            });
-
-            res.cookie("refreshToken", response.refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
+            CookieUtil.setAuthCookies(res,response.accessToken,response.refreshToken);
 
             res.status(200).json({
                 success: true,
@@ -65,12 +54,7 @@ export class PhotographerAuthController {
 
             const accessToken = await this._authService.refresh(refreshToken);
 
-            res.cookie("accessToken", accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 15 * 60 * 1000,
-            });
+            CookieUtil.setAccessToken(res,refreshToken);
 
             res.status(200).json({
                 success: true,
@@ -154,8 +138,8 @@ export class PhotographerAuthController {
 
             await this._authService.logout(req.user.id);
 
-            res.clearCookie("accessToken");
-            res.clearCookie("refreshToken");
+            CookieUtil.clearAuthCookies(res);
+            
             res.status(200).json({
                 success: true,
                 message: "Logged out successfully"
