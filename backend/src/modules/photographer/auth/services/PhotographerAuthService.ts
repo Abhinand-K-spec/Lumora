@@ -17,6 +17,8 @@ import type { ForgotPasswordDto } from "../../../user/auth/dto/ForgotPasswordDto
 import { passwordResetEmail } from "../../../user/auth/templates/email/passwordReset.email.js";
 import type { ResetPasswordDto } from "../../../user/auth/dto/ResetPasswordDto.js";
 import type { IPhotographerAuthService } from "../interfaces/IPhotographerAuthService.js";
+import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
+import { AUTH_MESSAGES } from "../../../../shared/constants/message.constant.js";
 
 export class PhotographerAuthService implements IPhotographerAuthService {
     constructor(
@@ -56,13 +58,13 @@ export class PhotographerAuthService implements IPhotographerAuthService {
         const user = await this._photographerRepository.findByEmail(data.email);
 
         if (!user) {
-            throw new AppError(409, 'Invalid email or password');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
         const passwordValid = await this._passwordService.comparePassword(data.password, user.password);
 
         if (!passwordValid) {
-            throw new AppError(409, 'Invalid email or password');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
         const accessToken = this._tokenService.generateAccessToken({ id: user._id.toString(), role: user.role });
@@ -82,11 +84,11 @@ export class PhotographerAuthService implements IPhotographerAuthService {
         const user = await this._photographerRepository.findById(payload.id);
 
         if (!user) {
-            throw new AppError(404, 'User not found');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         if (user.refreshToken !== refreshToken) {
-            throw new AppError(401, 'Refresh token is invalid');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_REFRESH_TOKEN);
         }
 
         const accessToken = this._tokenService.generateAccessToken({
@@ -100,25 +102,25 @@ export class PhotographerAuthService implements IPhotographerAuthService {
         const user = await this._photographerRepository.findByEmail(data.email);
 
         if (!user) {
-            throw new AppError(401, 'User not found');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         if (user.isEmailVerified) {
-            throw new AppError(400, "Email is already verified");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
         }
 
         if (!user.emailVerificationOtpExpires || user.emailVerificationOtpExpires < new Date()) {
-            throw new AppError(400, "OTP has expired");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
         }
 
         if (!user.emailVerificationOtp) {
-            throw new AppError(400, "No OTP found. Please request a new OTP.");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.NO_OTP);
         }
 
         const isOtpValid = await this._passwordService.comparePassword(data.otp, user.emailVerificationOtp);
 
         if (!isOtpValid) {
-            throw new AppError(400, "Invalid OTP");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
         }
 
         await this._photographerRepository.update(
@@ -135,11 +137,11 @@ export class PhotographerAuthService implements IPhotographerAuthService {
         const user = await this._photographerRepository.findByEmail(data.email); 
 
         if (!user) {
-            throw new AppError(404, "User not found");
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         if (user.isEmailVerified) {
-            throw new AppError(400, "Email is already verified.");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
         }
 
         const otp = this._otpService.generateOTP();
@@ -166,7 +168,7 @@ export class PhotographerAuthService implements IPhotographerAuthService {
         const user = await this._photographerRepository.findByEmail(data.email);
 
         if (!user) {
-            throw new AppError(404, 'User not found');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         const otp = this._otpService.generateOTP();
@@ -192,20 +194,20 @@ export class PhotographerAuthService implements IPhotographerAuthService {
     async resetPassword(data: ResetPasswordDto): Promise<void> {
         const user = await this._photographerRepository.findByEmail(data.email);
         if (!user) {
-            throw new AppError(404, "User not found");
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
         }
     
         if (!user.passwordResetOtp) {
-            throw new AppError(400, "No reset OTP found.");
+            throw new AppError(HttpStatus.BAD_REQUEST, "No reset OTP found.");
         }
     
         if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
-            throw new AppError(400, "OTP has expired");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
         }
     
         const isOtpValid = await this._passwordService.comparePassword(data.otp, user.passwordResetOtp);
         if (!isOtpValid) {
-            throw new AppError(400, "Invalid OTP");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
         }
     
         const hashedPassword = await this._passwordService.hashPassword(data.newPassword);
@@ -222,21 +224,21 @@ export class PhotographerAuthService implements IPhotographerAuthService {
         const user = await this._photographerRepository.findByEmail(data.email);
     
         if (!user) {
-            throw new AppError(404, "User not found");
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
         }
     
         if (!user.passwordResetOtp) {
-            throw new AppError(400, "No reset OTP found.");
+            throw new AppError(HttpStatus.BAD_REQUEST, "No reset OTP found.");
         }
     
         if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
-            throw new AppError(400, "OTP has expired");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
         }
     
         const isOtpValid = await this._passwordService.comparePassword(data.otp, user.passwordResetOtp);
     
         if (!isOtpValid) {
-            throw new AppError(400, "Invalid OTP");
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
         }
     }
 
@@ -244,7 +246,7 @@ export class PhotographerAuthService implements IPhotographerAuthService {
         const user = await this._photographerRepository.findById(userId);
 
         if (!user) {
-            throw new AppError(404, 'User not found');
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         await this._photographerRepository.update(

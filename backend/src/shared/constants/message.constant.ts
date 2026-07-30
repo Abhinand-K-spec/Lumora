@@ -6,8 +6,12 @@ export const AUTH_MESSAGES = {
     REGISTER_SUCCESS: "OTP sent to the email.",
     OTP_SENT: "OTP sent successfully.",
     OTP_VERIFIED: "OTP verified.",
+    OTP_EXPIRED:'OTP Is expired',
+    NO_OTP:"No OTP found. Please request a new OTP.",
+    OTP_INVALID: 'Invalid OTP',
 
     EMAIL_VERIFIED: "Email verified successfully.",
+    EMAIL_ALREADY_VERIFIED : 'Email is already verified',
 
     PASSWORD_RESET_OTP_SENT: "Password reset OTP sent successfully.",
     PASSWORD_RESET_SUCCESS: "Password reset successfully.",
@@ -24,5 +28,6 @@ export const AUTH_MESSAGES = {
 
     FORBIDEN: 'Forbidden',
     ADMIN_NOT_FOUND : 'Admin not found',
+    USER_NOT_FOUND: 'User not found',
 
 } as const;
