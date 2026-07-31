@@ -5,5 +5,4 @@ export interface IAdminRepository {
     findByEmail(email: string): Promise<IAdmin | null>;
     findById(id: string): Promise<IAdmin | null>;
     updateRefreshToken(id: string, token: string | null): Promise<void>;
-    getUsers():Promise<IUser[]>;
 }

@@ -35,4 +35,8 @@ export class UserRepository implements IUserRepository{
     async updateRefreshToken(id: string, refreshToken: string): Promise<IUser | null> {
         return await User.findByIdAndUpdate(id,{refreshToken},{new :true})
     }
+
+    async getUsers():Promise<IUser[]>{
+        return await User.find();
+    }
 }

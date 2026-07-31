@@ -1,14 +1,15 @@
 import type { IUser } from "../../../../shared/interfaces/IUser";
-import type { AdminRepository } from "../../repositories/AdminRepository";
+import type { UserRepository } from "../../../user/repositories/UserRepository";
+
 
 export class UserManagementService{
     constructor(
-        private readonly _adminRepository:AdminRepository
+        private readonly _userRepository:UserRepository
     ){}
 
 
     async getUsers():Promise<IUser[]>{
-        const response = await this._adminRepository.getUsers();
+        const response = await this._userRepository.getUsers();
         return response;
     }
 }

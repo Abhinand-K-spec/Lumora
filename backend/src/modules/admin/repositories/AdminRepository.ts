@@ -43,8 +43,5 @@ export class AdminRepository implements IAdminRepository {
         await Admin.findByIdAndDelete(id);
     }
 
-    async getUsers():Promise<IUser[]>{
-        const users = await User.find()
-        return users;
-    }
+
 }

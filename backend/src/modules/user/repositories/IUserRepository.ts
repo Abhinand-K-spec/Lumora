@@ -8,4 +8,5 @@ export interface IUserRepository {
     deleteById(id:string) : Promise<boolean>;
     exists(email:string) : Promise<boolean>;
     updateRefreshToken(id:string, refreshToken:string):Promise<IUser|null>;
+    getUsers():Promise<IUser[]>;
 }
