@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { authenticate } from "../../../shared/middlewares/auth.middleware.js";
+import { authenticate } from "../../../../shared/middlewares/auth.middleware.js";
 import { UserController } from "../controllers/UserController.js";
 import { UserService } from "../services/UserService.js";
-import { UserRepository } from "../repositories/UserRepository.js";
-import { PhotographerRepository } from "../../photographer/repositories/PhotographerRepository.js";
+import { UserRepository } from "../controllers/repositories/UserRepository.js";
+import { PhotographerRepository } from "../../../photographer/repositories/PhotographerRepository.js";
 
 const router = Router();
 

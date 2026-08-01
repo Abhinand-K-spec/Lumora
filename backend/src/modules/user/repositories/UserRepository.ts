@@ -1,7 +1,7 @@
-import User from "../../../shared/models/user.model.js";
-import type { IUser } from "../../../shared/interfaces/IUser.js";
+import User from "../../../shared/models/user.model";
+import type { IUser } from "../../../shared/interfaces/IUser";
 import type { IUserRepository } from "./IUserRepository.js";
-import { BaseRepository } from "../../../shared/repository/BaseRepository.js";
+import { BaseRepository } from "../../../shared/repository/BaseRepository";
 
 export class UserRepository extends BaseRepository<IUser> implements IUserRepository
 {

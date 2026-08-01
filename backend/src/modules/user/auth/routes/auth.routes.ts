@@ -3,7 +3,7 @@ import { UserAuthController } from '../controllers/UserAuthController.js';
 import { UserAuthService } from '../services/UserAuthService.js';
 import { PasswordService } from '../services/PasswordService.js';
 import { TokenService } from '../services/TokenService.js';
-import { UserRepository } from '../../repositories/UserRepository.js';
+import { UserRepository } from '../../general/controllers/repositories/UserRepository.js';
 import { OTPService } from '../services/OTPService.js';
 import { EmailService } from '../services/EmailService.js';
 import { GoogleAuthService } from '../services/GoogleOauthService.js';

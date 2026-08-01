@@ -8,7 +8,7 @@ import userManagementRoutes from './modules/admin/userManagement/routes/user.man
 import cors from 'cors';
 import { AppError } from './shared/errors/AppError.js';
 import cookieParser from 'cookie-parser';
-import appRoutes from './modules/user/routes/user.routes.js';
+import appRoutes from './modules/user/general/routes/user.routes.js';
 import dotenv from 'dotenv';
 
 dotenv.config();

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { IUserAuthService } from '../interfaces/IUserAuthService.js';
 import type { IGoogleAuthService } from '../interfaces/IGoogleAuthService.js';
-import type { IUserRepository } from '../../repositories/IUserRepository.js';
+import type { IUserRepository } from '../../general/controllers/repositories/IUserRepository.js';
 import type { IPhotographerRepository } from '../../../photographer/repositories/IPhotographerRepository.js';
 import type { ITokenService } from '../interfaces/ITokenService.js';
 import type { RegisterUserDto } from '../dto/RegisterUserDto.js';

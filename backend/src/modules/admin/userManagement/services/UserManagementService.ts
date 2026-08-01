@@ -9,7 +9,7 @@ export class UserManagementService{
 
 
     async getUsers():Promise<IUser[]>{
-        const response = await this._userRepository.getUsers();
+        const response = await this._userRepository.find();
         return response;
     }
 }
