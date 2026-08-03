@@ -5,6 +5,8 @@ import { AdminRepository } from '../../repositories/AdminRepository.js';
 import { PasswordService } from '../../../user/auth/services/PasswordService.js';
 import { TokenService } from '../../../user/auth/services/TokenService.js';
 import { authenticate } from '../../../../shared/middlewares/auth.middleware.js';
+import { validate } from '../../../../shared/middlewares/validation.middleware.js';
+import { loginSchema } from '../../../../shared/validators/auth.validator.js';
 
 const router = Router();
 
@@ -20,7 +22,7 @@ const adminAuthService = new AdminAuthService(
 
 const adminAuthController = new AdminAuthController(adminAuthService);
 
-router.post('/login', adminAuthController.login.bind(adminAuthController));
+router.post('/login', validate(loginSchema), adminAuthController.login.bind(adminAuthController));
 router.post('/refresh', adminAuthController.refresh.bind(adminAuthController));
 router.post('/logout', authenticate, adminAuthController.logout.bind(adminAuthController));
 router.get('/me', authenticate, adminAuthController.getCurrentAdmin.bind(adminAuthController));

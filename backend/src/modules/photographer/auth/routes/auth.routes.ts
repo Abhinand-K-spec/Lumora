@@ -7,6 +7,15 @@ import { PhotographerRepository } from '../../repositories/PhotographerRepositor
 import { OTPService } from '../../../user/auth/services/OTPService.js';
 import { EmailService } from '../../../user/auth/services/EmailService.js';
 import { authenticate } from '../../../../shared/middlewares/auth.middleware.js';
+import { validate } from '../../../../shared/middlewares/validation.middleware.js';
+import {
+    registerSchema,
+    loginSchema,
+    verifyEmailSchema,
+    resendOtpSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema
+} from '../../../../shared/validators/auth.validator.js';
 
 const router = Router();
 
@@ -22,14 +31,14 @@ const photographerAuthService = new PhotographerAuthService(
 
 const photographerAuthController = new PhotographerAuthController(photographerAuthService);
 
-router.post('/register', photographerAuthController.register.bind(photographerAuthController));
-router.post('/login', photographerAuthController.login.bind(photographerAuthController));
+router.post('/register', validate(registerSchema), photographerAuthController.register.bind(photographerAuthController));
+router.post('/login', validate(loginSchema), photographerAuthController.login.bind(photographerAuthController));
 router.post('/refresh', photographerAuthController.refresh.bind(photographerAuthController));
-router.post("/verifyEmail", photographerAuthController.verifyEmail.bind(photographerAuthController));
-router.post("/resendOtp", photographerAuthController.resendOtp.bind(photographerAuthController));
-router.post('/forgotPassword', photographerAuthController.forgotPassword.bind(photographerAuthController));
+router.post("/verifyEmail", validate(verifyEmailSchema), photographerAuthController.verifyEmail.bind(photographerAuthController));
+router.post("/resendOtp", validate(resendOtpSchema), photographerAuthController.resendOtp.bind(photographerAuthController));
+router.post('/forgotPassword', validate(forgotPasswordSchema), photographerAuthController.forgotPassword.bind(photographerAuthController));
 router.post('/verifyResendOtp', photographerAuthController.verifyResetOtp.bind(photographerAuthController));
-router.post('/resetPassword', photographerAuthController.resetPassword.bind(photographerAuthController));
+router.post('/resetPassword', validate(resetPasswordSchema), photographerAuthController.resetPassword.bind(photographerAuthController));
 router.post('/logout', authenticate, photographerAuthController.logout.bind(photographerAuthController));
 
 export default router;
