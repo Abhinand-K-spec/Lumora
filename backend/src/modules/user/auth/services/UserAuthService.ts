@@ -52,6 +52,9 @@ export class UserAuthService implements IUserAuthService {
             emailVerificationOtpExpires: otpExpiry,
         });
 
+        console.log('otp : ',otp);
+        
+
         const html = verificationEmail(data.name, otp);
         this._emailService.sendEmail(
             data.email,
