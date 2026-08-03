@@ -2,6 +2,7 @@ import User from "../../../shared/models/user.model";
 import type { IUser } from "../../../shared/interfaces/IUser";
 import type { IUserRepository } from "./IUserRepository.js";
 import { BaseRepository } from "../../../shared/repository/BaseRepository";
+import { accountStatus } from "../../../shared/enums/accountStatus";
 
 export class UserRepository extends BaseRepository<IUser> implements IUserRepository
 {
@@ -19,5 +20,13 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
             { refreshToken },
             { new: true }
         );
+    }
+
+    async changeStatus(id: string,status:accountStatus): Promise<void> {
+        await User.findByIdAndUpdate({_id:id},{accountStatus:status});
+    }
+
+    async delete(id:string):Promise<void>{
+        await User.findByIdAndUpdate({id:id},{accountStatus:accountStatus.Deleted})
     }
 }

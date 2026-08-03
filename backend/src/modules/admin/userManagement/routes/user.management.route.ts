@@ -15,7 +15,8 @@ const userManagementController = new UserManagementController(userManagementServ
 
 
 router.get('/users',userManagementController.getUsers.bind(userManagementController));
-
+router.patch('/users/:id/status',userManagementController.changeStatus.bind(userManagementController));
+router.delete('/users/:id/delete',userManagementController.delete.bind(userManagementController));
 
 
 export default router;

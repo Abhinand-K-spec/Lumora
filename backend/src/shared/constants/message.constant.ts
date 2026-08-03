@@ -33,4 +33,6 @@ export const AUTH_MESSAGES = {
     USER_ALREADY_LOGGED : 'User already exists',
     CURRENT_USER_FETCHED : 'Current user fetched successfully',
 
+    STATUS_UPDATED : 'User status updated successfully.'
+
 } as const;
