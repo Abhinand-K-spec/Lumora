@@ -33,6 +33,8 @@ export const AUTH_MESSAGES = {
     USER_ALREADY_LOGGED : 'User already exists',
     CURRENT_USER_FETCHED : 'Current user fetched successfully',
 
-    STATUS_UPDATED : 'User status updated successfully.'
+    STATUS_UPDATED : 'User status updated successfully.',
 
+    SUSPENDED: 'Your account is suspended.',
+    DELETED : 'Your account is deleted by admin'
 } as const;

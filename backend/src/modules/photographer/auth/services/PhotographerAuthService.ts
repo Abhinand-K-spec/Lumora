@@ -67,6 +67,10 @@ export class PhotographerAuthService implements IPhotographerAuthService {
             throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
+        if (!user.isEmailVerified) {
+            throw new AppError(HttpStatus.UNAUTHORIZED, "Please verify your email before logging in.");
+        }
+
         const accessToken = this._tokenService.generateAccessToken({ id: user._id.toString(), role: user.role });
         const refreshToken = this._tokenService.generateRefreshToken({ id: user._id.toString(), role: user.role });
 

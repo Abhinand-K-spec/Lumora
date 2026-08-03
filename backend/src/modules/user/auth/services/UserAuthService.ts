@@ -70,10 +70,18 @@ export class UserAuthService implements IUserAuthService {
             throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
+        if(user.accountStatus===accountStatus.Suspended){
+            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.SUSPENDED);
+        }
+
         const passwordValid = await this._passwordService.comparePassword(data.password, user.password);
 
         if (!passwordValid) {
             throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.INVALID_CREDENTIALS);
+        }
+
+        if (!user.isEmailVerified) {
+            throw new AppError(HttpStatus.UNAUTHORIZED, "Please verify your email before logging in.");
         }
 
         const accessToken = this._tokenService.generateAccessToken({ id: user._id.toString(), role: user.role });
