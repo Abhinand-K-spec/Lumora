@@ -1,6 +1,9 @@
+import type { accountStatus } from "../../../backend/src/shared/enums/accountStatus";
+
 export interface User {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     role: string;
+    accountStatus: accountStatus;
 }

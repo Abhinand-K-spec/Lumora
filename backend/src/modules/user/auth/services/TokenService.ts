@@ -6,6 +6,7 @@ import type { ITokenService } from "../interfaces/ITokenService.js";
 dotenv.config();
 
 export class TokenService implements ITokenService {
+    
     private readonly accessSecret = process.env.JWT_ACCESS_SECRET!;
     private readonly refreshSecret = process.env.JWT_REFRESH_SECRET!;
 
@@ -13,6 +14,7 @@ export class TokenService implements ITokenService {
     private readonly refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN!;
 
     generateAccessToken(payload: object): string {
+        
         return jwt.sign(payload, this.accessSecret, {
             expiresIn: this.accessExpiresIn,
         } as SignOptions);
@@ -25,6 +27,7 @@ export class TokenService implements ITokenService {
     }
 
     verifyAccessToken(token: string): AuthPayload {
+        
         return jwt.verify(token, this.accessSecret) as AuthPayload;
     }
 

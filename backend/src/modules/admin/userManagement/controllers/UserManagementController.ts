@@ -26,7 +26,7 @@ export class UserManagementController {
 
     async changeStatus(req: Request,res: Response,next: NextFunction): Promise<void> {
         try {
-            const { id } = req.params;
+            const id = req.params.id as string;
             const { status } = req.body;
 
             const user = await this._userManagementService.changeStatus(
@@ -47,7 +47,7 @@ export class UserManagementController {
 
     async delete(req:Request,res:Response,next:NextFunction):Promise<void>{
         try {
-            const {id} = req.params;
+            const id = req.params.id as string;
 
             await this._userManagementService.delete(id);
             

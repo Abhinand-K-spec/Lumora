@@ -11,6 +11,7 @@ import AdminLogin from '../pages/auth/AdminLogin';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminRoute from './AdminRoute';
 import AdminPublicRoute from './AdminPublicRoute';
+import UserManagement from '../pages/admin/UserManagement';
 
 const AppRoutes = () => {
   return (
@@ -34,6 +35,7 @@ const AppRoutes = () => {
 
             <Route element={<AdminRoute/>}>
                 <Route path='/admin/dashboard' element={<AdminDashboard/>}/>
+                <Route path='/admin/users' element={<UserManagement/>} ></Route>
             </Route>
             
         </Routes>

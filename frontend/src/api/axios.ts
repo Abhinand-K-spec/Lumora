@@ -2,43 +2,48 @@ import axios from "axios";
 import { toast } from "sonner";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+    baseURL: "http://localhost:3000/api",
+    withCredentials: true,
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+api.interceptors.response.use((response) => response,
 
-  async (error) => {
-    const originalRequest = error.config;
+    async (error) => {
+        const originalRequest = error.config;
 
-    
+        if (error.response?.status === 401 &&!originalRequest._retry) {
+            originalRequest._retry = true;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (
-        originalRequest.url === "/auth/refresh" ||
-        originalRequest.url === "/auth/login" ||
-        originalRequest.url === "/auth/register"
-      ) {
+            let refreshUrl = "/auth/refresh";
+
+            if (originalRequest.url.startsWith("/admin")) {
+                refreshUrl = "/admin/auth/refresh";
+            } else if (originalRequest.url.startsWith("/photographer")) {
+                refreshUrl = "/photographer/auth/refresh";
+            }
+
+            if (
+                originalRequest.url === refreshUrl ||
+                originalRequest.url.endsWith("/login") ||
+                originalRequest.url.endsWith("/register")
+            ) {
+                return Promise.reject(error);
+            }
+
+            await api.post(refreshUrl);
+
+            return api(originalRequest);
+        }
+
+        if (axios.isAxiosError(error) && !error.response) {
+            toast.error("Unable to connect to the server.");
+        }
+
         return Promise.reject(error);
-      }
-      originalRequest._retry = true;
-
-      await api.post('/auth/refresh');
-
-      return api(originalRequest);
     }
-    if (axios.isAxiosError(error) && !error.response) {
-      toast.error("Unable to connect to the server.");
-      return Promise.reject(error);
-    }
-    return Promise.reject(error);
-  }
 );
 
 export default api;

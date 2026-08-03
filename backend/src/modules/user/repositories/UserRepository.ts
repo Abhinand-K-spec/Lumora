@@ -14,6 +14,10 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
         return await User.findOne({ email });
     }
 
+    async update(id: string, data: Partial<IUser>): Promise<IUser | null> {
+        return await User.findByIdAndUpdate(id, data, { new: true });
+    }
+
     async updateRefreshToken(id: string,refreshToken: string): Promise<IUser | null> {
         return await User.findByIdAndUpdate(
             id,
@@ -23,10 +27,10 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     }
 
     async changeStatus(id: string,status:accountStatus): Promise<void> {
-        await User.findByIdAndUpdate({_id:id},{accountStatus:status});
+        await User.findByIdAndUpdate(id,{accountStatus:status});
     }
 
     async delete(id:string):Promise<void>{
-        await User.findByIdAndUpdate({id:id},{accountStatus:accountStatus.Deleted})
+        await User.findByIdAndUpdate(id,{accountStatus:accountStatus.Deleted})
     }
 }

@@ -16,7 +16,7 @@ export class CookieUtil {
             COOKIE.ACCESS_TOKEN,
             accessToken,
             this.getCookieOptions(
-                Number(process.env.JWT_ACCESS_EXPIRES_IN)
+                Number(process.env.COOKIE_ACCESS_EXPIRES_IN)
             )
         );
 
@@ -24,7 +24,7 @@ export class CookieUtil {
             COOKIE.REFRESH_TOKEN,
             refreshToken,
             this.getCookieOptions(
-                Number(process.env.JWT_REFRESH_EXPIRES_IN)
+                Number(process.env.COOKIE_REFRESH_EXPIRES_IN)
             )
         );
     }
@@ -34,7 +34,7 @@ export class CookieUtil {
             COOKIE.ACCESS_TOKEN,
             accessToken,
             this.getCookieOptions(
-                Number(process.env.JWT_ACCESS_EXPIRES_IN)
+                Number(process.env.COOKIE_ACCESS_EXPIRES_IN)
             )
         );
     }

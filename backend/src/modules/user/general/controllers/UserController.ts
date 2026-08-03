@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type { IUserService } from "../interfaces/IUserService.js";
-import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
-import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
+import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
+import { AUTH_MESSAGES } from "../../../../shared/constants/message.constant.js";
 
 export class UserController {
     constructor(

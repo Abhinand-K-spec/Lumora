@@ -24,7 +24,7 @@ const ForgotPasswordPage = () => {
 
             setLoading(true);
 
-            await authService.forgetPassword({ email });
+            await authService.forgotPassword({ email });
 
             toast.success("OTP sent successfully.");
 

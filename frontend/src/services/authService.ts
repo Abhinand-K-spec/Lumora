@@ -1,116 +1,62 @@
-import api from '../api/axios';
-import type {  ForgotPasswordRequest, ResendOtpRequest, ResetPasswordRequest, VerifyEmailRequest } from '../types/auth';
+import api from "../api/axios";
+import type {
+    ForgotPasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    ResendOtpRequest,
+    ResetPasswordRequest,
+    VerifyEmailRequest,
+} from "../types/auth";
 
-const authService = {
-    register:async(data:any)=>{
-        const path = data.role === 'PHOTOGRAPHER' ? '/photographer/auth/register' : '/auth/register';
-        const response = await api.post(path, data);
+const userAuthService = {
+    register: async (data: RegisterRequest) => {
+        const response = await api.post("/auth/register", data);
         return response.data;
     },
 
-    login:async(data:any)=>{
-        try {
-            const response = await api.post('/auth/login', data);
-            return response.data;
-        } catch (error) {
-            try {
-                const response = await api.post('/photographer/auth/login', data);
-                return response.data;
-            } catch (err) {
-                throw error;
-            }
-        }
+    login: async (data: LoginRequest) => {
+        const response = await api.post("/auth/login", data);
+        return response.data;
     },
 
     logout: async () => {
-        try {
-            return await api.post('/auth/logout');
-        } catch (error) {
-            return await api.post('/photographer/auth/logout');
-        }
+        const response = await api.post("/auth/logout");
+        return response.data;
     },
 
-    getCurrentUser(){
-        return api.get('/app/me')
+    getCurrentUser: async () => {
+        const response = await api.get("/app/me");
+        return response.data;
     },
 
-    verifyEmail:async(data:VerifyEmailRequest)=>{
-        try {
-            const response = await api.post('/auth/verifyEmail',data);
-            return response.data;
-        } catch (error) {
-            try {
-                const response = await api.post('/photographer/auth/verifyEmail',data);
-                return response.data;
-            } catch (err) {
-                throw error;
-            }
-        }
+    verifyEmail: async (data: VerifyEmailRequest) => {
+        const response = await api.post("/auth/verifyEmail", data);
+        return response.data;
     },
 
-    resendOtp:async(data:ResendOtpRequest)=>{
-        try {
-            const response = await api.post('/auth/resendOtp',data);
-            return response.data;
-        } catch (error) {
-            try {
-                const response = await api.post('/photographer/auth/resendOtp',data);
-                return response.data;
-            } catch (err) {
-                throw error;
-            }
-        }
+    resendOtp: async (data: ResendOtpRequest) => {
+        const response = await api.post("/auth/resendOtp", data);
+        return response.data;
     },
 
-    resetPassword:async(data:ResetPasswordRequest)=>{
-        try {
-            const response = await api.post('/auth/resetPassword',data);
-            return response.data;
-        } catch (error) {
-            try {
-                const response = await api.post('/photographer/auth/resetPassword',data);
-                return response.data;
-            } catch (err) {
-                throw error;
-            }
-        }
+    verifyResetOtp: async (data: VerifyEmailRequest) => {
+        const response = await api.post("/auth/verifyResendOtp", data);
+        return response.data;
     },
 
-    verifyResetOtp:async(data:VerifyEmailRequest)=>{
-        try {
-            const response = await api.post('/auth/verifyResendOtp',data);
-            return response.data;
-        } catch (error) {
-            try {
-                const response = await api.post('/photographer/auth/verifyResendOtp',data);
-                return response.data;
-            } catch (err) {
-                throw error;
-            }
-        }
+    forgotPassword: async (data: ForgotPasswordRequest) => {
+        const response = await api.post("/auth/forgotPassword", data);
+        return response.data;
     },
 
-    forgetPassword:async(data:ForgotPasswordRequest)=>{
-        try {
-            const response = await api.post('/auth/forgotPassword',data);
-            return response.data;
-        } catch (error) {
-            try {
-                const response = await api.post('/photographer/auth/forgotPassword',data);
-                return response.data;
-            } catch (err) {
-                throw error;
-            }
-        }
+    resetPassword: async (data: ResetPasswordRequest) => {
+        const response = await api.post("/auth/resetPassword", data);
+        return response.data;
     },
-    
-    adminGetCurrentUser() {
-        return api.get('/admin/me');
+
+    googleLogin: () => {
+        window.location.href = "http://localhost:3000/api/auth/google";
     },
-    
-    adminRefresh() {
-        return api.post('/admin/auth/refresh');
-    }
 };
 
-export default authService;
+export default userAuthService;

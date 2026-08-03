@@ -11,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 import {registerSchema, type RegisterFormData} from "../../schemas/auth/registerSchema";
 
 import authService from "../../services/authService";
-import type { LoginFormData } from "../../schemas/auth/loginSchema";
 import axios from "axios";
 import { toast } from "sonner";
 
@@ -31,7 +30,7 @@ const RegisterForm = () => {
 
       const navigate = useNavigate();
 
-      const onSubmit = async(data: LoginFormData) => {
+      const onSubmit = async(data: RegisterFormData) => {
     
         try {
             const response = await authService.register(data);

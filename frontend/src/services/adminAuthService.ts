@@ -1,17 +1,25 @@
-import adminApi from '../api/adminAxios';
+import api from '../api/axios';
 
 const adminAuthService = {
     login: async (data: unknown) => {
-        const response = await adminApi.post('/admin/auth/login', data);
+        const response = await api.post('/admin/auth/login', data);
         return response.data;
     },
 
     logout() {
-        return adminApi.post('/admin/auth/logout');
+        return api.post('/admin/auth/logout');
     },
 
     getCurrentAdmin() {
-        return adminApi.get('/admin/auth/me');
+        return api.get('/admin/auth/me');
+    },
+        
+    adminGetCurrentUser() {
+        return api.get('/admin/me');
+    },
+    
+    adminRefresh() {
+        return api.post('/admin/auth/refresh');
     }
 };
 
