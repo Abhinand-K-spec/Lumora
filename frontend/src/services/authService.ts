@@ -51,6 +51,8 @@ const userAuthService = {
 
     resetPassword: async (data: ResetPasswordRequest) => {
         const response = await api.post("/auth/resetPassword", data);
+        console.log('response data from resetPassword service:',response);
+        
         return response.data;
     },
 

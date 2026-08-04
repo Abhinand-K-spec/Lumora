@@ -40,5 +40,5 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   otp: z.string().min(1, "OTP is required"),
-  password: passwordSchema,
+  newPassword: passwordSchema,
 });

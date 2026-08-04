@@ -60,7 +60,7 @@ const ResetPasswordPage = () => {
     useEffect(() => {
         if (!email || !otp) {
             toast.error("Invalid access. Please request a password reset first.");
-            navigate("/forgotPassword");
+            navigate("/login");
         }
     }, [email, otp, navigate]);
     
