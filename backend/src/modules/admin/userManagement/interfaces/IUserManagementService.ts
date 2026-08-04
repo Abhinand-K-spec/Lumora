@@ -1,8 +1,11 @@
-import type { accountStatus } from "../../../../shared/enums/accountStatus";
-import type { IUser } from "../../../../shared/interfaces/IUser";
+import type { accountStatus } from "../../../../shared/enums/accountStatus.js";
+import type { UserManagementResponseDto } from "../dto/UserManagementResponseDto.js";
 
-export interface IUserManagementService{
-    getUsers():Promise<IUser[]>;
-    changeStatus(id:string,status:accountStatus):Promise<void>;
-    delete(id:string):Promise<void>;
+export interface IUserManagementService {
+  getUsers(): Promise<UserManagementResponseDto[]>;
+  changeStatus(
+    id: string,
+    status: accountStatus,
+  ): Promise<UserManagementResponseDto>;
+  delete(id: string): Promise<void>;
 }
