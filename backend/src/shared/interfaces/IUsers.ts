@@ -1,12 +1,10 @@
 import {userRole} from '../enums/UserRole.js';
 import { Types } from 'mongoose';
 
-export interface IUser{
+export interface IUsers{
     _id: Types.ObjectId;
     email:string;
     phone:string;
-    bio:string;
-    profilePhoto?:string;
     refreshToken?:string | null;
     role:userRole;
     name:string;

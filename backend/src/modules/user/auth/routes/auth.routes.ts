@@ -5,7 +5,7 @@ import { PasswordService } from '../services/PasswordService.js';
 import { TokenService } from '../services/TokenService.js';
 import { UserRepository } from '../../repositories/UserRepository.js';
 import { OTPService } from '../services/OTPService.js';
-import { EmailService } from '../services/EmailService.js';
+import { EmailService } from '../../../../shared/services/EmailService.js';
 import { GoogleAuthService } from '../services/GoogleOauthService.js';
 import { PhotographerRepository } from '../../../photographer/repositories/PhotographerRepository.js';
 import { authenticate } from '../../../../shared/middlewares/auth.middleware.js';

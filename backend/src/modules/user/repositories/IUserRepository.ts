@@ -1,5 +1,5 @@
 import type { IBaseRepository } from "../../../shared/repository/IBaseRepository";
-import type { IUser } from "../../../shared/interfaces/IUser";
+import type { IUser } from "../../../shared/interfaces/IUsers";
 import type { accountStatus } from "../../../shared/enums/accountStatus";
 
 export interface IUserRepository extends IBaseRepository<IUser> {

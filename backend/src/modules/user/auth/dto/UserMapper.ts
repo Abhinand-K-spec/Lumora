@@ -1,4 +1,4 @@
-import type { IUser } from "../../../../shared/interfaces/IUser.js";
+import type { IUser } from "../../../../shared/interfaces/IUsers.js";
 import type { IPhotographer } from "../../../../shared/interfaces/IPhotographer.js";
 import type { LoginUserResponseDto } from "./LoginUserResponseDto.js";
 

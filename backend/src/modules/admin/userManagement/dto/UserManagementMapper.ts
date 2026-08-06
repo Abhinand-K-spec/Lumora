@@ -1,4 +1,4 @@
-import type { IUser } from "../../../../shared/interfaces/IUser.js";
+import type { IUser } from "../../../../shared/interfaces/IUsers.js";
 import type { UserManagementResponseDto } from "./UserManagementResponseDto.js";
 
 export class UserManagementMapper {

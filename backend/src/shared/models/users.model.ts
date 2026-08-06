@@ -1,10 +1,10 @@
 import {Schema, model} from 'mongoose';
 import {userRole} from '../enums/UserRole.js';
-import type {IUser} from '../interfaces/IUsers.js';
+import type {IUsers} from '../interfaces/IUsers.js';
 import { accountStatus } from '../enums/accountStatus.js';
 
 
-const userSchema = new Schema<IUser>(
+const userSchema = new Schema<IUsers>(
     {
         name:{
             type:String,
@@ -40,10 +40,6 @@ const userSchema = new Schema<IUser>(
             type: Date,
             default: null,
         },
-        profilePhoto:{
-            type:String,
-            default:null,
-        },
 
         role:{
             type:String,
@@ -76,5 +72,5 @@ const userSchema = new Schema<IUser>(
     }
 )
 
-const User = model<IUser>('User',userSchema);
-export default User;
+const Users = model<IUsers>('Users',userSchema);
+export default Users;

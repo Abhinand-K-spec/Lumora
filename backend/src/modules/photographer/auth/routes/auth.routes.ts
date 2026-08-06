@@ -5,7 +5,7 @@ import { PasswordService } from '../../../user/auth/services/PasswordService.js'
 import { TokenService } from '../../../user/auth/services/TokenService.js';
 import { PhotographerRepository } from '../../repositories/PhotographerRepository.js';
 import { OTPService } from '../../../user/auth/services/OTPService.js';
-import { EmailService } from '../../../user/auth/services/EmailService.js';
+import { EmailService } from '../../../../shared/services/EmailService.js';
 import { authenticate } from '../../../../shared/middlewares/auth.middleware.js';
 import { validate } from '../../../../shared/middlewares/validation.middleware.js';
 import {

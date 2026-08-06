@@ -1,4 +1,4 @@
-import type { IUser } from "../../../shared/interfaces/IUser.js";
+import type { IUser } from "../../../shared/interfaces/IUsers.js";
 import type { IAdmin } from "../../../shared/models/admin.model.js";
 import type { IBaseRepository } from "../../../shared/repository/IBaseRepository.js";
 
