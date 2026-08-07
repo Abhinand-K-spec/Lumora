@@ -2,7 +2,7 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useUsers } from "../../hooks/admin/useUsers";
 import type { User as UserType } from "../../types/user";
-import type { accountStatus } from "../../../../backend/src/shared/enums/accountStatus";
+import type { accountStatus } from "../../types/user";
 
 import UserStats from "../../components/admin/users/UserStats";
 import UserFilters from "../../components/admin/users/UserFilters";

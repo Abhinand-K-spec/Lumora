@@ -1,5 +1,5 @@
 import type { User as UserType } from "../../../types/user";
-import type { accountStatus } from "../../../../../backend/src/shared/enums/accountStatus";
+import type { accountStatus } from "../../../types/user";
 import UserActions from "./UserActions";
 
 interface UserRowProps {

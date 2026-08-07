@@ -1,4 +1,4 @@
-import type { accountStatus } from "../../../backend/src/shared/enums/accountStatus";
+export type accountStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED';
 
 export interface User {
     _id: string;

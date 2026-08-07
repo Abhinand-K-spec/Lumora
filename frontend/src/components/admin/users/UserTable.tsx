@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowUpDown } from "lucide-react";
 import type { User as UserType } from "../../../types/user";
-import type { accountStatus } from "../../../../../backend/src/shared/enums/accountStatus";
+import type { accountStatus } from "../../../types/user";
 import UserRow from "./UserRow";
 
 interface UserTableProps {

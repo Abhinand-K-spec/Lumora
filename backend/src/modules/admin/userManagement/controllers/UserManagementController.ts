@@ -52,6 +52,13 @@ export class UserManagementController {
       const id = req.params.id as string;
 
       await this._userManagementService.delete(id);
-    } catch (error) {}
+
+      res.status(HttpStatus.OK).json({
+        success: true,
+        message: "User deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 }

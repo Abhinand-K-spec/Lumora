@@ -1,12 +1,11 @@
 import {userRole} from '../enums/UserRole.js';
 import { Types } from 'mongoose';
 
-export interface IPhotographer {
+export interface IUser{
     _id: Types.ObjectId;
     userId:string;
-    bio:string;
-    profilePhoto?:string;
+    phone:string;
+    profilePhoto:string;
     updatedAt:Date;
     createdAt:Date;
-    phone:string;
 }

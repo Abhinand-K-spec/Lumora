@@ -17,4 +17,5 @@ export interface IUsers{
     emailVerificationOtpExpires?:Date|null;
     passwordResetOtp?:string |null;
     passwordResetOtpExpiry?:Date | null;
+    googleId?:string | null;
 }

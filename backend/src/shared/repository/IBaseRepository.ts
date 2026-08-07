@@ -1,4 +1,3 @@
-import type { IUser } from "../interfaces/IUsers";
 
 export interface IBaseRepository<T>{
     find():Promise<T[]>;

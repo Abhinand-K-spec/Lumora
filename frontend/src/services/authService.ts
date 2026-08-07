@@ -8,7 +8,7 @@ import type {
     VerifyEmailRequest,
 } from "../types/auth";
 
-const userAuthService = {
+const authService = {
     register: async (data: RegisterRequest) => {
         const response = await api.post("/auth/register", data);
         return response.data;
@@ -25,34 +25,33 @@ const userAuthService = {
     },
 
     getCurrentUser: async () => {
-        const response = await api.get("/app/me");
+        const response = await api.get("/auth/me");
         return response.data;
     },
 
     verifyEmail: async (data: VerifyEmailRequest) => {
-        const response = await api.post("/auth/verifyEmail", data);
+        const response = await api.post("/auth/verify-email", data);
         return response.data;
     },
 
     resendOtp: async (data: ResendOtpRequest) => {
-        const response = await api.post("/auth/resendOtp", data);
+        const response = await api.post("/auth/resend-otp", data);
         return response.data;
     },
 
     verifyResetOtp: async (data: VerifyEmailRequest) => {
-        const response = await api.post("/auth/verifyResendOtp", data);
+        const response = await api.post("/auth/verify-reset-otp", data);
         return response.data;
     },
 
     forgotPassword: async (data: ForgotPasswordRequest) => {
-        const response = await api.post("/auth/forgotPassword", data);
+        const response = await api.post("/auth/forgot-password", data);
         return response.data;
     },
 
     resetPassword: async (data: ResetPasswordRequest) => {
-        const response = await api.post("/auth/resetPassword", data);
-        console.log('response data from resetPassword service:',response);
-        
+        const response = await api.post("/auth/reset-password", data);
+
         return response.data;
     },
 
@@ -61,4 +60,4 @@ const userAuthService = {
     },
 };
 
-export default userAuthService;
+export default authService;

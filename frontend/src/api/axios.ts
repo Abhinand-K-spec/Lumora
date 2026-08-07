@@ -2,40 +2,40 @@ import axios from "axios";
 import { toast } from "sonner";
 
 const api = axios.create({
-    baseURL: "http://localhost:3000/api",
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
     withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-api.interceptors.response.use((response) => response,
+api.interceptors.response.use(
+    (response) => response,
 
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 &&!originalRequest._retry) {
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry
+        ) {
             originalRequest._retry = true;
 
-            let refreshUrl = "/auth/refresh";
-
-            if (originalRequest.url.startsWith("/admin")) {
-                refreshUrl = "/admin/auth/refresh";
-            } else if (originalRequest.url.startsWith("/photographer")) {
-                refreshUrl = "/photographer/auth/refresh";
-            }
-
             if (
-                originalRequest.url === refreshUrl ||
-                originalRequest.url.endsWith("/login") ||
-                originalRequest.url.endsWith("/register")
-            ) {
+                originalRequest.url === "/auth/refresh" 
+                ||originalRequest.url === "/auth/login"
+                ||originalRequest.url === "/auth/register") {
+
                 return Promise.reject(error);
             }
 
-            await api.post(refreshUrl);
+            try {
+                await api.post("/auth/refresh");
 
-            return api(originalRequest);
+                return api(originalRequest);
+            } catch (refreshError) {
+                return Promise.reject(refreshError);
+            }
         }
 
         if (axios.isAxiosError(error) && !error.response) {

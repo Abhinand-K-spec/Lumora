@@ -1,4 +1,4 @@
-import type { IEmailService } from "../../modules/user/auth/interfaces/IEmailService.js";
+import type { IEmailService } from "../interfaces/IEmailService.js";
 import nodemailer from 'nodemailer';
 
 export class EmailService implements IEmailService {

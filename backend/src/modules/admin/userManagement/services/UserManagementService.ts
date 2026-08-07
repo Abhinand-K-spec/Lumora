@@ -2,7 +2,7 @@ import { AUTH_MESSAGES } from "../../../../shared/constants/message.constant.js"
 import { accountStatus } from "../../../../shared/enums/accountStatus.js";
 import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
 import { AppError } from "../../../../shared/errors/AppError.js";
-import type { UserRepository } from "../../../user/repositories/UserRepository.js";
+import type { UserRepository } from "../../../auth/repositories/UserRepository.js";
 import type { UserManagementResponseDto } from "../dto/UserManagementResponseDto.js";
 import { UserManagementMapper } from "../dto/UserManagementMapper.js";
 import type { IUserManagementService } from "../interfaces/IUserManagementService.js";

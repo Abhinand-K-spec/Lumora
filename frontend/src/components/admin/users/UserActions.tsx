@@ -1,5 +1,5 @@
 import { UserCheck, UserX, Trash2 } from "lucide-react";
-import type { accountStatus } from "../../../../../backend/src/shared/enums/accountStatus";
+import type { accountStatus } from "../../../types/user";
 
 interface UserActionsProps {
   status: accountStatus;

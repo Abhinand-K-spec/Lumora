@@ -1,8 +1,8 @@
-import type { IUser } from "../../../../shared/interfaces/IUsers.js";
+import type { IUsers } from "../../../../shared/interfaces/IUsers.js";
 import type { UserManagementResponseDto } from "./UserManagementResponseDto.js";
 
 export class UserManagementMapper {
-  static toResponseDto(user: IUser): UserManagementResponseDto {
+  static toResponseDto(user: IUsers): UserManagementResponseDto {
     return {
       _id: user._id.toString(),
       name: user.name,
@@ -14,7 +14,7 @@ export class UserManagementMapper {
     };
   }
 
-  static toResponseDtoList(users: IUser[]): UserManagementResponseDto[] {
+  static toResponseDtoList(users: IUsers[]): UserManagementResponseDto[] {
     return users.map((user) => this.toResponseDto(user));
   }
 }

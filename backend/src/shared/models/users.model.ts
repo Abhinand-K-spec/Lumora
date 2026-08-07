@@ -63,6 +63,10 @@ const userSchema = new Schema<IUsers>(
 
         passwordResetOtpExpiry:{
             type:Date
+        },
+        googleId:{
+            type:String,
+            default:null
         }
 
     },

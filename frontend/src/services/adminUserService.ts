@@ -1,5 +1,5 @@
 import api from "../api/axios";
-import type { accountStatus } from "../../../backend/src/shared/enums/accountStatus";
+import type { accountStatus } from "../types/user";
 
 const adminUserService = {
     getUsers: async () => {

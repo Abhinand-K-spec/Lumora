@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AdminAuthContext } from "./AdminAuthContext";
 import type { LoginFormData } from "../schemas/auth/loginSchema";
-import adminAuthService from "../services/adminAuthService";
+import authService from "../services/authService";
 import type { User } from "../types/user";
 
 interface AdminAuthProviderProps {
@@ -15,18 +15,18 @@ const AdminAuthProvider = ({ children }: AdminAuthProviderProps) => {
 
   // login function
   const login = async (data: LoginFormData) => {
-    const response = await adminAuthService.login(data);
+    const response = await authService.login(data);
     setIsAuthenticated(true);
-    setAdmin(response.data.admin);
+    setAdmin(response.data.user);
     return response;
   };
 
   // getAdmin function
   const getCurrentAdmin = async () => {
     try {
-      const response = await adminAuthService.getCurrentAdmin();
+      const response = await authService.getCurrentUser();
       
-      setAdmin(response.data.admin);
+      setAdmin(response.data.user);
       setIsAuthenticated(true);
     } catch (error) {
       console.error(error);
@@ -50,7 +50,7 @@ const AdminAuthProvider = ({ children }: AdminAuthProviderProps) => {
 
   // logout function
   const logout = async () => {
-    await adminAuthService.logout();
+    await authService.logout();
     setIsAuthenticated(false);
     setAdmin(null);
   };

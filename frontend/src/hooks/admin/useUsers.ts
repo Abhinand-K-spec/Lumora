@@ -3,7 +3,7 @@ import { toast } from "sonner";
 
 import adminUserService from "../../services/adminUserService";
 import type { User } from "../../types/user";
-import { accountStatus } from "../../../../backend/src/shared/enums/accountStatus";
+import type { accountStatus } from "../../types/user";
 
 export const useUsers = () => {
     const [users, setUsers] = useState<User[]>([]);
