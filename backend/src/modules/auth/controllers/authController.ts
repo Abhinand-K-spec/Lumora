@@ -11,8 +11,7 @@ import { userRole } from '../../../shared/enums/UserRole.js';
 
 export class AuthController {
     constructor(
-        private readonly _authService: IAuthService,
-        private readonly _tokenService: ITokenService
+        private readonly _authService: IAuthService
     ) { }
 
     async register(req: Request, res: Response, next: NextFunction): Promise<void> {
