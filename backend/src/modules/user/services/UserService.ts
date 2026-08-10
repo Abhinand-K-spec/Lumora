@@ -1,5 +1,5 @@
 import type { IUserService } from "../interfaces/IUserService.js";
-import type { IUserRepository } from "../../auth/repositories/IUserRepository.js";
+import type { IUserRepository } from "../../auth/interfaces/IUserRepository.js";
 import { AppError } from "../../../shared/errors/AppError.js";
 import { UserMapper } from "../../auth/dto/UserMapper.js";
 

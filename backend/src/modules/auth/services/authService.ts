@@ -1,4 +1,4 @@
-import type { IUserRepository } from "../repositories/IUserRepository.js";
+import type { IUserRepository } from "../interfaces/IUserRepository.js";
 import type { IPasswordService } from "../interfaces/IPasswordService.js";
 import type { ITokenService } from "../interfaces/ITokenService.js";
 import type { IOTPService } from "../interfaces/IOTPService.js";

@@ -1,6 +1,6 @@
 import Users from "../../../shared/models/users.model";
 import type { IUsers } from "../../../shared/interfaces/IUsers";
-import type { IUserRepository } from "./IUserRepository.js";
+import type { IUserRepository } from "../interfaces/IUserRepository.js";
 import { BaseRepository } from "../../../shared/repository/BaseRepository";
 import { accountStatus } from "../../../shared/enums/accountStatus";
 
