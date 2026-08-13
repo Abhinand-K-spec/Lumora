@@ -22,6 +22,8 @@ import { passwordResetEmail } from "../templates/email/passwordReset.email.js";
 import type { ResetPasswordDto } from "../dto/ResetPasswordDto.js";
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
 import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
+import type { IOTPRepository } from "../interfaces/IOTPRepository.js";
+import { otpPurpose } from "../../../shared/enums/OTPPurpose.js";
 
 export class AuthService implements IAuthService {
     constructor(
@@ -32,8 +34,9 @@ export class AuthService implements IAuthService {
         private readonly _otpService: IOTPService,
         private readonly _googleAuthService: IGoogleAuthService,
         private readonly _photographerRepository: IPhotographerRepository,
-        private readonly _userProfileRepository: IUserProfileRepository
-    ) {}
+        private readonly _userProfileRepository: IUserProfileRepository,
+        private readonly _otpRepository: IOTPRepository
+    ) { }
 
     async register(data: RegisterUserDto): Promise<void> {
         const existing = await this._userRepository.findByEmail(data.email);
@@ -43,23 +46,21 @@ export class AuthService implements IAuthService {
         }
 
         const otp = this._otpService.generateOTP();
-        const hashedOtp = await this._passwordService.hashPassword(otp);
-        const otpExpiry = this._otpService.getOTPExpiry();
         const hashedPassword = await this._passwordService.hashPassword(data.password);
 
-        await this._userRepository.create({
+        const user = await this._userRepository.create({
             name: data.name,
             email: data.email,
             password: hashedPassword,
             role: (data.role as userRole) || userRole.USER,
             accountStatus: accountStatus.Active,
             isEmailVerified: false,
-            emailVerificationOtp: hashedOtp,
-            emailVerificationOtpExpires: otpExpiry,
         });
 
-        console.log('otp : ',otp);
-        
+        await this._otpRepository.save(user._id.toString(),otpPurpose.Email,otp,900)
+
+        console.log('otp : ', otp);
+
 
         const html = verificationEmail(data.name, otp);
         this._emailService.sendEmail(
@@ -76,14 +77,14 @@ export class AuthService implements IAuthService {
             throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
-        if(user.accountStatus===accountStatus.Suspended){
-            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.SUSPENDED);
+        if (user.accountStatus === accountStatus.Suspended) {
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.SUSPENDED);
         }
 
         const passwordValid = await this._passwordService.comparePassword(data.password, user.password);
 
         if (!passwordValid) {
-            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.INVALID_CREDENTIALS);
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
         }
 
         if (!user.isEmailVerified) {
@@ -111,7 +112,7 @@ export class AuthService implements IAuthService {
         }
 
         if (user.refreshToken !== refreshToken) {
-            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.INVALID_REFRESH_TOKEN);
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_REFRESH_TOKEN);
         }
 
         const accessToken = this._tokenService.generateAccessToken({
@@ -132,52 +133,33 @@ export class AuthService implements IAuthService {
             throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
         }
 
-        if (!user.emailVerificationOtpExpires || user.emailVerificationOtpExpires < new Date()) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
+        const storedOtp = await this._otpRepository.get(user._id.toString(),otpPurpose.Email);
+
+        if(!storedOtp){
+            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.OTP_EXPIRED);
         }
 
-        if (!user.emailVerificationOtp) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.NO_OTP);
+        if(data.otp !== storedOtp){
+            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_INVALID);
         }
 
-        const isOtpValid = await this._passwordService.comparePassword(data.otp, user.emailVerificationOtp);
-
-        if (!isOtpValid) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
-        }
-
-        await this._userRepository.update(
-            user._id.toString(),
-            {
-                isEmailVerified: true,
-                emailVerificationOtp: null,
-                emailVerificationOtpExpires: null
-            }
-        );
+        await this._userRepository.update(user._id.toString(),{isEmailVerified: true});
+        await this._otpRepository.delete(user._id.toString(),otpPurpose.Email);
     }
 
     async resendOtp(data: ResendOtpDto): Promise<void> {
-        const user = await this._userRepository.findByEmail(data.email); 
+        const user = await this._userRepository.findByEmail(data.email);
 
         if (!user) {
             throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
 
         if (user.isEmailVerified) {
-            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
+            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
         }
 
         const otp = this._otpService.generateOTP();
-        const hashedOtp = await this._passwordService.hashPassword(otp);
-        const otpExpiry = this._otpService.getOTPExpiry();
-
-        await this._userRepository.update(
-            user._id.toString(),
-            {
-                emailVerificationOtp: hashedOtp,
-                emailVerificationOtpExpires: otpExpiry
-            }
-        );
+        await this._otpRepository.save(user._id.toString(),otpPurpose.Email,otp,900);
 
         const html = verificationEmail(user.name, otp);
         await this._emailService.sendEmail(
@@ -195,16 +177,8 @@ export class AuthService implements IAuthService {
         }
 
         const otp = this._otpService.generateOTP();
-        const hashedOtp = await this._passwordService.hashPassword(otp);
-        const otpExpiry = this._otpService.getOTPExpiry();
 
-        await this._userRepository.update(
-            user._id.toString(),
-            {
-                passwordResetOtp: hashedOtp,
-                passwordResetOtpExpiry: otpExpiry
-            }
-        );
+        await this._otpRepository.save(user._id.toString(),otpPurpose.Password_reset,otp,900);
 
         const html = passwordResetEmail(user.name, otp);
         await this._emailService.sendEmail(
@@ -219,50 +193,42 @@ export class AuthService implements IAuthService {
         if (!user) {
             throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
-    
-        if (!user.passwordResetOtp) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.NO_OTP);
+
+        const storedOtp = await this._otpRepository.get(user._id.toString(),otpPurpose.Password_reset);
+
+        if(!storedOtp){
+            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.NO_OTP);
         }
-    
-        if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
+        if(data.otp !== storedOtp){
+            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_INVALID);
         }
-    
-        const isOtpValid = await this._passwordService.comparePassword(data.otp, user.passwordResetOtp);
-        if (!isOtpValid) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
-        }
-    
+
         const hashedPassword = await this._passwordService.hashPassword(data.newPassword);
-    
+
+        await this._otpRepository.delete(user._id.toString(),otpPurpose.Password_reset);
+
         await this._userRepository.update(user._id.toString(), {
             password: hashedPassword,
-            passwordResetOtp: null,
-            passwordResetOtpExpiry: null,
             refreshToken: null
         });
     }
 
     async verifyResetOtp(data: VerifyEmailDto): Promise<void> {
         const user = await this._userRepository.findByEmail(data.email);
-    
+
         if (!user) {
             throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
         }
-    
-        if (!user.passwordResetOtp) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.NO_OTP);
+
+        const storedOtp = await this._otpRepository.get(user._id.toString(),otpPurpose.Password_reset);
+
+        if(!storedOtp){
+            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_INVALID);
         }
-    
-        if (!user.passwordResetOtpExpiry || user.passwordResetOtpExpiry < new Date()) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
-        }
-    
-        const isOtpValid = await this._passwordService.comparePassword(data.otp, user.passwordResetOtp);
-    
-        if (!isOtpValid) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
-        }
+
+       if(data.otp !== storedOtp){
+        throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_INVALID);
+       }
     }
 
     async logout(userId: string): Promise<void> {

@@ -19,6 +19,7 @@ import {
     forgotPasswordSchema,
     resetPasswordSchema
 } from '../../../shared/validators/auth.validator.js';
+import { OtpRepository } from '../repositories/OTPRepository.js';
 
 const router = Router();
 
@@ -30,6 +31,7 @@ const emailService = new EmailService();
 const googleAuthService = new GoogleAuthService();
 const photographerRepository = new PhotographerRepository();
 const userProfileRepository = new UserProfileRepository();
+const otpRespository = new OtpRepository();
 
 const authService = new AuthService(
     userRepository,
@@ -39,13 +41,11 @@ const authService = new AuthService(
     otpService,
     googleAuthService,
     photographerRepository,
-    userProfileRepository
+    userProfileRepository,
+    otpRespository
 );
 
-const authController = new AuthController(
-    authService,
-    tokenService
-);
+const authController = new AuthController(authService);
 
 router.post('/register', validate(registerSchema), authController.register.bind(authController));
 router.post('/login', validate(loginSchema), authController.login.bind(authController));
