@@ -223,7 +223,7 @@ export class AuthService implements IAuthService {
         const storedOtp = await this._otpRepository.get(user._id.toString(),otpPurpose.Password_reset);
 
         if(!storedOtp){
-            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_INVALID);
+            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_EXPIRED);
         }
 
        if(data.otp !== storedOtp){
