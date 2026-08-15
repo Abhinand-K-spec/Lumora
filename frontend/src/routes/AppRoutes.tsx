@@ -4,6 +4,7 @@ import Register from '../pages/auth/Register';
 import Home from '../pages/home/Home';
 import ProtectedRoute from './ProtectedRoute';
 import UserLayout from '../layouts/UserLayout';
+import AdminLayout from '../layouts/AdminLayout';
 import VerifyEmailPage from '../pages/auth/VerifyEmail';
 import ResetPasswordPage from '../pages/auth/ResetPassword';
 import ForgetPassword from '../pages/auth/ForgetPassword';
@@ -37,8 +38,10 @@ const AppRoutes = () => {
             </Route>
 
             <Route element={<AdminRoute/>}>
+              <Route element={<AdminLayout/>}>
                 <Route path='/admin/dashboard' element={<AdminDashboard/>}/>
                 <Route path='/admin/users' element={<UserManagement/>} ></Route>
+              </Route>
             </Route>
             
         </Routes>
