@@ -3,6 +3,7 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import Home from '../pages/home/Home';
 import ProtectedRoute from './ProtectedRoute';
+import UserLayout from '../layouts/UserLayout';
 import VerifyEmailPage from '../pages/auth/VerifyEmail';
 import ResetPasswordPage from '../pages/auth/ResetPassword';
 import ForgetPassword from '../pages/auth/ForgetPassword';
@@ -30,7 +31,9 @@ const AppRoutes = () => {
               <Route path='/forgotPassword' element={<ForgetPassword/>}/>
 
             <Route element={<ProtectedRoute/>}>
+              <Route element={<UserLayout/>}>
                 <Route path='/' element={<Home/>}/>
+              </Route>
             </Route>
 
             <Route element={<AdminRoute/>}>
