@@ -32,15 +32,21 @@ const UserManagement = () => {
 
   const handleChangeStatus = async (id: string, status: accountStatus) => {
     setActionLoading(true);
-    await changeStatus(id, status);
-    setActionLoading(false);
+    try{
+      await changeStatus(id, status);
+    }finally{
+      setActionLoading(false);
+    }
   };
 
   const handleDeleteConfirm = async () => {
     if (!selectedUserForDelete) return;
     setActionLoading(true);
-    await deleteUser(selectedUserForDelete._id);
-    setActionLoading(false);
+    try{
+      await deleteUser(selectedUserForDelete._id);
+    }finally{
+      setActionLoading(false);
+    }
     setSelectedUserForDelete(null);
   };
 
