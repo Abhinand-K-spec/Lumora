@@ -18,8 +18,8 @@ const UserManagement = () => {
   const [selectedUserForDelete, setSelectedUserForDelete] = useState<UserType | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Apply filters locally (Photographers and Admins are excluded as they are in different collections)
-  // Therefore, all users fetched by useUsers() are Clients/Regular Users.
+
+  //all users fetched by useUsers() are Clients/Regular Users.
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
