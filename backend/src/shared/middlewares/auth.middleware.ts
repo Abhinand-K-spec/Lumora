@@ -4,10 +4,8 @@ import { AppError } from "../errors/AppError.js";
 import { accountStatus } from "../enums/accountStatus.js";
 import { HttpStatus } from "../enums/HTTP.status.code.js";
 import { AUTH_MESSAGES } from "../constants/message.constant.js";
-import { Admin } from "../models/admin.model.js";
-import { userRole } from "../enums/UserRole.js";
 import Users from "../models/users.model.js";
-import Photographer from "../models/photographer.model.js";
+import type{IUsers}from '../../shared/interfaces/IUsers.js';
 
 const tokenService = new TokenService();
 
@@ -24,7 +22,7 @@ export const authenticate = async (
     }
 
     const decoded = tokenService.verifyAccessToken(token);
-    let user;
+    let user: IUsers|null = null;
 
     req.user = decoded;
 

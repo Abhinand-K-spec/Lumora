@@ -1,5 +1,5 @@
 import  { OAuth2Client } from "google-auth-library";
-import  type { TokenPayload } from "google-auth-library";
+import  type { GenerateAuthUrlOpts, TokenPayload } from "google-auth-library";
 
 import type { IGoogleAuthService } from "../interfaces/IGoogleAuthService.js";
 import { AppError } from "../../../shared/errors/AppError.js";
@@ -24,7 +24,7 @@ export class GoogleAuthService implements IGoogleAuthService {
     }
 
     public getGoogleAuthUrl(state?: string): string {
-        const opts: any = {
+        const opts: GenerateAuthUrlOpts = {
             access_type: "offline",
             prompt: "consent",
             scope: [

@@ -1,3 +1,4 @@
+import type { accountStatus } from "../../../../shared/enums/accountStatus.js";
 import type { IUsers } from "../../../../shared/interfaces/IUsers.js";
 import type { UserManagementResponseDto } from "./UserManagementResponseDto.js";
 
@@ -8,7 +9,7 @@ export class UserManagementMapper {
       name: user.name,
       email: user.email,
       role: user.role,
-      accountStatus: user.accountStatus as any,
+      accountStatus: user.accountStatus as accountStatus,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
