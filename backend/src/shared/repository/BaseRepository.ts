@@ -1,17 +1,16 @@
 import type { IBaseRepository } from "./IBaseRepository";
-import type {Model, Document} from 'mongoose';
+import type { Model } from 'mongoose';
 
-export abstract class BaseRepository<T> implements IBaseRepository<T>{
+export abstract class BaseRepository<T> implements IBaseRepository<T> {
     constructor(
-        private readonly _model: Model<T>
-    ){}
+        protected readonly _model: Model<T>
+    ) {}
 
-    async find():Promise<T[]>{
+    async find(): Promise<T[]> {
         return await this._model.find();
     }
 
-
-    async create(data: Partial<T>):Promise <T>{
+    async create(data: Partial<T>): Promise<T> {
         return await this._model.create(data);
     }
 
@@ -19,10 +18,11 @@ export abstract class BaseRepository<T> implements IBaseRepository<T>{
         return await this._model.findById(id);
     }
 
-    async exists(email: string): Promise<boolean> {
-        const data = await this._model.findOne({ email });
-    
-        return !!data;
-        }
-
+    async update(id: string, data: Partial<T>): Promise<T | null> {
+        return await this._model.findByIdAndUpdate(
+            id,
+            data,
+            { new: true }
+        );
+    }
 }

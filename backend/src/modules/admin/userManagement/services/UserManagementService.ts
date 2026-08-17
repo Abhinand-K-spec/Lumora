@@ -1,5 +1,6 @@
 import { AUTH_MESSAGES } from "../../../../shared/constants/message.constant.js";
 import { accountStatus } from "../../../../shared/enums/accountStatus.js";
+import { userRole } from "../../../../shared/enums/UserRole.js";
 import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
 import { AppError } from "../../../../shared/errors/AppError.js";
 import type { UserRepository } from "../../../auth/repositories/UserRepository.js";
@@ -8,11 +9,14 @@ import { UserManagementMapper } from "../dto/UserManagementMapper.js";
 import type { IUserManagementService } from "../interfaces/IUserManagementService.js";
 
 export class UserManagementService implements IUserManagementService {
-  constructor(private readonly _userRepository: UserRepository) {}
+  constructor(private readonly _userRepository: UserRepository) { }
 
   async getUsers(): Promise<UserManagementResponseDto[]> {
     const response = await this._userRepository.find();
-    return UserManagementMapper.toResponseDtoList(response);
+    const users = response.filter(
+      (user) => user.role === userRole.USER && user.accountStatus !== accountStatus.Deleted
+    );
+    return UserManagementMapper.toResponseDtoList(users);
   }
 
   async changeStatus(
