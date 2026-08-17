@@ -3,6 +3,7 @@ import { AuthContext } from "./AuthContext";
 import type { LoginFormData } from "../schemas/auth/loginSchema";
 import authService from "../services/authService";
 import type { User } from "../types/user";
+import type { ApiResponse } from "../types/api";
 
 
 interface AuthProviderProps {
@@ -18,7 +19,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // login function
 
-  const login = async(data:LoginFormData)=>{
+  const login = async(data:LoginFormData): Promise<ApiResponse<{ user: User }>>=>{
 
     const response = await authService.login(data);
   
@@ -31,7 +32,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
 
   //getUser function
-  const getCurrentUser = async()=>{
+  const getCurrentUser = async(): Promise<void>=>{
     try {
         const response = await authService.getCurrentUser();
 
@@ -66,7 +67,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
 //logout function 
 
-const logout = async()=>{
+const logout = async(): Promise<void>=>{
 
     await authService.logout();
     setIsAuthenticated(false);
