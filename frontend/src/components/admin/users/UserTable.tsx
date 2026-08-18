@@ -84,7 +84,7 @@ const UserTable = ({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border/40 bg-[#121214]/10 shadow-md">
-      <div className="overflow-x-auto">
+      <div>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-border bg-[#121214]/30 text-xs font-semibold uppercase tracking-widest text-text-secondary/70">
