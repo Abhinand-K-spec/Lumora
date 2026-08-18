@@ -17,18 +17,32 @@ const AdminAuthProvider = ({ children }: AdminAuthProviderProps) => {
   // login function
   const login = async (data: LoginFormData): Promise<ApiResponse<{ user: User }>> => {
     const response = await authService.login(data);
-    setIsAuthenticated(true);
-    setAdmin(response.data.user);
-    return response;
+    const user = response.data.user;
+    if (user.role === "ADMIN") {
+      setIsAuthenticated(true);
+      setAdmin(user);
+      return response;
+    } else {
+      await authService.logout();
+      setIsAuthenticated(false);
+      setAdmin(null);
+      throw new Error("Unauthorized access. Admin role required.");
+    }
   };
 
   // getAdmin function
   const getCurrentAdmin = async (): Promise<void> => {
     try {
       const response = await authService.getCurrentUser();
-      
-      setAdmin(response.data.user);
-      setIsAuthenticated(true);
+      const user = response.data.user;
+
+      if (user.role === 'ADMIN') {
+        setAdmin(user);
+        setIsAuthenticated(true);
+      } else {
+        setAdmin(null);
+        setIsAuthenticated(false);
+      }
     } catch (error) {
       console.error(error);
       setAdmin(null);
