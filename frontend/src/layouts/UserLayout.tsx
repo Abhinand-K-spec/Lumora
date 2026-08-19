@@ -11,7 +11,10 @@ const UserLayout = () => {
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -41,7 +44,10 @@ const UserLayout = () => {
       <header className="sticky top-0 z-50 w-full bg-black/80 backdrop-blur-md border-b border-border/30">
         <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="font-heading text-2xl font-semibold tracking-wider text-primary hover:opacity-90 transition">
+          <Link
+            to="/"
+            className="font-heading text-2xl font-semibold tracking-wider text-primary hover:opacity-90 transition"
+          >
             Lumora
           </Link>
 
@@ -53,7 +59,9 @@ const UserLayout = () => {
                 to={item.path}
                 className={({ isActive }) =>
                   `text-sm font-medium tracking-wide transition-colors duration-200 cursor-pointer ${
-                    isActive ? "text-primary font-semibold" : "text-text-secondary hover:text-text"
+                    isActive
+                      ? "text-primary font-semibold"
+                      : "text-text-secondary hover:text-text"
                   }`
                 }
               >
@@ -80,8 +88,12 @@ const UserLayout = () => {
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-neutral border border-border rounded-xl shadow-xl py-2 z-50">
                   <div className="px-4 py-2 border-b border-border/40 mb-1">
-                    <p className="text-sm font-semibold text-text truncate">{user?.name}</p>
-                    <p className="text-xs text-text-secondary truncate">{user?.email}</p>
+                    <p className="text-sm font-semibold text-text truncate">
+                      {user?.name}
+                    </p>
+                    <p className="text-xs text-text-secondary truncate">
+                      {user?.email}
+                    </p>
                   </div>
                   <button
                     onClick={handleLogout}

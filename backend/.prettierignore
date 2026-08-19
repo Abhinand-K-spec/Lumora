@@ -1,0 +1,10 @@
+node_modules
+dist
+build
+coverage
+.git
+.next
+.vite
+.env
+.env.*
+package-lock.json

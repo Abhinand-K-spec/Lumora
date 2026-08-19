@@ -15,7 +15,9 @@ const AdminAuthProvider = ({ children }: AdminAuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   // login function
-  const login = async (data: LoginFormData): Promise<ApiResponse<{ user: User }>> => {
+  const login = async (
+    data: LoginFormData,
+  ): Promise<ApiResponse<{ user: User }>> => {
     const response = await authService.login(data);
     const user = response.data.user;
     if (user.role === "ADMIN") {
@@ -36,7 +38,7 @@ const AdminAuthProvider = ({ children }: AdminAuthProviderProps) => {
       const response = await authService.getCurrentUser();
       const user = response.data.user;
 
-      if (user.role === 'ADMIN') {
+      if (user.role === "ADMIN") {
         setAdmin(user);
         setIsAuthenticated(true);
       } else {

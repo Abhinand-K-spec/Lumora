@@ -23,25 +23,41 @@ const AdminDashboard = () => {
             <Shield size={32} />
           </div>
           <div>
-            <h1 className="text-3xl font-heading font-bold text-primary">Admin Control Center</h1>
-            <p className="text-text-secondary text-sm">Overview of system settings and administrative actions.</p>
+            <h1 className="text-3xl font-heading font-bold text-primary">
+              Admin Control Center
+            </h1>
+            <p className="text-text-secondary text-sm">
+              Overview of system settings and administrative actions.
+            </p>
           </div>
         </div>
 
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 bg-neutral-900 rounded-xl border border-[#222]">
-              <span className="text-xs text-text-secondary uppercase tracking-wider">Logged In As</span>
-              <p className="font-semibold text-lg mt-1">{admin?.name || "Admin"}</p>
+              <span className="text-xs text-text-secondary uppercase tracking-wider">
+                Logged In As
+              </span>
+              <p className="font-semibold text-lg mt-1">
+                {admin?.name || "Admin"}
+              </p>
             </div>
             <div className="p-4 bg-neutral-900 rounded-xl border border-[#222]">
-              <span className="text-xs text-text-secondary uppercase tracking-wider">System Role</span>
-              <p className="font-semibold text-lg mt-1 text-primary">{admin?.role || "ADMIN"}</p>
+              <span className="text-xs text-text-secondary uppercase tracking-wider">
+                System Role
+              </span>
+              <p className="font-semibold text-lg mt-1 text-primary">
+                {admin?.role || "ADMIN"}
+              </p>
             </div>
           </div>
           <div className="p-4 bg-neutral-900 rounded-xl border border-[#222]">
-            <span className="text-xs text-text-secondary uppercase tracking-wider">Email Address</span>
-            <p className="font-semibold text-lg mt-1">{admin?.email || "admin@lumora.com"}</p>
+            <span className="text-xs text-text-secondary uppercase tracking-wider">
+              Email Address
+            </span>
+            <p className="font-semibold text-lg mt-1">
+              {admin?.email || "admin@lumora.com"}
+            </p>
           </div>
         </div>
 

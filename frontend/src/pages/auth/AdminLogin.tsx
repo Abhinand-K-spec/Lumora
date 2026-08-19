@@ -9,7 +9,10 @@ import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 import RegisterHero from "../../components/auth/RegisterHero";
 import useAdminAuth from "../../hooks/useAdminAuth";
-import { loginSchema, type LoginFormData } from "../../schemas/auth/loginSchema";
+import {
+  loginSchema,
+  type LoginFormData,
+} from "../../schemas/auth/loginSchema";
 
 const AdminLogin = () => {
   const { login } = useAdminAuth();
@@ -45,7 +48,7 @@ const AdminLogin = () => {
     <div className="min-h-screen bg-[#09090B]">
       <div className="mx-auto flex min-h-screen max-w-7xl">
         <RegisterHero />
-        
+
         <div className="flex w-1/2 items-center justify-center p-10 text-white">
           <div className="w-full max-w-xl space-y-5 rounded-2xl border border-[#2B2B2B] bg-[#171717] p-5 shadow-2xl">
             {/* Header */}
@@ -77,9 +80,7 @@ const AdminLogin = () => {
                 {...register("password")}
               />
 
-              <Button type="submit">
-                Log In as Admin
-              </Button>
+              <Button type="submit">Log In as Admin</Button>
             </form>
           </div>
         </div>

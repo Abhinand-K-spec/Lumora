@@ -32,7 +32,7 @@ const UserFilters = ({
           >
             All
           </button>
-          
+
           {/* ACTIVE status pill */}
           <button
             onClick={() => onStatusChange("ACTIVE")}
@@ -44,7 +44,7 @@ const UserFilters = ({
           >
             Active
           </button>
-          
+
           {/* SUSPENDED status pill */}
           <button
             onClick={() => onStatusChange("SUSPENDED")}
@@ -77,7 +77,8 @@ const UserFilters = ({
 
       {/* Right: Count */}
       <div className="text-[11px] text-text-secondary/80 shrink-0 self-end lg:self-center">
-        Showing <span className="font-semibold text-primary">{totalCount}</span> total users
+        Showing <span className="font-semibold text-primary">{totalCount}</span>{" "}
+        total users
       </div>
     </div>
   );

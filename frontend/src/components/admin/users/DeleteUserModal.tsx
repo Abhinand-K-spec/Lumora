@@ -20,8 +20,8 @@ const DeleteUserModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
@@ -48,7 +48,9 @@ const DeleteUserModal = ({
               Delete User Account
             </h3>
             <p className="text-sm text-text-secondary">
-              Are you sure you want to delete <span className="font-semibold text-text">{userName}</span>? This action is permanent and cannot be undone.
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-text">{userName}</span>? This
+              action is permanent and cannot be undone.
             </p>
           </div>
 

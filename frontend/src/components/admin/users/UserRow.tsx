@@ -68,7 +68,9 @@ const UserRow = ({
       {/* STATUS */}
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         <div className="flex items-center gap-2">
-          <span className={`h-1.5 w-1.5 rounded-full ${user.accountStatus === "ACTIVE" ? "bg-success" : "bg-error"}`} />
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${user.accountStatus === "ACTIVE" ? "bg-success" : "bg-error"}`}
+          />
           <span className="text-[13px] font-medium text-text">
             {user.accountStatus === "ACTIVE" ? "Active" : "Suspended"}
           </span>

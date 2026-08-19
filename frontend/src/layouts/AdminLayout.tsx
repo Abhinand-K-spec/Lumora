@@ -14,7 +14,7 @@ import {
   History,
   Moon,
   LogOut,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 import useAdminAuth from "../hooks/useAdminAuth";
 
@@ -27,7 +27,10 @@ const AdminLayout = () => {
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -87,7 +90,14 @@ const AdminLayout = () => {
                       : "text-text-secondary hover:text-text hover:bg-neutral-900/30"
                   }`}
                 >
-                  <Icon size={18} className={isActive ? "text-primary" : "text-text-secondary group-hover:text-text"} />
+                  <Icon
+                    size={18}
+                    className={
+                      isActive
+                        ? "text-primary"
+                        : "text-text-secondary group-hover:text-text"
+                    }
+                  />
                   {item.label}
                   {isActive && (
                     <div className="absolute right-0 top-0 h-full w-[2px] bg-primary rounded-l-md" />
@@ -115,7 +125,14 @@ const AdminLayout = () => {
                       : "text-text-secondary hover:text-text hover:bg-neutral-900/30"
                   }`}
                 >
-                  <Icon size={18} className={isActive ? "text-primary" : "text-text-secondary group-hover:text-text"} />
+                  <Icon
+                    size={18}
+                    className={
+                      isActive
+                        ? "text-primary"
+                        : "text-text-secondary group-hover:text-text"
+                    }
+                  />
                   {item.label}
                   {isActive && (
                     <div className="absolute right-0 top-0 h-full w-[2px] bg-primary rounded-l-md" />
@@ -177,14 +194,21 @@ const AdminLayout = () => {
                 <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold hover:bg-primary/20 transition-all select-none">
                   {admin?.name?.charAt(0).toUpperCase() || "A"}
                 </div>
-                <ChevronDown size={14} className="text-text-secondary group-hover:text-text transition" />
+                <ChevronDown
+                  size={14}
+                  className="text-text-secondary group-hover:text-text transition"
+                />
               </button>
 
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-neutral border border-border rounded-xl shadow-xl py-2 z-50">
                   <div className="px-4 py-2 border-b border-border/40 mb-1">
-                    <p className="text-sm font-semibold text-text truncate">{admin?.name || "Admin"}</p>
-                    <p className="text-xs text-text-secondary truncate">{admin?.email || "admin@lumora.com"}</p>
+                    <p className="text-sm font-semibold text-text truncate">
+                      {admin?.name || "Admin"}
+                    </p>
+                    <p className="text-xs text-text-secondary truncate">
+                      {admin?.email || "admin@lumora.com"}
+                    </p>
                   </div>
                   <button
                     onClick={handleLogout}

@@ -18,42 +18,35 @@ import { toast } from "sonner";
 import axios from "axios";
 import useAuth from "../../hooks/useAuth";
 
-
-
 const LoginForm = () => {
-    const {login} = useAuth();
+  const { login } = useAuth();
 
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-
-    const navigate = useNavigate();
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<LoginFormData>({
-        resolver: zodResolver(loginSchema),
-        defaultValues: {
-        email: "",
-        password: "",
-        },
-    });
-
-  const onSubmit = async(data: LoginFormData) => {
-    
+  const onSubmit = async (data: LoginFormData) => {
     try {
+      await login(data);
 
-        await login(data);
+      toast.success("User logged in successfully");
 
-        toast.success('User logged in successfully');
-
-        navigate('/');
-
+      navigate("/");
     } catch (error) {
-        if(axios.isAxiosError(error)){
-            toast.error(error.response?.data?.message);
-        }else{
-            toast.error('something went wrong');
-        }
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message);
+      } else {
+        toast.error("something went wrong");
+      }
     }
   };
 
@@ -62,9 +55,7 @@ const LoginForm = () => {
       <div className="w-full max-w-xl space-y-5 rounded-2xl border border-[#2B2B2B] bg-[#171717] p-5 shadow-2xl">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="font-heading text-5xl text-primary">
-            Welcome Back
-          </h1>
+          <h1 className="font-heading text-5xl text-primary">Welcome Back</h1>
 
           <p className="mt-3 text-text-secondary">
             Log in to your Lumora account.
@@ -72,10 +63,7 @@ const LoginForm = () => {
         </div>
 
         {/* Login Form */}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-5"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Input
             label="Email"
             type="email"
@@ -102,24 +90,22 @@ const LoginForm = () => {
             </Link>
           </div>
 
-          <Button type="submit">
-            Log In
-          </Button>
+          <Button type="submit">Log In</Button>
         </form>
 
         {/* Divider */}
         <div className="my-6 flex items-center">
           <div className="h-px flex-1 bg-border" />
-          <span className="mx-4 text-sm text-text-secondary">
-            OR
-          </span>
+          <span className="mx-4 text-sm text-text-secondary">OR</span>
           <div className="h-px flex-1 bg-border" />
         </div>
 
         {/* Google Login */}
         <button
           type="button"
-          onClick={() => window.location.href = 'http://localhost:3000/api/auth/google'}
+          onClick={() =>
+            (window.location.href = "http://localhost:3000/api/auth/google")
+          }
           className="
             flex
             w-full

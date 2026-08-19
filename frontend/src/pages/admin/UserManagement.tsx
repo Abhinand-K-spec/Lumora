@@ -14,27 +14,28 @@ const UserManagement = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
-  
-  const [selectedUserForDelete, setSelectedUserForDelete] = useState<UserType | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
 
+  const [selectedUserForDelete, setSelectedUserForDelete] =
+    useState<UserType | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   //all users fetched by useUsers() are Clients/Regular Users.
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = filterStatus === "ALL" || user.accountStatus === filterStatus;
+
+    const matchesStatus =
+      filterStatus === "ALL" || user.accountStatus === filterStatus;
 
     return matchesSearch && matchesStatus;
   });
 
   const handleChangeStatus = async (id: string, status: accountStatus) => {
     setActionLoading(true);
-    try{
+    try {
       await changeStatus(id, status);
-    }finally{
+    } finally {
       setActionLoading(false);
     }
   };
@@ -42,9 +43,9 @@ const UserManagement = () => {
   const handleDeleteConfirm = async () => {
     if (!selectedUserForDelete) return;
     setActionLoading(true);
-    try{
+    try {
       await deleteUser(selectedUserForDelete._id);
-    }finally{
+    } finally {
       setActionLoading(false);
     }
     setSelectedUserForDelete(null);
@@ -60,10 +61,11 @@ const UserManagement = () => {
               User Management
             </h1>
             <p className="text-text-secondary/80 text-sm mt-2 font-light">
-              Manage and monitor platform user activity across all global regions.
+              Manage and monitor platform user activity across all global
+              regions.
             </p>
           </div>
-          
+
           {/* Refresh Action */}
           <button
             onClick={fetchUsers}
@@ -91,7 +93,9 @@ const UserManagement = () => {
         {loading && users.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4">
             <RefreshCw size={36} className="animate-spin text-primary" />
-            <p className="text-sm text-text-secondary/70">Retrieving user directories...</p>
+            <p className="text-sm text-text-secondary/70">
+              Retrieving user directories...
+            </p>
           </div>
         ) : (
           <UserTable

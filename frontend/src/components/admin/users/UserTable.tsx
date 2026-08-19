@@ -51,7 +51,7 @@ const UserTable = ({
   const totalPages = Math.max(1, Math.ceil(sortedUsers.length / itemsPerPage));
   const paginatedUsers = sortedUsers.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const getPageNumbers = () => {
@@ -193,7 +193,9 @@ const UserTable = ({
 
             {/* Next page arrow */}
             <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
               disabled={currentPage === totalPages}
               className="px-2 py-1 rounded-md border border-border/50 bg-neutral-900/60 text-text-secondary hover:text-text hover:bg-white/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
             >

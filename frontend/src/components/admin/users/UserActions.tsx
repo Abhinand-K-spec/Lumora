@@ -20,7 +20,13 @@ const UserActions = ({
     <div className="flex items-center gap-2">
       {/* Toggle Status Action */}
       <button
-        onClick={() => onChangeStatus(isSuspended ? ("ACTIVE" as accountStatus) : ("SUSPENDED" as accountStatus))}
+        onClick={() =>
+          onChangeStatus(
+            isSuspended
+              ? ("ACTIVE" as accountStatus)
+              : ("SUSPENDED" as accountStatus),
+          )
+        }
         disabled={disabled}
         title={isSuspended ? "Activate User" : "Suspend User"}
         className={`p-2 rounded-lg border transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${

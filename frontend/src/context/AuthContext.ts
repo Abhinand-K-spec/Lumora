@@ -3,23 +3,22 @@ import type { LoginFormData } from "../schemas/auth/loginSchema";
 import type { User } from "../types/user";
 import type { ApiResponse } from "../types/api";
 
-interface authContextType{
-    isAuthenticated:boolean;
-    loading:boolean;
-    user:User | null;
-    login: (data: LoginFormData) => Promise<ApiResponse<{ user: User }>>;
-    logout:()=>void;
+interface authContextType {
+  isAuthenticated: boolean;
+  loading: boolean;
+  user: User | null;
+  login: (data: LoginFormData) => Promise<ApiResponse<{ user: User }>>;
+  logout: () => void;
 }
 
-
 export const AuthContext = createContext<authContextType>({
-    isAuthenticated:false,
-    loading:true,
-    user:null,
-    login: async () => {
-        throw new Error("login function not implemented");
-    },
-    logout:async()=>{
-        throw new Error('logout function is not implemented');
-    }
-})
+  isAuthenticated: false,
+  loading: true,
+  user: null,
+  login: async () => {
+    throw new Error("login function not implemented");
+  },
+  logout: async () => {
+    throw new Error("logout function is not implemented");
+  },
+});
