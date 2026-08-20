@@ -4,15 +4,20 @@ import { authenticate } from "../../../shared/middlewares/auth.middleware.js";
 import { UserController } from "../controllers/UserController.js";
 import { UserService } from "../services/UserService.js";
 import { UserRepository } from "../../auth/repositories/UserRepository.js";
+import { UserProfileRepository } from "../repositories/UserProfileRepository.js";
 
 const router = Router();
 
 const userRepository = new UserRepository();
+const userProfileRepository = new UserProfileRepository();
 
-const userService = new UserService(userRepository);
+const userService = new UserService(userRepository, userProfileRepository);
 
 const userController = new UserController(userService);
 
-router.get( "/me",authenticate,userController.getCurrentUser.bind(userController));
+
+
+router.get('/profile',authenticate,userController.getProfile.bind(userController));
+router.patch('/profile',authenticate,userController.editProfile.bind(userController));
 
 export default router;

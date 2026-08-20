@@ -1,5 +1,7 @@
-import type { LoginUserResponseDto } from "../../auth/dto/LoginUserResponseDto.js";
+import type { editProfileDto } from "../dto/editProfileDto.js";
+import type { profileResponseDto } from "../dto/profileResponseDto.js";
 
 export interface IUserService {
-    getCurrentUser(userId: string): Promise<LoginUserResponseDto["user"]>;
+    getProfile(userId:string): Promise<profileResponseDto>;
+    editProfile(userId:string,data:editProfileDto):Promise<profileResponseDto>;
 }

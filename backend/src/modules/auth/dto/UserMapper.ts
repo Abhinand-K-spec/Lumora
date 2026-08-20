@@ -1,5 +1,4 @@
 import type { IUsers } from "../../../shared/interfaces/IUsers.js";
-import type { IPhotographer } from "../../../shared/interfaces/IPhotographer.js";
 import type { LoginUserResponseDto } from "./LoginUserResponseDto.js";
 
 export class UserMapper {
