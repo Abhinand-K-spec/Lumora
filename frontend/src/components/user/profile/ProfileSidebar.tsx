@@ -5,8 +5,11 @@ import {
     CalendarDays,
     LogOut,
 } from "lucide-react";
+import useAuth from "../../../hooks/useAuth";
 
 const ProfileSidebar = () => {
+    const { logout } = useAuth();
+
     return (
         <div className="rounded-xl border border-[#292929] bg-[#151515] p-7">
 
@@ -40,7 +43,10 @@ const ProfileSidebar = () => {
 
             <div className="my-8 border-t border-[#292929]" />
 
-            <button className="flex w-full items-center gap-4 px-4 py-3 text-sm text-red-300">
+            <button 
+                onClick={logout}
+                className="flex w-full items-center gap-4 px-4 py-3 text-sm text-red-300 cursor-pointer hover:bg-neutral-900/60 rounded-lg transition"
+            >
                 <LogOut size={18} />
                 Sign Out
             </button>

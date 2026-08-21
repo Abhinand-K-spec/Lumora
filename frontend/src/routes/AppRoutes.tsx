@@ -15,6 +15,16 @@ import AdminRoute from "./AdminRoute";
 import AdminPublicRoute from "./AdminPublicRoute";
 import UserManagement from "../pages/admin/UserManagement";
 import Profile from '../pages/user/Profile';
+import PhotographerLayout from "../layouts/PhotographerLayout";
+import useAuth from "../hooks/useAuth";
+
+const RoleBasedLayout = () => {
+  const { user } = useAuth();
+  if (user?.role === "PHOTOGRAPHER") {
+    return <PhotographerLayout />;
+  }
+  return <UserLayout />;
+};
 
 const AppRoutes = () => {
   return (
@@ -33,7 +43,7 @@ const AppRoutes = () => {
         <Route path="/forgotPassword" element={<ForgetPassword />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route element={<UserLayout />}>
+          <Route element={<RoleBasedLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile/>}/>
           </Route>
