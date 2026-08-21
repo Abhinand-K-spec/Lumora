@@ -13,7 +13,7 @@ export class userProfileMapper{
             id:profile.userId,
             name:user.name,
             email:user.email,
-            phone:user.phone,
+            phone:profile.phone,
             profilePhoto:profile.profilePhoto
         }
     }
