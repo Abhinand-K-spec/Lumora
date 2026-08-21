@@ -4,7 +4,6 @@ import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
 import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
 import { AppError } from "../../../shared/errors/AppError.js";
 import { success } from "zod";
-import { uploadToCloudinary } from "../../../shared/config/cloudinary.js";
 
 export class UserController {
     constructor(
@@ -76,20 +75,13 @@ export class UserController {
                 throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
             }
 
-            if(!req.file){
-                throw new AppError(HttpStatus.BAD_REQUEST,'No file uploaded');
-            }
-
-            const cloudinaryUrl = await uploadToCloudinary(req.file.buffer,'profile_photos');
-
-            await this._userService.editProfile(userId,{profilePhoto:cloudinaryUrl});
-
+            const updatedUser = await this._userService.editProfile(userId,{profilePhoto:req.body.profilePhoto});
 
             res.status(HttpStatus.OK).json({
                 success:true,
                 message:'Photo uploaded successfully',
                 data:{
-                    photoUrl:cloudinaryUrl
+                    photoUrl:updatedUser.profilePhoto
                 }
             });
         } catch (error) {

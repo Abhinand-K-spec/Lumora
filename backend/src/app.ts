@@ -7,6 +7,7 @@ import cors from "cors";
 import { AppError } from "./shared/errors/AppError.js";
 import cookieParser from "cookie-parser";
 import appRoutes from "./modules/user/routes/user.routes.js";
+import photographerRoutes from "./modules/photographer/routes/photographer.routes.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/photographer/auth", authRoutes);
 app.use("/api/admin/auth", authRoutes);
 app.use("/api/app", appRoutes);
+app.use("/api/photographer", photographerRoutes);
 app.use("/api/admin/userManagement", userManagementRoutes);
 
 app.use((req: Request, res: Response) => {
