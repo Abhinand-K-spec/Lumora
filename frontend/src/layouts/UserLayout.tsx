@@ -1,34 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import {  useRef } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { Search, LogOut } from "lucide-react";
+import { Search } from "lucide-react";
 import useAuth from "../hooks/useAuth";
 
 const UserLayout = () => {
-  const { user, logout } = useAuth();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { user } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
 
   const navItems = [
     { label: "Feed", path: "/" },
@@ -78,32 +56,14 @@ const UserLayout = () => {
 
             {/* Profile Dropdown */}
             <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold cursor-pointer hover:bg-primary/20 transition-all select-none focus:outline-none"
-              >
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </button>
+            <Link
+              to="/profile"
+              className="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold cursor-pointer hover:bg-primary/20 transition-all select-none focus:outline-none"
+            >
+              {user?.name?.charAt(0).toUpperCase() || "U"}
+            </Link>
 
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-56 bg-neutral border border-border rounded-xl shadow-xl py-2 z-50">
-                  <div className="px-4 py-2 border-b border-border/40 mb-1">
-                    <p className="text-sm font-semibold text-text truncate">
-                      {user?.name}
-                    </p>
-                    <p className="text-xs text-text-secondary truncate">
-                      {user?.email}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2.5 text-sm text-error hover:bg-neutral-900/60 transition-colors flex items-center gap-2.5 cursor-pointer font-medium"
-                  >
-                    <LogOut size={16} />
-                    Logout Session
-                  </button>
-                </div>
-              )}
+              
             </div>
           </div>
         </div>

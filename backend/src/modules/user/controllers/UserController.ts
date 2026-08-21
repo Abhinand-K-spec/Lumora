@@ -71,11 +71,18 @@ export class UserController {
 
     async uploadProfilePhoto(req:Request,res:Response,next:NextFunction):Promise<void>{
         try {
+            const userId = req.user?.id;
+            if(!userId){
+                throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
+            }
+
             if(!req.file){
                 throw new AppError(HttpStatus.BAD_REQUEST,'No file uploaded');
             }
 
             const cloudinaryUrl = await uploadToCloudinary(req.file.buffer,'profile_photos');
+
+            await this._userService.editProfile(userId,{profilePhoto:cloudinaryUrl});
 
 
             res.status(HttpStatus.OK).json({
