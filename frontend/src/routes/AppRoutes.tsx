@@ -14,6 +14,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminRoute from "./AdminRoute";
 import AdminPublicRoute from "./AdminPublicRoute";
 import UserManagement from "../pages/admin/UserManagement";
+import Profile from '../pages/user/Profile';
 
 const AppRoutes = () => {
   return (
@@ -34,6 +35,7 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute />}>
           <Route element={<UserLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile/>}/>
           </Route>
         </Route>
 
