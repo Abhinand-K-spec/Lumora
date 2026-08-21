@@ -1,4 +1,7 @@
 import { Pencil, Share2 , UserIcon } from "lucide-react";
+import { useRef, useState } from "react";
+import userService from "../../../services/userService";
+import { toast } from "sonner";
 
 interface ProfileHeaderProps {
   name: string;
@@ -6,6 +9,7 @@ interface ProfileHeaderProps {
   eventsCount: number;
   followingCount: number;
   onEdit: () => void;
+  onProfileUploadSuccess:(newPhotoUrl:string)=>void;
 }
 
 const ProfileHeader = ({
@@ -14,7 +18,37 @@ const ProfileHeader = ({
   eventsCount,
   followingCount,
   onEdit,
+  onProfileUploadSuccess
 }: ProfileHeaderProps) => {
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploading,setUploading]= useState(false);
+
+    const handlePencilClick = ()=>{
+        fileInputRef.current?.click();
+    }
+
+
+    const handleFileChange = async(e:React.ChangeEvent<HTMLInputElement>)=>{
+        const file = e.target.files?.[0];
+        if(!file) return;
+
+        try {
+            setUploading(true);
+
+            const res = await userService.uploadProfilePhoto(file);
+            onProfileUploadSuccess(res.data.photoUrl);
+
+            toast.success('Profile image uploaded successfully');
+        } catch (error) {
+            console.log(error);
+            toast.error('Error uploading profile photo');
+        }finally{
+            setUploading(false);
+        }
+    }
+
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-10">
@@ -32,8 +66,18 @@ const ProfileHeader = ({
             </div>
           )}
 
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        className="hidden"
+                    />
+
           <button
+            onClick={handlePencilClick}
             type="button"
+            disabled={isUploading}
             className="absolute bottom-1 right-1 flex h-10 w-10 items-center justify-center rounded-full bg-[#f5c76b] text-black shadow-lg"
           >
             <Pencil size={18} />

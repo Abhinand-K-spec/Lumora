@@ -19,6 +19,16 @@ const Profile = () => {
     setIsEditing(false);
   };
 
+  const handlePhotoUpdated = (newPhotoUrl:string)=>{
+    setProfile((prev)=>{
+        if(!prev) return null;
+        return{
+            ...prev,
+            profilePhoto:newPhotoUrl
+        }
+    })
+  }
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -61,6 +71,7 @@ const Profile = () => {
             eventsCount={0} 
             followingCount={0}
             onEdit={() => setIsEditing(true)}
+            onProfileUploadSuccess={handlePhotoUpdated}
           />
         </section>
 
