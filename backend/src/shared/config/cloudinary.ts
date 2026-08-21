@@ -21,7 +21,7 @@ export const uploadToCloudinary = (
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: folder, resource_type: "auto" },
+      { folder: folder, resource_type: "image" },
       (error, result) => {
         if (error) return reject(error);
         resolve(result!.secure_url);
