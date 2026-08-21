@@ -1,4 +1,4 @@
-import { Pencil, Share2 , UserIcon } from "lucide-react";
+import { Pencil, Share2, UserIcon, Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import userService from "../../../services/userService";
 import { toast } from "sonner";
@@ -9,7 +9,7 @@ interface ProfileHeaderProps {
   eventsCount: number;
   followingCount: number;
   onEdit: () => void;
-  onProfileUploadSuccess:(newPhotoUrl:string)=>void;
+  onProfileUploadSuccess: (newPhotoUrl: string) => void;
 }
 
 const ProfileHeader = ({
@@ -18,36 +18,33 @@ const ProfileHeader = ({
   eventsCount,
   followingCount,
   onEdit,
-  onProfileUploadSuccess
+  onProfileUploadSuccess,
 }: ProfileHeaderProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setUploading] = useState(false);
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [isUploading,setUploading]= useState(false);
+  const handlePencilClick = () => {
+    fileInputRef.current?.click();
+  };
 
-    const handlePencilClick = ()=>{
-        fileInputRef.current?.click();
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+
+      const res = await userService.uploadProfilePhoto(file);
+      onProfileUploadSuccess(res.data.photoUrl);
+
+      toast.success("Profile image uploaded successfully");
+    } catch (error) {
+      console.log(error);
+      toast.error("Error uploading profile photo");
+    } finally {
+      setUploading(false);
     }
-
-
-    const handleFileChange = async(e:React.ChangeEvent<HTMLInputElement>)=>{
-        const file = e.target.files?.[0];
-        if(!file) return;
-
-        try {
-            setUploading(true);
-
-            const res = await userService.uploadProfilePhoto(file);
-            onProfileUploadSuccess(res.data.photoUrl);
-
-            toast.success('Profile image uploaded successfully');
-        } catch (error) {
-            console.log(error);
-            toast.error('Error uploading profile photo');
-        }finally{
-            setUploading(false);
-        }
-    }
-
+  };
 
   return (
     <div className="flex items-center justify-between">
@@ -58,21 +55,34 @@ const ProfileHeader = ({
             <img
               src={profilePhoto}
               alt={name}
-              className="h-44 w-44 rounded-full object-cover ring-4 ring-[#252525]"
+              className={`h-44 w-44 rounded-full object-cover ring-4 ring-[#252525] transition-opacity duration-200 ${
+                isUploading ? "opacity-30" : ""
+              }`}
             />
           ) : (
-            <div className="flex h-44 w-44 items-center justify-center rounded-full bg-text-tertiary text-5xl font-serif font-semibold text-primary uppercase ring-4 ring-[#252525]">
+            <div
+              className={`flex h-44 w-44 items-center justify-center rounded-full bg-text-tertiary text-5xl font-serif font-semibold text-primary uppercase ring-4 ring-[#252525] transition-opacity duration-200 ${
+                isUploading ? "opacity-30" : ""
+              }`}
+            >
               <UserIcon size={40} />
             </div>
           )}
 
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        accept="image/*"
-                        className="hidden"
-                    />
+          {/* Uploading Spinner Overlay */}
+          {isUploading && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-[1px]">
+              <Loader2 className="h-10 w-10 animate-spin text-[#f5c76b]" />
+            </div>
+          )}
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
 
           <button
             onClick={handlePencilClick}
