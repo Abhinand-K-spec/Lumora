@@ -4,6 +4,7 @@ import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
 import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
 import { AppError } from "../../../shared/errors/AppError.js";
 import { success } from "zod";
+import { uploadToCloudinary } from "../../../shared/config/cloudinary.js";
 
 export class UserController {
     constructor(
@@ -62,6 +63,28 @@ export class UserController {
                     user:updatedUser
                 }
             })
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
+    async uploadProfilePhoto(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try {
+            if(!req.file){
+                throw new AppError(HttpStatus.BAD_REQUEST,'No file uploaded');
+            }
+
+            const cloudinaryUrl = await uploadToCloudinary(req.file.buffer,'profile_photos');
+
+
+            res.status(HttpStatus.OK).json({
+                success:true,
+                message:'Photo uploaded successfully',
+                data:{
+                    photoUrl:cloudinaryUrl
+                }
+            });
         } catch (error) {
             next(error);
         }
