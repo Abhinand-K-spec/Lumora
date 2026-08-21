@@ -1,0 +1,8 @@
+export interface photographerProfileResponseDto{
+    id:string;
+    name:string;
+    email:string;
+    bio:string;
+    phone:string;
+    profilePhoto:string;
+}

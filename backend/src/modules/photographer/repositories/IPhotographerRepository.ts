@@ -8,4 +8,5 @@ export interface IPhotographerRepository {
     deleteById(id:string) : Promise<boolean>;
     exists(email:string) : Promise<boolean>;
     updateRefreshToken(id:string, refreshToken:string):Promise<IPhotographer|null>;
+    findByUserId(id:string):Promise<IPhotographer|null>;
 }

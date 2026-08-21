@@ -34,4 +34,8 @@ export class PhotographerRepository implements IPhotographerRepository {
     async updateRefreshToken(id: string, refreshToken: string): Promise<IPhotographer | null> {
         return await Photographer.findByIdAndUpdate(id, { refreshToken }, { new: true });
     }
+
+        async findByUserId(userId: string): Promise<IPhotographer | null> {
+            return await Photographer.findOne({ userId });
+        }
 }
