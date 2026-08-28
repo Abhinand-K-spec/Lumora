@@ -6,6 +6,12 @@ export interface IPhotographer {
     userId:string;
     bio:string;
     profilePhoto?:string;
+    coverPhoto?:string;
+    location?:string;
+    languages?:string[];
+    specialities?:string[];
+    equipment?:string[];
+    serviceRegions?:string[];
     updatedAt:Date;
     createdAt:Date;
     phone:string;

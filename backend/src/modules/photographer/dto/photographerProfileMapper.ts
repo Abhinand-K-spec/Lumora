@@ -10,7 +10,13 @@ export class photographerProfileMapper{
             email: user.email,
             bio: profile.bio || "",
             phone: profile.phone || "",
-            profilePhoto: profile.profilePhoto || ""
+            profilePhoto: profile.profilePhoto || "",
+            coverPhoto: profile.coverPhoto || "",
+            location: profile.location || "",
+            languages: profile.languages || [],
+            specialities: profile.specialities || [],
+            equipment: profile.equipment || [],
+            serviceRegions: profile.serviceRegions || []
         }
     }
 }

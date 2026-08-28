@@ -15,6 +15,34 @@ const photographerSchema = new Schema<IPhotographer>(
             type:String,
             trim:true
         },
+        profilePhoto:{
+            type:String,
+            trim:true
+        },
+        coverPhoto:{
+            type:String,
+            trim:true
+        },
+        location:{
+            type:String,
+            trim:true
+        },
+        languages:{
+            type:[String],
+            default:[]
+        },
+        specialities:{
+            type:[String],
+            default:[]
+        },
+        equipment:{
+            type:[String],
+            default:[]
+        },
+        serviceRegions:{
+            type:[String],
+            default:[]
+        },
 
     },
 

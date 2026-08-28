@@ -57,6 +57,20 @@ export class AuthService implements IAuthService {
             isEmailVerified: false,
         });
 
+        if (user.role === userRole.PHOTOGRAPHER) {
+            await this._photographerRepository.create({
+                userId: user._id.toString(),
+                phone: '',
+                bio: ''
+            });
+        } else {
+            await this._userProfileRepository.create({
+                userId: user._id.toString(),
+                phone: '',
+                profilePhoto: ''
+            });
+        }
+
         await this._otpRepository.save(user._id.toString(),otpPurpose.Email,otp,900)
 
         console.log('otp : ', otp);

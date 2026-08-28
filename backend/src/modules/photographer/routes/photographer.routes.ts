@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { PhotographerService } from "../services/PhotographerService";
-import { PhotographerController } from "../controllers/photographerController";
+import { PhotographerController } from "../controllers/PhotographerController";
 import { UserRepository } from "../../auth/repositories/UserRepository";
 import { PhotographerRepository } from "../repositories/PhotographerRepository";
 import { authenticate } from "../../../shared/middlewares/auth.middleware";

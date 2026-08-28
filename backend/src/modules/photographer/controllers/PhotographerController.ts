@@ -21,6 +21,8 @@ export class PhotographerController{
         }
 
         const photographer = await this._photographerService.getProfile(userId);
+        console.log('photographer : ',photographer);
+        
 
         res.status(HttpStatus.OK).json({
             success:true,

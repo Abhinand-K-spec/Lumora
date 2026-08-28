@@ -8,6 +8,7 @@ import {
   BarChart3,
   Coins,
   LogOut,
+  AlertCircle,
 } from "lucide-react";
 import useAuth from "../hooks/useAuth";
 import photographerService, { type PhotographerProfile } from "../services/photographerService";
@@ -17,7 +18,7 @@ const PhotographerLayout = () => {
   const [profile, setProfile] = useState<PhotographerProfile | null>(null);
   const location = useLocation();
 
-  // Fetch photographer profile details (including photo) on mount
+  // Fetch photographer profile details (including photo) on mount and path changes
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -31,7 +32,7 @@ const PhotographerLayout = () => {
     if (user) {
       fetchProfile();
     }
-  }, [user]);
+  }, [user, location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -41,8 +42,17 @@ const PhotographerLayout = () => {
     }
   };
 
+  const isProfilePage = location.pathname === "/profile";
+  const isProfileIncomplete = profile !== null && (
+    !profile.bio || 
+    !profile.phone || 
+    !profile.location || 
+    !profile.equipment || 
+    profile.equipment.length === 0
+  );
+
   const menuItems = [
-    { label: "Dashboard", path: "/photographer/dashboard", icon: LayoutDashboard },
+    { label: "Dashboard", path: "/", icon: LayoutDashboard },
     { label: "Bookings", path: "/photographer/bookings", icon: Calendar },
     { label: "Events", path: "/photographer/events", icon: Camera },
     { label: "Chat", path: "/photographer/chat", icon: MessageSquare },
@@ -136,6 +146,17 @@ const PhotographerLayout = () => {
 
       {/* 2. MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-black">
+        {isProfileIncomplete && !isProfilePage && (
+          <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-200 px-6 py-3 flex items-center justify-between text-xs select-none">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle size={16} className="text-amber-500 animate-pulse flex-shrink-0" />
+              <span>Your profile is incomplete! Please complete your bio, phone, location, and gear list so clients can find and book you.</span>
+            </div>
+            <Link to="/profile" className="px-3.5 py-1.5 bg-amber-500 text-black font-bold rounded hover:bg-amber-400 transition-colors flex-shrink-0">
+              Complete Profile
+            </Link>
+          </div>
+        )}
         {/* Content Viewport */}
         <main className="flex-1 overflow-y-auto">
           <Outlet />

@@ -19,13 +19,13 @@ const Profile = () => {
     setIsEditing(false);
   };
 
-  const handlePhotoUpdated = (newPhotoUrl:string)=>{
-    setProfile((prev)=>{
-        if(!prev) return null;
-        return{
-            ...prev,
-            profilePhoto:newPhotoUrl
-        }
+  const handlePhotoUpdated = (newPhotoUrl: string) => {
+    setProfile((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        profilePhoto: newPhotoUrl
+      }
     })
   }
 
@@ -68,7 +68,7 @@ const Profile = () => {
           <ProfileHeader
             name={profile.name}
             profilePhoto={profile.profilePhoto}
-            eventsCount={0} 
+            eventsCount={0}
             followingCount={0}
             onEdit={() => setIsEditing(true)}
             onProfileUploadSuccess={handlePhotoUpdated}

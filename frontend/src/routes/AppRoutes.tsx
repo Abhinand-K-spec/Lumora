@@ -16,6 +16,7 @@ import AdminPublicRoute from "./AdminPublicRoute";
 import UserManagement from "../pages/admin/UserManagement";
 import Profile from '../pages/user/Profile';
 import PhotographerLayout from "../layouts/PhotographerLayout";
+import PhotographerProfile from "../pages/photographer/PhotographerProfile";
 import useAuth from "../hooks/useAuth";
 
 const RoleBasedLayout = () => {
@@ -24,6 +25,14 @@ const RoleBasedLayout = () => {
     return <PhotographerLayout />;
   }
   return <UserLayout />;
+};
+
+const ProfileRouteSelector = () => {
+  const { user } = useAuth();
+  if (user?.role === "PHOTOGRAPHER") {
+    return <PhotographerProfile />;
+  }
+  return <Profile />;
 };
 
 const AppRoutes = () => {
@@ -45,7 +54,7 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute />}>
           <Route element={<RoleBasedLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/profile" element={<Profile/>}/>
+            <Route path="/profile" element={<ProfileRouteSelector />}/>
           </Route>
         </Route>
 

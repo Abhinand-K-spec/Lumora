@@ -5,4 +5,10 @@ export interface photographerProfileResponseDto{
     bio:string;
     phone:string;
     profilePhoto:string;
+    coverPhoto:string;
+    location:string;
+    languages:string[];
+    specialities:string[];
+    equipment:string[];
+    serviceRegions:string[];
 }

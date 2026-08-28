@@ -4,6 +4,12 @@ import type { UserProfile } from '../types/profile';
 
 export interface PhotographerProfile extends UserProfile {
     bio: string;
+    coverPhoto?: string;
+    location?: string;
+    languages?: string[];
+    specialities?: string[];
+    equipment?: string[];
+    serviceRegions?: string[];
 }
 
 export interface UpdatePhotographerRequest {
@@ -11,6 +17,12 @@ export interface UpdatePhotographerRequest {
     phone?: string;
     bio?: string;
     profilePhoto?: string;
+    coverPhoto?: string;
+    location?: string;
+    languages?: string[];
+    specialities?: string[];
+    equipment?: string[];
+    serviceRegions?: string[];
 }
 
 const photographerService = {
