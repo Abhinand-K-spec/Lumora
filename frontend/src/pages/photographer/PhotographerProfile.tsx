@@ -154,7 +154,7 @@ const PhotographerProfile = () => {
         await photographerService.updateProfile({ profilePhoto: url });
         setProfile((prev) => ({ ...prev, profilePhoto: url }));
         toast.success("Avatar photo updated!");
-      } catch (err) {
+      } catch {
         const mockUrl = URL.createObjectURL(file);
         setProfile((prev) => ({ ...prev, profilePhoto: mockUrl }));
         toast.success("Avatar photo updated (Sandbox Mode)!");
@@ -183,7 +183,7 @@ const PhotographerProfile = () => {
         await photographerService.updateProfile({ coverPhoto: url });
         setProfile((prev) => ({ ...prev, coverPhoto: url }));
         toast.success("Cover photo updated!");
-      } catch (err) {
+      } catch {
         const mockUrl = URL.createObjectURL(file);
         setProfile((prev) => ({ ...prev, coverPhoto: mockUrl }));
         toast.success("Cover photo updated (Sandbox Mode)!");
@@ -283,8 +283,8 @@ const PhotographerProfile = () => {
                 profile.equipment && profile.equipment.length > 0
                   ? profile.equipment.map((item, index) => {
                       const lower = item.toLowerCase();
-                      let category = "Camera Gear";
-                      let iconName: "camera" | "stabilizer" | "drone" = "camera";
+                      let category: string;
+                      let iconName: "camera" | "stabilizer" | "drone";
                       if (lower.includes("drone") || lower.includes("dji")) {
                         category = "Aerial Drone";
                         iconName = "drone";

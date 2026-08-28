@@ -89,7 +89,7 @@ const PhotographersList = () => {
         if (res.data && res.data.photographers) {
           setPhotographers(res.data.photographers);
         }
-      } catch (err) {
+      } catch {
         toast.error("Failed to load photographers list");
       } finally {
         setLoading(false);
@@ -117,7 +117,7 @@ const PhotographersList = () => {
   };
 
   // Derived filtered & sorted list
-  let displayPhotographers = [...photographers];
+  const displayPhotographers = [...photographers];
 
   // Sorting logic
   if (sortBy === "Price: Low to High") {
