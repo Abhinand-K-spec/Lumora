@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Trash2 } from "lucide-react";
+import { DISTRICTS, SERVICES } from "../../../constants/profileOptions";
 
 interface PhotographerEditModalProps {
   isOpen: boolean;
@@ -13,7 +14,15 @@ interface PhotographerEditModalProps {
     equipment: string[];
     serviceRegions?: string[];
   };
-  onSave: (updatedData: any) => void;
+  onSave: (updatedData: {
+    name: string;
+    bio: string;
+    specialities: string[];
+    location: string;
+    languages: string[];
+    equipment: string[];
+    serviceRegions?: string[];
+  }) => void;
 }
 
 const PhotographerEditModal = ({
@@ -139,13 +148,19 @@ const PhotographerEditModal = ({
           {/* Location */}
           <div>
             <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-2">Based In (Location)</label>
-            <input
-              type="text"
+            <select
               required
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full bg-neutral-950 border border-border/20 rounded-lg px-4 py-2.5 text-xs text-text outline-none focus:border-primary/50 transition"
-            />
+              className="w-full bg-neutral-950 border border-border/20 rounded-lg px-4 py-2.5 text-xs text-text outline-none focus:border-primary/50 transition cursor-pointer"
+            >
+              <option value="" disabled>Select Location</option>
+              {DISTRICTS.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Service Areas */}
@@ -167,18 +182,23 @@ const PhotographerEditModal = ({
             </div>
             
             <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Add service area (e.g. Dubai)"
+              <select
                 value={newRegion}
                 onChange={(e) => setNewRegion(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addRegion())}
-                className="flex-1 bg-neutral-950 border border-border/20 rounded-lg px-3 py-2 text-xs text-text outline-none"
-              />
+                className="flex-1 bg-neutral-950 border border-border/20 rounded-lg px-3 py-2 text-xs text-text outline-none cursor-pointer focus:border-primary/50 transition"
+              >
+                <option value="">Select Service Area...</option>
+                {DISTRICTS.filter(d => !serviceRegions.includes(d)).map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={addRegion}
-                className="px-4 py-2 bg-neutral-950 hover:bg-neutral-900 border border-border/20 text-text font-bold text-xs rounded-lg transition"
+                disabled={!newRegion}
+                className="px-4 py-2 bg-neutral-950 hover:bg-neutral-900 border border-border/20 disabled:opacity-50 disabled:hover:bg-neutral-950 text-text font-bold text-xs rounded-lg transition"
               >
                 Add
               </button>
@@ -216,18 +236,23 @@ const PhotographerEditModal = ({
             </div>
             
             <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Add specialty tag (e.g. FASHION)"
+              <select
                 value={newSpeciality}
                 onChange={(e) => setNewSpeciality(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSpeciality())}
-                className="flex-1 bg-neutral-950 border border-border/20 rounded-lg px-3 py-2 text-xs text-text outline-none"
-              />
+                className="flex-1 bg-neutral-950 border border-border/20 rounded-lg px-3 py-2 text-xs text-text outline-none cursor-pointer focus:border-primary/50 transition"
+              >
+                <option value="">Select Speciality...</option>
+                {SERVICES.filter(s => !specialities.includes(s)).map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={addSpeciality}
-                className="px-4 py-2 bg-neutral-950 hover:bg-neutral-900 border border-border/20 text-text font-bold text-xs rounded-lg transition"
+                disabled={!newSpeciality}
+                className="px-4 py-2 bg-neutral-950 hover:bg-neutral-900 border border-border/20 disabled:opacity-50 disabled:hover:bg-neutral-950 text-text font-bold text-xs rounded-lg transition"
               >
                 Add
               </button>

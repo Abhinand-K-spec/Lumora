@@ -28,4 +28,8 @@ export class UserRepository extends BaseRepository<IUsers> implements IUserRepos
     async delete(id: string): Promise<void> {
         await Users.findByIdAndUpdate(id, { accountStatus: accountStatus.Deleted })
     }
+
+    async findWithFilter(filter: any): Promise<IUsers[]> {
+        return await Users.find(filter);
+    }
 }

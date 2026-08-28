@@ -1,3 +1,5 @@
+import type { IPackage } from "../../../shared/interfaces/IPackage.js";
+
 export interface photographerProfileResponseDto{
     id:string;
     name:string;
@@ -11,4 +13,5 @@ export interface photographerProfileResponseDto{
     specialities:string[];
     equipment:string[];
     serviceRegions:string[];
+    packages:IPackage[];
 }

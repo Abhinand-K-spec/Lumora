@@ -1,9 +1,10 @@
-import type { IPhotographer } from "../../../shared/interfaces/IPhotographer";
-import type { IUsers } from "../../../shared/interfaces/IUsers";
-import type { photographerProfileResponseDto } from "./photographerProfileResponseDto";
+import type { IPhotographer } from "../../../shared/interfaces/IPhotographer.js";
+import type { IUsers } from "../../../shared/interfaces/IUsers.js";
+import type { IPackage } from "../../../shared/interfaces/IPackage.js";
+import type { photographerProfileResponseDto } from "./photographerProfileResponseDto.js";
 
 export class photographerProfileMapper{
-    static toProfileResponse(user:IUsers,profile:IPhotographer):photographerProfileResponseDto{
+    static toProfileResponse(user:IUsers,profile:IPhotographer,packages:IPackage[]):photographerProfileResponseDto{
         return{
             id: profile.userId,
             name: user.name,
@@ -16,7 +17,8 @@ export class photographerProfileMapper{
             languages: profile.languages || [],
             specialities: profile.specialities || [],
             equipment: profile.equipment || [],
-            serviceRegions: profile.serviceRegions || []
+            serviceRegions: profile.serviceRegions || [],
+            packages: packages
         }
     }
 }

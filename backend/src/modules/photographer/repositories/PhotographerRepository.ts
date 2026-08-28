@@ -38,4 +38,8 @@ export class PhotographerRepository implements IPhotographerRepository {
         async findByUserId(userId: string): Promise<IPhotographer | null> {
             return await Photographer.findOne({ userId });
         }
+
+        async findAll(filter: any): Promise<IPhotographer[]> {
+            return await Photographer.find(filter);
+        }
 }

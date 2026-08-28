@@ -11,5 +11,5 @@ export interface IUserRepository extends IBaseRepository<IUsers> {
     changeStatus(id:string,status:accountStatus):Promise<void>;
 
     delete(id:string):Promise<void>;
-
+    findWithFilter(filter: any): Promise<IUsers[]>;
 }

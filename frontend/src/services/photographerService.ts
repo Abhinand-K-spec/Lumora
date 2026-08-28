@@ -2,6 +2,21 @@ import api from '../api/axios';
 import type { ApiResponse } from '../types/api';
 import type { UserProfile } from '../types/profile';
 
+export interface PackageItem {
+    _id: string;
+    packageName: string;
+    photographerId: string;
+    price: number;
+    description: string;
+    framesIncluded: boolean;
+    droneIncluded: boolean;
+    albumIncluded: boolean;
+    videographersIncluded: boolean;
+    status: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export interface PhotographerProfile extends UserProfile {
     bio: string;
     coverPhoto?: string;
@@ -10,6 +25,7 @@ export interface PhotographerProfile extends UserProfile {
     specialities?: string[];
     equipment?: string[];
     serviceRegions?: string[];
+    packages?: PackageItem[];
 }
 
 export interface UpdatePhotographerRequest {
@@ -28,6 +44,11 @@ export interface UpdatePhotographerRequest {
 const photographerService = {
     getProfile: async (): Promise<ApiResponse<{ photographer: PhotographerProfile }>> => {
         const response = await api.get<ApiResponse<{ photographer: PhotographerProfile }>>('/photographer/profile');
+        return response.data;
+    },
+
+    getPhotographers: async (params: { search?: string; district?: string; service?: string; price?: string; }): Promise<ApiResponse<{ photographers: PhotographerProfile[] }>> => {
+        const response = await api.get<ApiResponse<{ photographers: PhotographerProfile[] }>>('/photographer', { params });
         return response.data;
     },
 
@@ -65,6 +86,21 @@ const photographerService = {
                 },
             }
         );
+        return response.data;
+    },
+
+    addPackage: async (data: Omit<PackageItem, '_id' | 'photographerId'>): Promise<ApiResponse<{ photographer: PhotographerProfile }>> => {
+        const response = await api.post<ApiResponse<{ photographer: PhotographerProfile }>>('/photographer/profile/packages', data);
+        return response.data;
+    },
+
+    editPackage: async (packageId: string, data: Omit<PackageItem, '_id' | 'photographerId'>): Promise<ApiResponse<{ photographer: PhotographerProfile }>> => {
+        const response = await api.put<ApiResponse<{ photographer: PhotographerProfile }>>(`/photographer/profile/packages/${packageId}`, data);
+        return response.data;
+    },
+
+    deletePackage: async (packageId: string): Promise<ApiResponse<{ photographer: PhotographerProfile }>> => {
+        const response = await api.delete<ApiResponse<{ photographer: PhotographerProfile }>>(`/photographer/profile/packages/${packageId}`);
         return response.data;
     }
 };

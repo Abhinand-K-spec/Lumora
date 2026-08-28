@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import useAuth from "../../hooks/useAuth";
-import photographerService from "../../services/photographerService";
+import photographerService, { type PackageItem } from "../../services/photographerService";
 
 // Subcomponent Imports
 import PhotographerHero from "../../components/photographer/profile/PhotographerHero";
@@ -12,12 +12,31 @@ import PhotographerServices from "../../components/photographer/profile/Photogra
 import PhotographerSubscription from "../../components/photographer/profile/PhotographerSubscription";
 import PhotographerRecent from "../../components/photographer/profile/PhotographerRecent";
 import PhotographerEditModal from "../../components/photographer/profile/PhotographerEditModal";
+import PhotographerPackageModal from "../../components/photographer/profile/PhotographerPackageModal";
 
 const PhotographerProfile = () => {
   const { user } = useAuth();
 
-  // Profile State mapping the mockup details
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    bio: string;
+    profilePhoto: string;
+    coverPhoto: string;
+    location: string;
+    languages: string[];
+    specialities: string[];
+    equipment: string[];
+    rating: number;
+    reviewsCount: number;
+    totalBookings: number;
+    bookingsThisMonth: number;
+    experienceYears: number;
+    completionRate: number;
+    serviceRegions: string[];
+    packages: PackageItem[];
+  }>({
     name: user?.name || "Photographer",
     email: user?.email || "photographer@lumora.com",
     phone: "",
@@ -34,12 +53,15 @@ const PhotographerProfile = () => {
     bookingsThisMonth: 12,
     experienceYears: 8,
     completionRate: 98,
-    serviceRegions: ["Kerala", "UAE"]
+    serviceRegions: ["Kerala", "UAE"],
+    packages: []
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isPackageModalOpen, setIsPackageModalOpen] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<PackageItem | null>(null);
 
   // Sync profile details if DB returns any
   useEffect(() => {
@@ -61,7 +83,8 @@ const PhotographerProfile = () => {
             languages: dbData.languages || prev.languages,
             specialities: dbData.specialities || prev.specialities,
             equipment: dbData.equipment || prev.equipment,
-            serviceRegions: dbData.serviceRegions || prev.serviceRegions
+            serviceRegions: dbData.serviceRegions || prev.serviceRegions,
+            packages: dbData.packages || prev.packages
           }));
         }
       } catch (err) {
@@ -72,7 +95,18 @@ const PhotographerProfile = () => {
   }, []);
 
   // Save profile updates
-  const handleSaveProfile = async (updatedData: any) => {
+  const handleSaveProfile = async (updatedData: {
+    name: string;
+    bio: string;
+    specialities: string[];
+    location: string;
+    languages: string[];
+    equipment: string[];
+    serviceRegions?: string[];
+    phone?: string;
+    profilePhoto?: string;
+    coverPhoto?: string;
+  }) => {
     try {
       // Sync local state
       setProfile((prev) => ({
@@ -107,8 +141,9 @@ const PhotographerProfile = () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "image/*";
-    fileInput.onchange = async (e: any) => {
-      const file = e.target.files?.[0];
+    fileInput.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
       if (!file) return;
 
       try {
@@ -135,8 +170,9 @@ const PhotographerProfile = () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "image/*";
-    fileInput.onchange = async (e: any) => {
-      const file = e.target.files?.[0];
+    fileInput.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
       if (!file) return;
 
       try {
@@ -156,6 +192,48 @@ const PhotographerProfile = () => {
       }
     };
     fileInput.click();
+  };
+
+  // Packages CRUD Handlers
+  const handleAddPackageClick = () => {
+    setEditingPackage(null);
+    setIsPackageModalOpen(true);
+  };
+
+  const handleEditPackageClick = (pkg: PackageItem) => {
+    setEditingPackage(pkg);
+    setIsPackageModalOpen(true);
+  };
+
+  const handleSavePackage = async (data: Omit<PackageItem, "_id" | "photographerId">) => {
+    try {
+      if (editingPackage) {
+        // Edit existing package
+        const res = await photographerService.editPackage(editingPackage._id, data);
+        setProfile((prev) => ({ ...prev, packages: res.data.photographer.packages || [] }));
+        toast.success("Package updated successfully!");
+      } else {
+        // Add new package
+        const res = await photographerService.addPackage(data);
+        setProfile((prev) => ({ ...prev, packages: res.data.photographer.packages || [] }));
+        toast.success("Package added successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save package.");
+    }
+  };
+
+  const handleDeletePackage = async (packageId: string) => {
+    if (!window.confirm("Are you sure you want to delete this package?")) return;
+    try {
+      const res = await photographerService.deletePackage(packageId);
+      setProfile((prev) => ({ ...prev, packages: res.data.photographer.packages || [] }));
+      toast.success("Package deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete package.");
+    }
   };
 
   return (
@@ -236,7 +314,12 @@ const PhotographerProfile = () => {
 
           {/* Right Column: Packages & Subscription */}
           <div className="space-y-6.5 flex flex-col">
-            <PhotographerServices />
+            <PhotographerServices
+              packages={profile.packages}
+              onAddClick={handleAddPackageClick}
+              onEditClick={handleEditPackageClick}
+              onDeleteClick={handleDeletePackage}
+            />
             <PhotographerSubscription />
           </div>
 
@@ -275,6 +358,14 @@ const PhotographerProfile = () => {
           serviceRegions: profile.serviceRegions
         }}
         onSave={handleSaveProfile}
+      />
+
+      {/* 8. Package Modal */}
+      <PhotographerPackageModal
+        isOpen={isPackageModalOpen}
+        onClose={() => setIsPackageModalOpen(false)}
+        packageData={editingPackage}
+        onSave={handleSavePackage}
       />
 
     </div>
