@@ -79,4 +79,25 @@ export class PhotographerController{
             next(error);
         }
     }
+
+    async uploadCoverPhoto(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try {
+            const userId = req.user?.id;
+            if(!userId){
+                throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
+            }
+
+            const updatedProfile = await this._photographerService.editProfile(userId,{coverPhoto:req.body.profilePhoto});
+
+            res.status(HttpStatus.OK).json({
+                success:true,
+                message:'Cover photo uploaded successfully',
+                data:{
+                    coverPhotoUrl:updatedProfile.coverPhoto
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

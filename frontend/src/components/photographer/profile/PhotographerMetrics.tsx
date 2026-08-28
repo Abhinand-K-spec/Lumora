@@ -60,8 +60,8 @@ const PhotographerMetrics = ({
 
       <MetricCard
         label="Service Region"
-        value={serviceRegions[0]}
-        subValue={`& ${serviceRegions.slice(1).join(", ")}`}
+        value={serviceRegions && serviceRegions.length > 0 ? serviceRegions[0] : "Not Specified"}
+        subValue={serviceRegions && serviceRegions.length > 1 ? `& ${serviceRegions.slice(1).join(", ")}` : ""}
       />
 
     </div>

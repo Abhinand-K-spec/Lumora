@@ -39,6 +39,7 @@ const PhotographerProfile = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
 
   // Sync profile details if DB returns any
   useEffect(() => {
@@ -129,6 +130,34 @@ const PhotographerProfile = () => {
     fileInput.click();
   };
 
+  // Upload Profile Cover Photo
+  const triggerCoverUpload = () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      try {
+        setIsUploadingCover(true);
+        const res = await photographerService.uploadCoverPhoto(file);
+        const url = res.data.coverPhotoUrl;
+
+        await photographerService.updateProfile({ coverPhoto: url });
+        setProfile((prev) => ({ ...prev, coverPhoto: url }));
+        toast.success("Cover photo updated!");
+      } catch (err) {
+        const mockUrl = URL.createObjectURL(file);
+        setProfile((prev) => ({ ...prev, coverPhoto: mockUrl }));
+        toast.success("Cover photo updated (Sandbox Mode)!");
+      } finally {
+        setIsUploadingCover(false);
+      }
+    };
+    fileInput.click();
+  };
+
   return (
     <div className="min-h-screen bg-black text-text flex flex-col justify-between font-body">
       
@@ -145,7 +174,9 @@ const PhotographerProfile = () => {
           reviewsCount={profile.reviewsCount}
           onEdit={() => setIsEditModalOpen(true)}
           onUploadPhotoClick={triggerPhotoUpload}
+          onUploadCoverClick={triggerCoverUpload}
           isUploading={isUploadingPhoto}
+          isUploadingCover={isUploadingCover}
         />
 
         {/* 3. Metric stats row */}

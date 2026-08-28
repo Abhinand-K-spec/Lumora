@@ -50,6 +50,22 @@ const photographerService = {
             }
         );
         return response.data;
+    },
+
+    uploadCoverPhoto: async (file: File): Promise<ApiResponse<{ coverPhotoUrl: string }>> => {
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        const response = await api.post<ApiResponse<{ coverPhotoUrl: string }>>(
+            '/photographer/profile/upload-cover',
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
+        return response.data;
     }
 };
 

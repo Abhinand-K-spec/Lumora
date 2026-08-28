@@ -9,7 +9,9 @@ interface PhotographerHeroProps {
   reviewsCount: number;
   onEdit: () => void;
   onUploadPhotoClick: () => void;
+  onUploadCoverClick?: () => void;
   isUploading?: boolean;
+  isUploadingCover?: boolean;
 }
 
 const PhotographerHero = ({
@@ -21,19 +23,41 @@ const PhotographerHero = ({
   reviewsCount = 124,
   onEdit,
   onUploadPhotoClick,
+  onUploadCoverClick,
   isUploading = false,
+  isUploadingCover = false,
 }: PhotographerHeroProps) => {
   return (
     <div className="relative w-full select-none">
       
       {/* 1. Cover Photo Banner */}
-      <div className="h-64 w-full bg-neutral-900 overflow-hidden relative">
+      <div className="h-64 w-full bg-neutral-900 overflow-hidden relative group/cover">
         <img
           src={coverUrl}
           alt="Photographer Cover"
-          className="w-full h-full object-cover opacity-60"
+          className={`w-full h-full object-cover transition-opacity duration-200 ${
+            isUploadingCover ? "opacity-25" : "opacity-60"
+          }`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+
+        {/* Cover Photo Upload Button */}
+        {isUploadingCover ? (
+          <div className="absolute top-4 right-4 bg-black/70 border border-border/20 px-3.5 py-2 rounded-xl text-primary text-xs font-semibold flex items-center gap-2 backdrop-blur-[1px]">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span>Uploading Cover...</span>
+          </div>
+        ) : (
+          onUploadCoverClick && (
+            <button
+              onClick={onUploadCoverClick}
+              className="absolute top-4 right-4 bg-black/50 hover:bg-black/75 border border-border/20 px-3.5 py-2 rounded-xl text-text hover:text-primary text-xs font-semibold flex items-center gap-2 opacity-0 group-hover/cover:opacity-100 transition-opacity duration-200 cursor-pointer shadow-lg"
+            >
+              <Camera size={14} />
+              <span>Change Cover</span>
+            </button>
+          )
+        )}
       </div>
 
       {/* 2. Overlapping Profile Metadata Container */}
