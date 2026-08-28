@@ -22,6 +22,7 @@ const photographerController = new PhotographerController(photographerService);
 
 router.get('/',authenticate,photographerController.getPhotographers.bind(photographerController));
 router.get('/profile',authenticate,photographerController.getProfile.bind(photographerController));
+router.get('/:userId',authenticate,photographerController.getPhotographerById.bind(photographerController));
 router.patch('/profile',authenticate,photographerController.editProfile.bind(photographerController));
 router.post('/profile/upload',authenticate,uploadProfilePhoto.single('photo'),uploadToCloudinaryMiddleware('photographer_profiles'),photographerController.uploadProfilePhoto.bind(photographerController));
 router.post('/profile/upload-cover',authenticate,uploadProfilePhoto.single('photo'),uploadToCloudinaryMiddleware('photographer_covers'),photographerController.uploadCoverPhoto.bind(photographerController));

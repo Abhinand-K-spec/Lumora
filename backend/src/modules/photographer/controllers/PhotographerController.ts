@@ -35,6 +35,26 @@ export class PhotographerController{
     }
 }
 
+    async getPhotographerById(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try {
+            const { userId } = req.params;
+            if(!userId){
+                throw new AppError(HttpStatus.BAD_REQUEST,'User ID is required');
+            }
+
+            const photographer = await this._photographerService.getProfile(userId);
+
+            res.status(HttpStatus.OK).json({
+                success:true,
+                message:'Profile fetched successfully',
+                data:{photographer}
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+
 
     async editProfile(req:Request,res:Response,next:NextFunction):Promise<void>{
         try {

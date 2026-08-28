@@ -26,6 +26,10 @@ export interface PhotographerProfile extends UserProfile {
     equipment?: string[];
     serviceRegions?: string[];
     packages?: PackageItem[];
+    experienceYears?: number;
+    rating?: number;
+    reviewsCount?: number;
+    totalBookings?: number;
 }
 
 export interface UpdatePhotographerRequest {
@@ -101,6 +105,11 @@ const photographerService = {
 
     deletePackage: async (packageId: string): Promise<ApiResponse<{ photographer: PhotographerProfile }>> => {
         const response = await api.delete<ApiResponse<{ photographer: PhotographerProfile }>>(`/photographer/profile/packages/${packageId}`);
+        return response.data;
+    },
+
+    getPhotographerById: async (userId: string): Promise<ApiResponse<{ photographer: PhotographerProfile }>> => {
+        const response = await api.get<ApiResponse<{ photographer: PhotographerProfile }>>(`/photographer/${userId}`);
         return response.data;
     }
 };

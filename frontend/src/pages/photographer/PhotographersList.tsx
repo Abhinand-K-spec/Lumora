@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, MapPin, Star, ChevronLeft, ChevronRight, ArrowRight, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import photographerService, { type PhotographerProfile } from "../../services/photographerService";
 import { toast } from "sonner";
 import { DISTRICTS as BASE_DISTRICTS, SERVICES as BASE_SERVICES } from "../../constants/profileOptions";
@@ -49,6 +50,7 @@ const FALLBACK_THUMBNAILS = [
 ];
 
 const PhotographersList = () => {
+  const navigate = useNavigate();
   const [photographers, setPhotographers] = useState<PhotographerProfile[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -321,7 +323,10 @@ const PhotographersList = () => {
                     className="bg-[#0f1012]/60 border border-border/10 rounded-xl overflow-hidden flex flex-col justify-between hover:border-border/35 shadow-xl hover:shadow-2xl transition duration-300 group"
                   >
                     {/* Top Section: Cover & Overlay */}
-                    <div className="h-40 relative overflow-hidden bg-neutral-950">
+                    <div 
+                      onClick={() => navigate(`/photographers/${p.id}`)}
+                      className="h-40 relative overflow-hidden bg-neutral-950 cursor-pointer"
+                    >
                       <img
                         src={coverUrl}
                         alt={p.name}

@@ -18,6 +18,7 @@ import Profile from '../pages/user/Profile';
 import PhotographerLayout from "../layouts/PhotographerLayout";
 import PhotographerProfile from "../pages/photographer/PhotographerProfile";
 import PhotographersList from "../pages/photographer/PhotographersList";
+import PhotographerDetails from "../pages/photographer/PhotographerDetails";
 import useAuth from "../hooks/useAuth";
 
 const RoleBasedLayout = () => {
@@ -57,6 +58,7 @@ const AppRoutes = () => {
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<ProfileRouteSelector />}/>
             <Route path="/photographers" element={<PhotographersList />} />
+            <Route path="/photographers/:id" element={<PhotographerDetails />} />
           </Route>
         </Route>
 
