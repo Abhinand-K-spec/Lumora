@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import appRoutes from "./modules/user/routes/user.routes.js";
 import photographerRoutes from "./modules/photographer/routes/photographer.routes.js";
 import dotenv from "dotenv";
+import { errorHandler } from "./shared/middlewares/error.handler.middleware.js";
 
 dotenv.config();
 
@@ -61,5 +62,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     message: "Internal Server Error",
   });
 });
+
+
+app.use(errorHandler);
 
 export default app;
