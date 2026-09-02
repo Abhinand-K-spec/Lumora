@@ -2,6 +2,7 @@
 import { AUTH_MESSAGES } from "../../../shared/constants/message.constant";
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code";
 import { AppError } from "../../../shared/errors/AppError";
+import { asyncHandler } from "../../../shared/middlewares/async.handler.middleware";
 import type { IPhotographerService } from "../interfaces/IPhotographerService";
 import type { Request, Response, NextFunction } from "express";
 
@@ -13,8 +14,7 @@ export class PhotographerController{
         private readonly _photographerService:IPhotographerService
     ){}
 
-    async getProfile(req:Request,res:Response,next:NextFunction):Promise<void>{
-    try {
+    getProfile = asyncHandler(async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
         const userId = req.user?.id;
         if(!userId){
             throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
@@ -29,31 +29,22 @@ export class PhotographerController{
             message:'Profile fetched successfully',
             data:{photographer:photographer}
         })
-    }
-     catch (error) {
-        next(error);
-    }
-}
+})
 
-    async getPhotographerById(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try {
+    getPhotographerById = asyncHandler(async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
             const { userId } = req.params;
             if(!userId){
                 throw new AppError(HttpStatus.BAD_REQUEST,'User ID is required');
             }
 
-            const photographer = await this._photographerService.getProfile(userId);
+            const photographer = await this._photographerService.getProfile(userId.toString());
 
             res.status(HttpStatus.OK).json({
                 success:true,
                 message:'Profile fetched successfully',
                 data:{photographer}
             });
-        }
-        catch (error) {
-            next(error);
-        }
-    }
+    })
 
 
     async editProfile(req:Request,res:Response,next:NextFunction):Promise<void>{
