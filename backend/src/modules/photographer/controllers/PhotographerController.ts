@@ -1,254 +1,228 @@
+import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
+import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
+import { AppError } from "../../../shared/errors/AppError.js";
+import type { IPhotographerService } from "../interfaces/IPhotographerService.js";
+import type { Request, Response } from "express";
 
-import { AUTH_MESSAGES } from "../../../shared/constants/message.constant";
-import { HttpStatus } from "../../../shared/enums/HTTP.status.code";
-import { AppError } from "../../../shared/errors/AppError";
-import { asyncHandler } from "../../../shared/middlewares/async.handler.middleware";
-import type { IPhotographerService } from "../interfaces/IPhotographerService";
-import type { Request, Response, NextFunction } from "express";
+export class PhotographerController {
+  constructor(private readonly _photographerService: IPhotographerService) {}
 
-
-
-
-export class PhotographerController{
-    constructor(
-        private readonly _photographerService:IPhotographerService
-    ){}
-
-    getProfile = asyncHandler(async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-        const userId = req.user?.id;
-        if(!userId){
-            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
-        }
-
-        const photographer = await this._photographerService.getProfile(userId);
-        console.log('photographer : ',photographer);
-        
-
-        res.status(HttpStatus.OK).json({
-            success:true,
-            message:'Profile fetched successfully',
-            data:{photographer:photographer}
-        })
-})
-
-    getPhotographerById = asyncHandler(async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-            const { userId } = req.params;
-            if(!userId){
-                throw new AppError(HttpStatus.BAD_REQUEST,'User ID is required');
-            }
-
-            const photographer = await this._photographerService.getProfile(userId.toString());
-
-            res.status(HttpStatus.OK).json({
-                success:true,
-                message:'Profile fetched successfully',
-                data:{photographer}
-            });
-    })
-
-
-    async editProfile(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try {
-            
-            const userId = req.user?.id;
-
-            if(!userId){
-                throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
-
-            }
-
-            const photographer = await this._photographerService.editProfile(userId,req.body);
-
-
-            res.status(HttpStatus.OK).json({
-                success:true,
-                message:AUTH_MESSAGES.PROFILE_UPDATED,
-                data:{photographer:photographer}
-            })
-        } catch (error) {
-            next(error);
-        }
+  async getProfile(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
     }
 
-    async getPhotographers(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try {
-            const { search, district, service, price } = req.query;
+    const photographer = await this._photographerService.getProfile(userId);
 
-            const photographers = await this._photographerService.getPhotographers({
-                search: search ? String(search) : undefined,
-                district: district ? String(district) : undefined,
-                service: service ? String(service) : undefined,
-                price: price ? String(price) : undefined
-            });
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Profile fetched successfully",
+      data: { photographer },
+    });
+  }
 
-            res.status(HttpStatus.OK).json({
-                success:true,
-                message:'Photographers fetched successfully',
-                data:{
-                    photographers
-                }
-            });
-        } catch (error) {
-            next(error);
-        }
+  async getPhotographerById(req: Request, res: Response): Promise<void> {
+    const { userId } = req.params;
+    if (!userId) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "User ID is required");
     }
 
-    async uploadProfilePhoto(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try {
-            const userId = req.user?.id;
-            if(!userId){
-                throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
-            }
+    const photographer = await this._photographerService.getProfile(
+      userId.toString()
+    );
 
-            const updatedProfile = await this._photographerService.editProfile(userId,{profilePhoto:req.body.profilePhoto});
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Profile fetched successfully",
+      data: { photographer },
+    });
+  }
 
-            res.status(HttpStatus.OK).json({
-                success:true,
-                message:'Photo uploaded successfully',
-                data:{
-                    photoUrl:updatedProfile.profilePhoto
-                }
-            });
-        } catch (error) {
-            next(error);
-        }
+  async editProfile(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
     }
 
-    async uploadCoverPhoto(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try {
-            const userId = req.user?.id;
-            if(!userId){
-                throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
-            }
+    const photographer = await this._photographerService.editProfile(
+      userId,
+      req.body
+    );
 
-            const updatedProfile = await this._photographerService.editProfile(userId,{coverPhoto:req.body.profilePhoto});
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: AUTH_MESSAGES.PROFILE_UPDATED,
+      data: { photographer },
+    });
+  }
 
-            res.status(HttpStatus.OK).json({
-                success:true,
-                message:'Cover photo uploaded successfully',
-                data:{
-                    coverPhotoUrl:updatedProfile.coverPhoto
-                }
-            });
-        } catch (error) {
-            next(error);
-        }
+  async getPhotographers(req: Request, res: Response): Promise<void> {
+    const { search, district, service, price } = req.query;
+
+    const photographers = await this._photographerService.getPhotographers({
+      search: search ? String(search) : undefined,
+      district: district ? String(district) : undefined,
+      service: service ? String(service) : undefined,
+      price: price ? String(price) : undefined,
+    });
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Photographers fetched successfully",
+      data: {
+        photographers,
+      },
+    });
+  }
+
+  async uploadProfilePhoto(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
     }
 
-    async addPackage(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try {
-            const userId = req.user?.id;
-            if(!userId){
-                throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
-            }
+    const updatedProfile = await this._photographerService.editProfile(userId, {
+      profilePhoto: req.body.profilePhoto,
+    });
 
-            const {
-                packageName,
-                price,
-                description,
-                framesIncluded,
-                droneIncluded,
-                albumIncluded,
-                videographersIncluded,
-                status
-            } = req.body;
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Photo uploaded successfully",
+      data: {
+        photoUrl: updatedProfile.profilePhoto,
+      },
+    });
+  }
 
-            if (!packageName || price === undefined || !description) {
-                throw new AppError(HttpStatus.BAD_REQUEST, 'Missing package details');
-            }
-
-            const updatedProfile = await this._photographerService.addPackage(userId, {
-                packageName,
-                price: Number(price),
-                description,
-                framesIncluded: Boolean(framesIncluded),
-                droneIncluded: Boolean(droneIncluded),
-                albumIncluded: Boolean(albumIncluded),
-                videographersIncluded: Boolean(videographersIncluded),
-                status: status || 'active'
-            });
-
-            res.status(HttpStatus.OK).json({
-                success:true,
-                message:'Package added successfully',
-                data:{
-                    photographer: updatedProfile
-                }
-            });
-        } catch (error) {
-            next(error);
-        }
+  async uploadCoverPhoto(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
     }
 
-    async editPackage(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try {
-            const userId = req.user?.id;
-            if(!userId){
-                throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
-            }
+    const updatedProfile = await this._photographerService.editProfile(userId, {
+      coverPhoto: req.body.profilePhoto,
+    });
 
-            const { packageId } = req.params;
-            const {
-                packageName,
-                price,
-                description,
-                framesIncluded,
-                droneIncluded,
-                albumIncluded,
-                videographersIncluded,
-                status
-            } = req.body;
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Cover photo uploaded successfully",
+      data: {
+        coverPhotoUrl: updatedProfile.coverPhoto,
+      },
+    });
+  }
 
-            if (!packageId || !packageName || price === undefined || !description) {
-                throw new AppError(HttpStatus.BAD_REQUEST, 'Missing package details');
-            }
-
-            const updatedProfile = await this._photographerService.editPackage(userId, packageId as string, {
-                packageName,
-                price: Number(price),
-                description,
-                framesIncluded: Boolean(framesIncluded),
-                droneIncluded: Boolean(droneIncluded),
-                albumIncluded: Boolean(albumIncluded),
-                videographersIncluded: Boolean(videographersIncluded),
-                status: status || 'active'
-            });
-
-            res.status(HttpStatus.OK).json({
-                success:true,
-                message:'Package updated successfully',
-                data:{
-                    photographer: updatedProfile
-                }
-            });
-        } catch (error) {
-            next(error);
-        }
+  async addPackage(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
     }
 
-    async deletePackage(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try {
-            const userId = req.user?.id;
-            if(!userId){
-                throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
-            }
+    const {
+      packageName,
+      price,
+      description,
+      framesIncluded,
+      droneIncluded,
+      albumIncluded,
+      videographersIncluded,
+      status,
+    } = req.body;
 
-            const { packageId } = req.params;
-            if (!packageId) {
-                throw new AppError(HttpStatus.BAD_REQUEST, 'Missing package ID');
-            }
-
-            const updatedProfile = await this._photographerService.deletePackage(userId, packageId as string);
-
-            res.status(HttpStatus.OK).json({
-                success:true,
-                message:'Package deleted successfully',
-                data:{
-                    photographer: updatedProfile
-                }
-            });
-        } catch (error) {
-            next(error);
-        }
+    if (!packageName || price === undefined || !description) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Missing package details");
     }
+
+    const updatedProfile = await this._photographerService.addPackage(userId, {
+      packageName,
+      price: Number(price),
+      description,
+      framesIncluded: Boolean(framesIncluded),
+      droneIncluded: Boolean(droneIncluded),
+      albumIncluded: Boolean(albumIncluded),
+      videographersIncluded: Boolean(videographersIncluded),
+      status: status || "active",
+    });
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Package added successfully",
+      data: {
+        photographer: updatedProfile,
+      },
+    });
+  }
+
+  async editPackage(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    }
+
+    const { packageId } = req.params;
+    const {
+      packageName,
+      price,
+      description,
+      framesIncluded,
+      droneIncluded,
+      albumIncluded,
+      videographersIncluded,
+      status,
+    } = req.body;
+
+    if (!packageId || !packageName || price === undefined || !description) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Missing package details");
+    }
+
+    const updatedProfile = await this._photographerService.editPackage(
+      userId,
+      packageId as string,
+      {
+        packageName,
+        price: Number(price),
+        description,
+        framesIncluded: Boolean(framesIncluded),
+        droneIncluded: Boolean(droneIncluded),
+        albumIncluded: Boolean(albumIncluded),
+        videographersIncluded: Boolean(videographersIncluded),
+        status: status || "active",
+      }
+    );
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Package updated successfully",
+      data: {
+        photographer: updatedProfile,
+      },
+    });
+  }
+
+  async deletePackage(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    }
+
+    const { packageId } = req.params;
+    if (!packageId) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Missing package ID");
+    }
+
+    const updatedProfile = await this._photographerService.deletePackage(
+      userId,
+      packageId as string
+    );
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Package deleted successfully",
+      data: {
+        photographer: updatedProfile,
+      },
+    });
+  }
 }
