@@ -19,6 +19,7 @@ import PhotographerLayout from "../layouts/PhotographerLayout";
 import PhotographerProfile from "../pages/photographer/PhotographerProfile";
 import PhotographersList from "../pages/photographer/PhotographersList";
 import PhotographerDetails from "../pages/photographer/PhotographerDetails";
+import NotFound from "../pages/error/NotFound"
 import useAuth from "../hooks/useAuth";
 
 const RoleBasedLayout = () => {
@@ -68,6 +69,7 @@ const AppRoutes = () => {
             <Route path="/admin/users" element={<UserManagement />}></Route>
           </Route>
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
