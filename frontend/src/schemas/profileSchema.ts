@@ -2,9 +2,14 @@ import { z } from "zod";
 
 export const profileSchema = z.object({
   name: z
-    .string()
-    .min(3, "Full name must be at least 3 characters")
-    .max(30, "Full name must be less than 30 characters"),
+  .string()
+  .trim()
+  .min(2, "Name must be at least 2 characters")
+  .max(50, "Name must not exceed 50 characters")
+  .regex(
+    /^[a-zA-ZÀ-ÿ\s'-]+$/,
+    "Name can only contain letters, spaces, apostrophes, and hyphens"
+  ),
   phone: z
     .string()
     .min(10, "Phone number must be  10 digits")
