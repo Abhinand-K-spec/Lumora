@@ -30,9 +30,16 @@ export const AUTH_MESSAGES = {
     ADMIN_NOT_FOUND : 'Admin not found',
     USER_NOT_FOUND: 'User not found',
 
+    PROFILE : 'Profile fetched successfully',
+    PHOTOGRAPHER_FETCHED : 'Photographers fetched succesfully',
+
     USER_ALREADY_LOGGED : 'User already exists',
     CURRENT_USER_FETCHED : 'Current user fetched successfully',
     PROFILE_UPDATED : 'Profile updated successfully',
+
+    PACKAGE_ADDED : 'Package added successfully',
+    PACKAGE_UPDATED : 'Package updated successfully',
+    PACKAGE_DELETED : 'Package deleted successfully',
 
     STATUS_UPDATED : 'User status updated successfully.',
 

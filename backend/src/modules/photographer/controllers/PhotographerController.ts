@@ -1,6 +1,7 @@
 import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
 import { AppError } from "../../../shared/errors/AppError.js";
+import { sendSuccess } from "../../../shared/utils/response.utils.js";
 import type { IPhotographerService } from "../interfaces/IPhotographerService.js";
 import type { Request, Response } from "express";
 
@@ -15,11 +16,7 @@ export class PhotographerController {
 
     const photographer = await this._photographerService.getProfile(userId);
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: "Profile fetched successfully",
-      data: { photographer },
-    });
+    sendSuccess(res,{photographer},AUTH_MESSAGES.PROFILE);
   }
 
   async getPhotographerById(req: Request, res: Response): Promise<void> {
@@ -32,11 +29,7 @@ export class PhotographerController {
       userId.toString()
     );
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: "Profile fetched successfully",
-      data: { photographer },
-    });
+    sendSuccess(res,{photographer},AUTH_MESSAGES.PROFILE);
   }
 
   async editProfile(req: Request, res: Response): Promise<void> {
@@ -50,11 +43,7 @@ export class PhotographerController {
       req.body
     );
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: AUTH_MESSAGES.PROFILE_UPDATED,
-      data: { photographer },
-    });
+    sendSuccess(res,{photographer},AUTH_MESSAGES.PROFILE_UPDATED);
   }
 
   async getPhotographers(req: Request, res: Response): Promise<void> {
@@ -67,13 +56,7 @@ export class PhotographerController {
       price: price ? String(price) : undefined,
     });
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: "Photographers fetched successfully",
-      data: {
-        photographers,
-      },
-    });
+    sendSuccess(res,{photographers},AUTH_MESSAGES.PHOTOGRAPHER_FETCHED);
   }
 
   async uploadProfilePhoto(req: Request, res: Response): Promise<void> {
@@ -86,13 +69,9 @@ export class PhotographerController {
       profilePhoto: req.body.profilePhoto,
     });
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: "Photo uploaded successfully",
-      data: {
-        photoUrl: updatedProfile.profilePhoto,
-      },
-    });
+    sendSuccess(res,{
+      photoUrl: updatedProfile.profilePhoto,
+    },AUTH_MESSAGES.PROFILE_UPDATED);
   }
 
   async uploadCoverPhoto(req: Request, res: Response): Promise<void> {
@@ -105,13 +84,9 @@ export class PhotographerController {
       coverPhoto: req.body.profilePhoto,
     });
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: "Cover photo uploaded successfully",
-      data: {
-        coverPhotoUrl: updatedProfile.coverPhoto,
-      },
-    });
+    sendSuccess(res,{
+      coverPhotoUrl: updatedProfile.coverPhoto,
+    },'Cover photo updated successfully');
   }
 
   async addPackage(req: Request, res: Response): Promise<void> {
@@ -146,13 +121,8 @@ export class PhotographerController {
       status: status || "active",
     });
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: "Package added successfully",
-      data: {
-        photographer: updatedProfile,
-      },
-    });
+
+    sendSuccess(res,{photographer:updatedProfile},AUTH_MESSAGES.PACKAGE_ADDED,HttpStatus.CREATED);
   }
 
   async editPackage(req: Request, res: Response): Promise<void> {
@@ -192,13 +162,7 @@ export class PhotographerController {
       }
     );
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: "Package updated successfully",
-      data: {
-        photographer: updatedProfile,
-      },
-    });
+    sendSuccess(res,{photographer:updatedProfile},AUTH_MESSAGES.PACKAGE_UPDATED)
   }
 
   async deletePackage(req: Request, res: Response): Promise<void> {
@@ -217,12 +181,7 @@ export class PhotographerController {
       packageId as string
     );
 
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: "Package deleted successfully",
-      data: {
-        photographer: updatedProfile,
-      },
-    });
+
+    sendSuccess(res,{photographer:updatedProfile},AUTH_MESSAGES.PACKAGE_DELETED)
   }
 }
