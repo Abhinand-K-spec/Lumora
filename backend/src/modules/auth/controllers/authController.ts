@@ -8,6 +8,7 @@ import { CookieUtil } from '../../../shared/utils/cookie.util.js';
 import { HttpStatus } from '../../../shared/enums/HTTP.status.code.js';
 import { AUTH_MESSAGES } from '../../../shared/constants/message.constant.js';
 import { userRole } from '../../../shared/enums/UserRole.js';
+import { sendSuccess } from '../../../shared/utils/response.utils.js';
 
 export class AuthController {
     constructor(
@@ -19,11 +20,8 @@ export class AuthController {
             const data: RegisterUserDto = req.body;
             await this._authService.register(data);
 
-            res.status(HttpStatus.CREATED).json({
-                success: true,
-                message: AUTH_MESSAGES.OTP_SENT,
-                data: null
-            });
+            sendSuccess(res,null,AUTH_MESSAGES.OTP_SENT,HttpStatus.CREATED);
+
         } catch (error) {
             next(error);
         }
@@ -36,13 +34,8 @@ export class AuthController {
 
             CookieUtil.setAuthCookies(res, response.accessToken, response.refreshToken);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.LOGIN_SUCCESS,
-                data: {
-                    user: response.user
-                }
-            });
+            sendSuccess(res,{user:response.user},AUTH_MESSAGES.LOGIN_SUCCESS);
+
         } catch (error) {
             next(error);
         }
@@ -60,10 +53,8 @@ export class AuthController {
 
             CookieUtil.setAccessToken(res, accessToken);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.ACCESS_TOKEN_REFRESHED,
-            });
+            sendSuccess(res,null,AUTH_MESSAGES.ACCESS_TOKEN_REFRESHED);
+
         } catch (error) {
             next(error);
         }
@@ -73,10 +64,8 @@ export class AuthController {
         try {
             await this._authService.verifyEmail(req.body);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.EMAIL_VERIFIED
-            });
+            sendSuccess(res,null,AUTH_MESSAGES.EMAIL_VERIFIED);
+
         } catch (error) {
             next(error);
         }
@@ -86,10 +75,9 @@ export class AuthController {
         try {
             await this._authService.resendOtp(req.body);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.OTP_SENT
-            });
+            
+            sendSuccess(res,null,AUTH_MESSAGES.OTP_SENT);
+
         } catch (error) {
             next(error);
         }
@@ -99,10 +87,8 @@ export class AuthController {
         try {
             await this._authService.forgotPassword(req.body);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.PASSWORD_RESET_OTP_SENT
-            });
+            sendSuccess(res,null,AUTH_MESSAGES.PASSWORD_RESET_OTP_SENT);
+
         } catch (error) {
             next(error);
         }
@@ -112,10 +98,8 @@ export class AuthController {
         try {
             await this._authService.resetPassword(req.body);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.PASSWORD_RESET_SUCCESS
-            });
+            sendSuccess(res,null,AUTH_MESSAGES.PASSWORD_RESET_SUCCESS);
+
         } catch (error) {
             next(error);
         }
@@ -125,10 +109,7 @@ export class AuthController {
         try {
             await this._authService.verifyResetOtp(req.body);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.OTP_VERIFIED,
-            });
+            sendSuccess(res,null,AUTH_MESSAGES.OTP_VERIFIED);
         } catch (error) {
             next(error);
         }
@@ -144,10 +125,8 @@ export class AuthController {
 
             CookieUtil.clearAuthCookies(res);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.LOGOUT_SUCCESS
-            });
+            sendSuccess(res,null,AUTH_MESSAGES.LOGIN_SUCCESS)
+
         } catch (error) {
             next(error);
         }
@@ -190,13 +169,8 @@ export class AuthController {
 
             const user = await this._authService.getUserById(req.user.id);
 
-            res.status(HttpStatus.OK).json({
-                success: true,
-                message: AUTH_MESSAGES.CURRENT_USER_FETCHED,
-                data: {
-                    user
-                }
-            });
+            sendSuccess(res,{user},AUTH_MESSAGES.CURRENT_USER_FETCHED);
+           
         } catch (error) {
             next(error);
         }
