@@ -1,4 +1,4 @@
-import { AUTH_MESSAGES } from "../../../../shared/constants/message.constant.js";
+import { USER_MESSAGES } from "../../../../shared/constants/message.constant.js";
 import { accountStatus } from "../../../../shared/enums/accountStatus.js";
 import { userRole } from "../../../../shared/enums/UserRole.js";
 import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
@@ -73,13 +73,13 @@ export class UserManagementService implements IUserManagementService {
     status: accountStatus,
   ): Promise<UserManagementResponseDto> {
     if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.USER_NOT_FOUND);
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_MESSAGES.USER_NOT_FOUND);
     }
 
     await this._userRepository.changeStatus(id, status);
     const updatedUser = await this._userRepository.findById(id);
     if (!updatedUser) {
-      throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
+      throw new AppError(HttpStatus.NOT_FOUND, USER_MESSAGES.USER_NOT_FOUND);
     }
 
     return UserManagementMapper.toResponseDto(updatedUser);
@@ -87,7 +87,7 @@ export class UserManagementService implements IUserManagementService {
 
   async delete(id: string): Promise<void> {
     if (!id) {
-      throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.USER_NOT_FOUND);
+      throw new AppError(HttpStatus.BAD_REQUEST, USER_MESSAGES.USER_NOT_FOUND);
     }
 
     await this._userRepository.delete(id);

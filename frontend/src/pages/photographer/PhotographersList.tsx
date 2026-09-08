@@ -3,6 +3,7 @@ import { Search, MapPin, Star, ChevronLeft, ChevronRight, ArrowRight, ChevronDow
 import { useNavigate } from "react-router-dom";
 import photographerService, { type PhotographerProfile } from "../../services/photographerService";
 import { toast } from "sonner";
+import { TOAST_MESSAGES } from "../../constants/messages";
 import { DISTRICTS as BASE_DISTRICTS, SERVICES as BASE_SERVICES } from "../../constants/profileOptions";
 
 const DISTRICTS = [
@@ -108,7 +109,7 @@ const PhotographersList = () => {
           if (res.data.total !== undefined) setTotalItems(res.data.total);
         }
       } catch {
-        toast.error("Failed to load photographers list");
+        toast.error(TOAST_MESSAGES.PHOTOGRAPHER.FETCH_LIST_FAILED);
       } finally {
         setLoading(false);
       }

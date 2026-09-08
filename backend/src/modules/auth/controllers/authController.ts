@@ -101,7 +101,7 @@ export class AuthController {
     if (typeof code !== "string") {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        "Google authorization code is required"
+        AUTH_MESSAGES.GOOGLE_AUTH_CODE_REQUIRED
       );
     }
 

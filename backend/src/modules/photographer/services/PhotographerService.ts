@@ -1,4 +1,7 @@
-import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
+import {
+  AUTH_MESSAGES,
+  PHOTOGRAPHER_MESSAGES,
+} from "../../../shared/constants/message.constant.js";
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
 import { AppError } from "../../../shared/errors/AppError.js";
 import type { IPhotographer } from "../../../shared/interfaces/IPhotographer.js";
@@ -28,7 +31,10 @@ export class PhotographerService implements IPhotographerService {
     const profile = await this._photographerRepository.findByUserId(userId);
 
     if (!profile) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "No profile found");
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+      );
     }
 
     const packages = await this._packageRepository.findByPhotographerId(
@@ -286,14 +292,17 @@ export class PhotographerService implements IPhotographerService {
 
     const profile = await this._photographerRepository.findByUserId(userId);
     if (!profile) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "No profile found");
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+      );
     }
 
     const pkg = await this._packageRepository.findById(packageId);
     if (!pkg || pkg.photographerId.toString() !== profile._id.toString()) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        "Package not found or unauthorized"
+        PHOTOGRAPHER_MESSAGES.PACKAGE_NOT_FOUND
       );
     }
 
@@ -326,14 +335,17 @@ export class PhotographerService implements IPhotographerService {
 
     const profile = await this._photographerRepository.findByUserId(userId);
     if (!profile) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "No profile found");
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+      );
     }
 
     const pkg = await this._packageRepository.findById(packageId);
     if (!pkg || pkg.photographerId.toString() !== profile._id.toString()) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        "Package not found or unauthorized"
+        PHOTOGRAPHER_MESSAGES.PACKAGE_NOT_FOUND
       );
     }
 

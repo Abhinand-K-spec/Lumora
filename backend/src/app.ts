@@ -10,6 +10,7 @@ import appRoutes from "./modules/user/routes/user.routes.js";
 import photographerRoutes from "./modules/photographer/routes/photographer.routes.js";
 import dotenv from "dotenv";
 import { errorHandler } from "./shared/middlewares/error.handler.middleware.js";
+import { COMMON_MESSAGES } from "./shared/constants/message.constant.js";
 
 dotenv.config();
 
@@ -43,7 +44,7 @@ app.use("/api/admin/userManagement", userManagementRoutes);
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
-    message: "Route not found",
+    message: COMMON_MESSAGES.ROUTE_NOT_FOUND,
   });
 });
 

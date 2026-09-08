@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
+import { TOAST_MESSAGES } from "../../constants/messages";
 
 import adminUserService, { type UserStats } from "../../services/adminUserService";
 import type { User } from "../../types/user";
@@ -46,7 +47,7 @@ export const useUsers = () => {
         }
       }
     } catch (error) {
-      toast.error("Failed to fetch users.");
+      toast.error(TOAST_MESSAGES.ADMIN.FETCH_USERS_FAILED);
       console.log(error);
     } finally {
       setLoading(false);
@@ -57,11 +58,11 @@ export const useUsers = () => {
     try {
       await adminUserService.changeStatus(id, status);
 
-      toast.success("User status updated.");
+      toast.success(TOAST_MESSAGES.ADMIN.USER_STATUS_UPDATED);
 
       await fetchUsers();
     } catch (error) {
-      toast.error("Unable to update user status.");
+      toast.error(TOAST_MESSAGES.ADMIN.USER_STATUS_UPDATE_FAILED);
       console.log(error);
     }
   };
@@ -70,11 +71,11 @@ export const useUsers = () => {
     try {
       await adminUserService.deleteUser(id);
 
-      toast.success("User deleted successfully.");
+      toast.success(TOAST_MESSAGES.ADMIN.USER_DELETED);
 
       await fetchUsers();
     } catch (error) {
-      toast.error("Unable to delete user.");
+      toast.error(TOAST_MESSAGES.ADMIN.USER_DELETE_FAILED);
       console.log(error);
     }
   };

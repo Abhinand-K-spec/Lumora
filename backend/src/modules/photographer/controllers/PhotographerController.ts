@@ -1,4 +1,7 @@
-import { AUTH_MESSAGES } from "../../../shared/constants/message.constant.js";
+import {
+  COMMON_MESSAGES,
+  PHOTOGRAPHER_MESSAGES,
+} from "../../../shared/constants/message.constant.js";
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
 import { AppError } from "../../../shared/errors/AppError.js";
 import { sendSuccess } from "../../../shared/utils/response.utils.js";
@@ -11,31 +14,31 @@ export class PhotographerController {
   async getProfile(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
     if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
     }
 
     const photographer = await this._photographerService.getProfile(userId);
 
-    sendSuccess(res,{photographer},AUTH_MESSAGES.PROFILE);
+    sendSuccess(res, { photographer }, PHOTOGRAPHER_MESSAGES.PROFILE_FETCHED);
   }
 
   async getPhotographerById(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
     if (!userId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "User ID is required");
+      throw new AppError(HttpStatus.BAD_REQUEST, COMMON_MESSAGES.USER_ID_REQUIRED);
     }
 
     const photographer = await this._photographerService.getProfile(
       userId.toString()
     );
 
-    sendSuccess(res,{photographer},AUTH_MESSAGES.PROFILE);
+    sendSuccess(res, { photographer }, PHOTOGRAPHER_MESSAGES.PROFILE_FETCHED);
   }
 
   async editProfile(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
     if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
     }
 
     const photographer = await this._photographerService.editProfile(
@@ -43,7 +46,7 @@ export class PhotographerController {
       req.body
     );
 
-    sendSuccess(res,{photographer},AUTH_MESSAGES.PROFILE_UPDATED);
+    sendSuccess(res, { photographer }, PHOTOGRAPHER_MESSAGES.PROFILE_UPDATED);
   }
 
   async getPhotographers(req: Request, res: Response): Promise<void> {
@@ -75,44 +78,52 @@ export class PhotographerController {
         limit: result.limit,
         totalPages: result.totalPages,
       },
-      AUTH_MESSAGES.PHOTOGRAPHER_FETCHED
+      PHOTOGRAPHER_MESSAGES.PHOTOGRAPHERS_FETCHED
     );
   }
 
   async uploadProfilePhoto(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
     if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
     }
 
     const updatedProfile = await this._photographerService.editProfile(userId, {
       profilePhoto: req.body.profilePhoto,
     });
 
-    sendSuccess(res,{
-      photoUrl: updatedProfile.profilePhoto,
-    },AUTH_MESSAGES.PROFILE_UPDATED);
+    sendSuccess(
+      res,
+      {
+        photoUrl: updatedProfile.profilePhoto,
+      },
+      PHOTOGRAPHER_MESSAGES.PROFILE_UPDATED
+    );
   }
 
   async uploadCoverPhoto(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
     if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
     }
 
     const updatedProfile = await this._photographerService.editProfile(userId, {
       coverPhoto: req.body.profilePhoto,
     });
 
-    sendSuccess(res,{
-      coverPhotoUrl: updatedProfile.coverPhoto,
-    },'Cover photo updated successfully');
+    sendSuccess(
+      res,
+      {
+        coverPhotoUrl: updatedProfile.coverPhoto,
+      },
+      PHOTOGRAPHER_MESSAGES.COVER_PHOTO_UPDATED
+    );
   }
 
   async addPackage(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
     if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
     }
 
     const {
@@ -127,7 +138,10 @@ export class PhotographerController {
     } = req.body;
 
     if (!packageName || price === undefined || !description) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Missing package details");
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_DETAILS
+      );
     }
 
     const updatedProfile = await this._photographerService.addPackage(userId, {
@@ -141,14 +155,18 @@ export class PhotographerController {
       status: status || "active",
     });
 
-
-    sendSuccess(res,{photographer:updatedProfile},AUTH_MESSAGES.PACKAGE_ADDED,HttpStatus.CREATED);
+    sendSuccess(
+      res,
+      { photographer: updatedProfile },
+      PHOTOGRAPHER_MESSAGES.PACKAGE_ADDED,
+      HttpStatus.CREATED
+    );
   }
 
   async editPackage(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
     if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
     }
 
     const { packageId } = req.params;
@@ -164,7 +182,10 @@ export class PhotographerController {
     } = req.body;
 
     if (!packageId || !packageName || price === undefined || !description) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Missing package details");
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_DETAILS
+      );
     }
 
     const updatedProfile = await this._photographerService.editPackage(
@@ -182,18 +203,25 @@ export class PhotographerController {
       }
     );
 
-    sendSuccess(res,{photographer:updatedProfile},AUTH_MESSAGES.PACKAGE_UPDATED)
+    sendSuccess(
+      res,
+      { photographer: updatedProfile },
+      PHOTOGRAPHER_MESSAGES.PACKAGE_UPDATED
+    );
   }
 
   async deletePackage(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
     if (!userId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
     }
 
     const { packageId } = req.params;
     if (!packageId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, "Missing package ID");
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_ID
+      );
     }
 
     const updatedProfile = await this._photographerService.deletePackage(
@@ -201,7 +229,10 @@ export class PhotographerController {
       packageId as string
     );
 
-
-    sendSuccess(res,{photographer:updatedProfile},AUTH_MESSAGES.PACKAGE_DELETED)
+    sendSuccess(
+      res,
+      { photographer: updatedProfile },
+      PHOTOGRAPHER_MESSAGES.PACKAGE_DELETED
+    );
   }
 }

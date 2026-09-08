@@ -1,4 +1,4 @@
-import { AUTH_MESSAGES } from "../../../../shared/constants/message.constant.js";
+import { USER_MESSAGES } from "../../../../shared/constants/message.constant.js";
 import { HttpStatus } from "../../../../shared/enums/HTTP.status.code.js";
 import type { IUserManagementService } from "../interfaces/IUserManagementService.js";
 import type { Request, Response } from "express";
@@ -30,7 +30,7 @@ export class UserManagementController {
 
     res.status(HttpStatus.OK).json({
       success: true,
-      message: AUTH_MESSAGES.CURRENT_USER_FETCHED,
+      message: USER_MESSAGES.USERS_FETCHED,
       data: result,
     });
   }
@@ -43,7 +43,7 @@ export class UserManagementController {
 
     res.status(HttpStatus.OK).json({
       success: true,
-      message: AUTH_MESSAGES.STATUS_UPDATED,
+      message: USER_MESSAGES.STATUS_UPDATED,
       data: user,
     });
   }
@@ -55,7 +55,7 @@ export class UserManagementController {
 
     res.status(HttpStatus.OK).json({
       success: true,
-      message: "User deleted successfully",
+      message: USER_MESSAGES.USER_DELETED,
     });
   }
 }

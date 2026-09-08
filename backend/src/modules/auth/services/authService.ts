@@ -102,7 +102,7 @@ export class AuthService implements IAuthService {
         }
 
         if (!user.isEmailVerified) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, "Please verify your email before logging in.");
+            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.EMAIL_NOT_VERIFIED);
         }
 
         const accessToken = this._tokenService.generateAccessToken({ id: user._id.toString(), role: user.role });
