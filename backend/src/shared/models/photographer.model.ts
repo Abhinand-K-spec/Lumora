@@ -43,7 +43,11 @@ const photographerSchema = new Schema<IPhotographer>(
             type:[String],
             default:[]
         },
-
+        startingPrice:{
+            type:Number,
+            default:0,
+            index:true
+        }
     },
 
     {

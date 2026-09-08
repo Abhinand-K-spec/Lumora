@@ -47,16 +47,36 @@ export class PhotographerController {
   }
 
   async getPhotographers(req: Request, res: Response): Promise<void> {
-    const { search, district, service, price } = req.query;
+    const { search, district, service, price, sortBy, page, limit } = req.query;
 
-    const photographers = await this._photographerService.getPhotographers({
-      search: search ? String(search) : undefined,
-      district: district ? String(district) : undefined,
-      service: service ? String(service) : undefined,
-      price: price ? String(price) : undefined,
-    });
+    const pageNum = page ? parseInt(String(page), 10) : 1;
+    const limitNum = limit ? parseInt(String(limit), 10) : 8;
 
-    sendSuccess(res,{photographers},AUTH_MESSAGES.PHOTOGRAPHER_FETCHED);
+    const result = await this._photographerService.getPhotographers(
+      {
+        search: search ? String(search) : undefined,
+        district: district ? String(district) : undefined,
+        service: service ? String(service) : undefined,
+        price: price ? String(price) : undefined,
+        sortBy: sortBy ? String(sortBy) : undefined,
+      },
+      {
+        page: isNaN(pageNum) ? 1 : pageNum,
+        limit: isNaN(limitNum) ? 8 : limitNum,
+      }
+    );
+
+    sendSuccess(
+      res,
+      {
+        photographers: result.items,
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
+      },
+      AUTH_MESSAGES.PHOTOGRAPHER_FETCHED
+    );
   }
 
   async uploadProfilePhoto(req: Request, res: Response): Promise<void> {

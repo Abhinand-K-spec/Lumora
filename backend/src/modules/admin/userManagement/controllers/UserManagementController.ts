@@ -9,12 +9,29 @@ export class UserManagementController {
   ) {}
 
   async getUsers(req: Request, res: Response): Promise<void> {
-    const users = await this._userManagementService.getUsers();
+    const { page, limit, search, status, sortField, sortOrder } = req.query;
+
+    const pageNum = page ? parseInt(String(page), 10) : 1;
+    const limitNum = limit ? parseInt(String(limit), 10) : 5;
+
+    const result = await this._userManagementService.getUsers(
+      {
+        search: search ? String(search) : undefined,
+        status: status ? String(status) : undefined,
+        sortField: sortField ? String(sortField) : undefined,
+        sortOrder:
+          sortOrder === "desc" || sortOrder === "asc" ? sortOrder : undefined,
+      },
+      {
+        page: isNaN(pageNum) ? 1 : pageNum,
+        limit: isNaN(limitNum) ? 5 : limitNum,
+      }
+    );
 
     res.status(HttpStatus.OK).json({
       success: true,
       message: AUTH_MESSAGES.CURRENT_USER_FETCHED,
-      data: users,
+      data: result,
     });
   }
 

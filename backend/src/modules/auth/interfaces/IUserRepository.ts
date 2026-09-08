@@ -12,4 +12,6 @@ export interface IUserRepository extends IBaseRepository<IUsers> {
 
     delete(id:string):Promise<void>;
     findWithFilter(filter: any): Promise<IUsers[]>;
+    findAllPaginated(filter: any, skip: number, limit: number, sort?: Record<string, 1 | -1>): Promise<[IUsers[], number]>;
+    countByStatus(): Promise<{ total: number; active: number; suspended: number }>;
 }

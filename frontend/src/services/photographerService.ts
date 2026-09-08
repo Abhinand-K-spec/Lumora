@@ -51,8 +51,28 @@ const photographerService = {
         return response.data;
     },
 
-    getPhotographers: async (params: { search?: string; district?: string; service?: string; price?: string; }): Promise<ApiResponse<{ photographers: PhotographerProfile[] }>> => {
-        const response = await api.get<ApiResponse<{ photographers: PhotographerProfile[] }>>('/photographer', { params });
+    getPhotographers: async (params?: {
+        search?: string;
+        district?: string;
+        service?: string;
+        price?: string;
+        sortBy?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<ApiResponse<{
+        photographers: PhotographerProfile[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>> => {
+        const response = await api.get<ApiResponse<{
+            photographers: PhotographerProfile[];
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        }>>('/photographer', { params });
         return response.data;
     },
 

@@ -15,4 +15,5 @@ export interface IPhotographer {
     updatedAt:Date;
     createdAt:Date;
     phone:string;
+    startingPrice?:number;
 }

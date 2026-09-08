@@ -74,22 +74,38 @@ const PhotographersList = () => {
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 6;
 
-  // Fetch photographers on filters update
+  // Fetch photographers on filters or page update
   useEffect(() => {
     const loadPhotographers = async () => {
       try {
         setLoading(true);
-        const params: Record<string, string> = {};
+        const params: {
+          search?: string;
+          district?: string;
+          service?: string;
+          price?: string;
+          sortBy?: string;
+          page?: number;
+          limit?: number;
+        } = {
+          page: currentPage,
+          limit: itemsPerPage,
+        };
         if (activeFilters.search) params.search = activeFilters.search;
         if (activeFilters.district) params.district = activeFilters.district;
         if (activeFilters.service) params.service = activeFilters.service;
         if (activeFilters.price) params.price = activeFilters.price;
+        if (sortBy) params.sortBy = sortBy;
 
         const res = await photographerService.getPhotographers(params);
         if (res.data && res.data.photographers) {
           setPhotographers(res.data.photographers);
+          if (res.data.totalPages !== undefined) setTotalPages(res.data.totalPages);
+          if (res.data.total !== undefined) setTotalItems(res.data.total);
         }
       } catch {
         toast.error("Failed to load photographers list");
@@ -98,7 +114,7 @@ const PhotographersList = () => {
       }
     };
     loadPhotographers();
-  }, [activeFilters]);
+  }, [activeFilters, currentPage, sortBy]);
 
   // Apply filters trigger
   const handleFilterSubmit = (e?: React.FormEvent) => {
@@ -118,29 +134,8 @@ const PhotographersList = () => {
     setCurrentPage(1);
   };
 
-  // Derived filtered & sorted list
-  const displayPhotographers = [...photographers];
-
-  // Sorting logic
-  if (sortBy === "Price: Low to High") {
-    displayPhotographers.sort((a, b) => {
-      const priceA = a.packages && a.packages.length > 0 ? Math.min(...a.packages.map((p) => p.price)) : 25000;
-      const priceB = b.packages && b.packages.length > 0 ? Math.min(...b.packages.map((p) => p.price)) : 25000;
-      return priceA - priceB;
-    });
-  } else if (sortBy === "Price: High to Low") {
-    displayPhotographers.sort((a, b) => {
-      const priceA = a.packages && a.packages.length > 0 ? Math.min(...a.packages.map((p) => p.price)) : 25000;
-      const priceB = b.packages && b.packages.length > 0 ? Math.min(...b.packages.map((p) => p.price)) : 25000;
-      return priceB - priceA;
-    });
-  }
-
-  // Pagination bounds
-  const totalItems = displayPhotographers.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedPhotographers = displayPhotographers.slice(startIndex, startIndex + itemsPerPage);
+  // Globally sorted and pre-paginated by backend
+  const paginatedPhotographers = photographers;
 
   const getStartsAtPrice = (profile: PhotographerProfile) => {
     if (profile.packages && profile.packages.length > 0) {
@@ -293,7 +288,10 @@ const PhotographersList = () => {
             <span className="text-text-secondary">Sort by:</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setCurrentPage(1);
+              }}
               className="bg-transparent text-text font-semibold outline-none cursor-pointer hover:text-primary transition text-xs"
             >
               <option value="Recommended" className="bg-[#0f1012]">Recommended</option>

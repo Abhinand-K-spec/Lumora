@@ -23,4 +23,14 @@ export class PackageRepository implements IPackageRepository {
     async findByPhotographerId(photographerId: string): Promise<IPackage[]> {
         return await Package.find({ photographerId });
     }
+
+    async findPhotographerIdsByPriceRange(minPrice: number, maxPrice: number): Promise<string[]> {
+        const query: any = { status: 'active', price: { $gte: minPrice } };
+        if (maxPrice !== Infinity) {
+            query.price.$lt = maxPrice;
+        }
+        const packages = await Package.find(query, { photographerId: 1 }).lean();
+        const ids = packages.map(p => p.photographerId.toString());
+        return [...new Set(ids)];
+    }
 }

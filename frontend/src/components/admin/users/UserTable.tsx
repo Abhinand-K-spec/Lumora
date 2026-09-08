@@ -9,50 +9,41 @@ interface UserTableProps {
   onChangeStatus: (id: string, status: accountStatus) => void;
   onDelete: (user: UserType) => void;
   disabled?: boolean;
+  currentPage?: number;
+  totalPages?: number;
+  sortField?: "name" | "email";
+  sortOrder?: "asc" | "desc";
+  onSort?: (field: "name" | "email") => void;
+  onPageChange?: (page: number) => void;
 }
 
 type SortField = "name" | "email";
-type SortOrder = "asc" | "desc";
 
 const UserTable = ({
   users,
   onChangeStatus,
   onDelete,
   disabled = false,
+  currentPage = 1,
+  totalPages = 1,
+  sortField = "name",
+  sortOrder = "asc",
+  onSort,
+  onPageChange,
 }: UserTableProps) => {
-  const [sortField, setSortField] = useState<SortField>("name");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Clean number of rows per page
-
-  // Reset page to 1 when users filter list updates
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [users.length]);
-
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
+    if (onSort) {
+      onSort(field);
     }
   };
 
-  const sortedUsers = [...users].sort((a, b) => {
-    const valA = a[sortField]?.toLowerCase() || "";
-    const valB = b[sortField]?.toLowerCase() || "";
-    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
+  const handlePageClick = (page: number) => {
+    if (onPageChange) {
+      onPageChange(page);
+    }
+  };
 
-  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / itemsPerPage));
-  const paginatedUsers = sortedUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const paginatedUsers = users;
 
   const getPageNumbers = () => {
     const pages = [];
@@ -98,7 +89,14 @@ const UserTable = ({
               >
                 <div className="flex items-center gap-1.5">
                   Name
-                  <ArrowUpDown size={12} className="opacity-60" />
+                  <ArrowUpDown
+                    size={12}
+                    className={
+                      sortField === "name"
+                        ? "text-primary opacity-100"
+                        : "opacity-60"
+                    }
+                  />
                 </div>
               </th>
 
@@ -109,7 +107,14 @@ const UserTable = ({
               >
                 <div className="flex items-center gap-1.5">
                   Email
-                  <ArrowUpDown size={12} className="opacity-60" />
+                  <ArrowUpDown
+                    size={12}
+                    className={
+                      sortField === "email"
+                        ? "text-primary opacity-100"
+                        : "opacity-60"
+                    }
+                  />
                 </div>
               </th>
 
@@ -157,7 +162,7 @@ const UserTable = ({
           <div className="flex items-center gap-1.5">
             {/* Previous page arrow */}
             <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              onClick={() => handlePageClick(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
               className="px-2 py-1 rounded-md border border-border/50 bg-neutral-900/60 text-text-secondary hover:text-text hover:bg-white/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
@@ -179,7 +184,7 @@ const UserTable = ({
               return (
                 <button
                   key={`page-${page}`}
-                  onClick={() => setCurrentPage(page as number)}
+                  onClick={() => handlePageClick(page as number)}
                   className={`px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer border ${
                     currentPage === page
                       ? "bg-primary border-primary text-tertiary shadow-sm"
@@ -194,7 +199,7 @@ const UserTable = ({
             {/* Next page arrow */}
             <button
               onClick={() =>
-                setCurrentPage(Math.min(totalPages, currentPage + 1))
+                handlePageClick(Math.min(totalPages, currentPage + 1))
               }
               disabled={currentPage === totalPages}
               className="px-2 py-1 rounded-md border border-border/50 bg-neutral-900/60 text-text-secondary hover:text-text hover:bg-white/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"

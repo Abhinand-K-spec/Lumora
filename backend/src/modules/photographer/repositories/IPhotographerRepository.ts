@@ -9,5 +9,5 @@ export interface IPhotographerRepository {
     exists(email:string) : Promise<boolean>;
     updateRefreshToken(id:string, refreshToken:string):Promise<IPhotographer|null>;
     findByUserId(id:string):Promise<IPhotographer|null>;
-    findAll(filter: any): Promise<IPhotographer[]>;
+    findAllPaginated(filter: any, skip: number, limit: number, sort?: Record<string, 1 | -1>): Promise<[IPhotographer[], number]>;
 }

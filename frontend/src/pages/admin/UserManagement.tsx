@@ -10,26 +10,29 @@ import UserTable from "../../components/admin/users/UserTable";
 import DeleteUserModal from "../../components/admin/users/DeleteUserModal";
 
 const UserManagement = () => {
-  const { users, loading, changeStatus, deleteUser, fetchUsers } = useUsers();
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("ALL");
+  const {
+    users,
+    loading,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    totalUsers,
+    searchQuery,
+    setSearchQuery,
+    filterStatus,
+    setFilterStatus,
+    sortField,
+    sortOrder,
+    handleSort,
+    stats,
+    changeStatus,
+    deleteUser,
+    fetchUsers,
+  } = useUsers();
 
   const [selectedUserForDelete, setSelectedUserForDelete] =
     useState<UserType | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-
-  //all users fetched by useUsers() are Clients/Regular Users.
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      filterStatus === "ALL" || user.accountStatus === filterStatus;
-
-    return matchesSearch && matchesStatus;
-  });
 
   const handleChangeStatus = async (id: string, status: accountStatus) => {
     setActionLoading(true);
@@ -78,7 +81,7 @@ const UserManagement = () => {
         </div>
 
         {/* Metric Cards (Total, Active, Suspended) */}
-        <UserStats users={users} />
+        <UserStats stats={stats} />
 
         {/* Control Bar (Status Filter Pills, Search Bar, Count) */}
         <UserFilters
@@ -86,7 +89,7 @@ const UserManagement = () => {
           onStatusChange={setFilterStatus}
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
-          totalCount={users.length}
+          totalCount={totalUsers}
         />
 
         {/* User Table Grid */}
@@ -99,10 +102,16 @@ const UserManagement = () => {
           </div>
         ) : (
           <UserTable
-            users={filteredUsers}
+            users={users}
             onChangeStatus={handleChangeStatus}
             onDelete={setSelectedUserForDelete}
             disabled={actionLoading}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            sortField={sortField}
+            sortOrder={sortOrder}
+            onSort={handleSort}
+            onPageChange={setCurrentPage}
           />
         )}
       </div>

@@ -1,13 +1,22 @@
 import type { User as UserType } from "../../../types/user";
 
 interface UserStatsProps {
-  users: UserType[];
+  users?: UserType[];
+  stats?: {
+    total: number;
+    active: number;
+    suspended: number;
+  };
 }
 
-const UserStats = ({ users }: UserStatsProps) => {
-  const total = users.length;
-  const active = users.filter((u) => u.accountStatus === "ACTIVE").length;
-  const suspended = users.filter((u) => u.accountStatus === "SUSPENDED").length;
+const UserStats = ({ users = [], stats }: UserStatsProps) => {
+  const total = stats ? stats.total : users.length;
+  const active = stats
+    ? stats.active
+    : users.filter((u) => u.accountStatus === "ACTIVE").length;
+  const suspended = stats
+    ? stats.suspended
+    : users.filter((u) => u.accountStatus === "SUSPENDED").length;
 
   const formatNumber = (num: number) => {
     return num.toLocaleString();

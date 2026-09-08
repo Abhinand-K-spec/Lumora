@@ -6,4 +6,5 @@ export interface IPackageRepository {
     update(id: string, data: Partial<IPackage>): Promise<IPackage | null>;
     delete(id: string): Promise<boolean>;
     findByPhotographerId(photographerId: string): Promise<IPackage[]>;
+    findPhotographerIdsByPriceRange(minPrice: number, maxPrice: number): Promise<string[]>;
 }
