@@ -69,7 +69,6 @@ const PhotographerPackageModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
       <div className="bg-[#0f1012] border border-border/30 max-w-md w-full rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-        
         {/* Header */}
         <div className="px-6 py-4 bg-neutral-950 border-b border-border/10 flex items-center justify-between">
           <h3 className="font-heading text-base font-semibold text-text tracking-wide">
@@ -84,11 +83,15 @@ const PhotographerPackageModal = ({
         </div>
 
         {/* Form Container (Scrollable) */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
-          
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 space-y-4 overflow-y-auto flex-1"
+        >
           {/* Package Name */}
           <div>
-            <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-1.5">Package Name</label>
+            <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-1.5">
+              Package Name
+            </label>
             <input
               type="text"
               required
@@ -102,19 +105,25 @@ const PhotographerPackageModal = ({
           {/* Price & Status Row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-1.5">Price (INR)</label>
+              <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-1.5">
+                Price (INR)
+              </label>
               <input
                 type="number"
                 required
                 min={0}
                 placeholder="e.g. 75000"
                 value={price}
-                onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                onChange={(e) =>
+                  setPrice(e.target.value === "" ? "" : Number(e.target.value))
+                }
                 className="w-full bg-neutral-950 border border-border/20 rounded-lg px-4 py-2.5 text-xs text-text outline-none focus:border-primary/50 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-1.5">Status</label>
+              <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-1.5">
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -126,11 +135,11 @@ const PhotographerPackageModal = ({
             </div>
           </div>
 
-
-
           {/* Description */}
           <div>
-            <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-1.5">Package Description</label>
+            <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-1.5">
+              Package Description
+            </label>
             <textarea
               rows={3}
               required
@@ -143,10 +152,11 @@ const PhotographerPackageModal = ({
 
           {/* Inclusion Checkboxes Grid */}
           <div className="pt-2">
-            <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-3">Service Inclusions</label>
-            
+            <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-3">
+              Service Inclusions
+            </label>
+
             <div className="grid grid-cols-2 gap-3.5">
-              
               {/* Album Included */}
               <label className="flex items-center gap-2.5 text-xs text-text cursor-pointer select-none">
                 <input
@@ -190,7 +200,6 @@ const PhotographerPackageModal = ({
                 />
                 <span>Videographers</span>
               </label>
-
             </div>
           </div>
 
@@ -210,9 +219,7 @@ const PhotographerPackageModal = ({
               {packageData ? "Save Changes" : "Create Package"}
             </button>
           </div>
-
         </form>
-
       </div>
     </div>
   );

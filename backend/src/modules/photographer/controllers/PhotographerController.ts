@@ -25,11 +25,14 @@ export class PhotographerController {
   async getPhotographerById(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
     if (!userId) {
-      throw new AppError(HttpStatus.BAD_REQUEST, COMMON_MESSAGES.USER_ID_REQUIRED);
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        COMMON_MESSAGES.USER_ID_REQUIRED,
+      );
     }
 
     const photographer = await this._photographerService.getProfile(
-      userId.toString()
+      userId.toString(),
     );
 
     sendSuccess(res, { photographer }, PHOTOGRAPHER_MESSAGES.PROFILE_FETCHED);
@@ -43,7 +46,7 @@ export class PhotographerController {
 
     const photographer = await this._photographerService.editProfile(
       userId,
-      req.body
+      req.body,
     );
 
     sendSuccess(res, { photographer }, PHOTOGRAPHER_MESSAGES.PROFILE_UPDATED);
@@ -66,7 +69,7 @@ export class PhotographerController {
       {
         page: isNaN(pageNum) ? 1 : pageNum,
         limit: isNaN(limitNum) ? 8 : limitNum,
-      }
+      },
     );
 
     sendSuccess(
@@ -78,7 +81,7 @@ export class PhotographerController {
         limit: result.limit,
         totalPages: result.totalPages,
       },
-      PHOTOGRAPHER_MESSAGES.PHOTOGRAPHERS_FETCHED
+      PHOTOGRAPHER_MESSAGES.PHOTOGRAPHERS_FETCHED,
     );
   }
 
@@ -97,7 +100,7 @@ export class PhotographerController {
       {
         photoUrl: updatedProfile.profilePhoto,
       },
-      PHOTOGRAPHER_MESSAGES.PROFILE_UPDATED
+      PHOTOGRAPHER_MESSAGES.PROFILE_UPDATED,
     );
   }
 
@@ -116,7 +119,7 @@ export class PhotographerController {
       {
         coverPhotoUrl: updatedProfile.coverPhoto,
       },
-      PHOTOGRAPHER_MESSAGES.COVER_PHOTO_UPDATED
+      PHOTOGRAPHER_MESSAGES.COVER_PHOTO_UPDATED,
     );
   }
 
@@ -140,7 +143,7 @@ export class PhotographerController {
     if (!packageName || price === undefined || !description) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_DETAILS
+        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_DETAILS,
       );
     }
 
@@ -159,7 +162,7 @@ export class PhotographerController {
       res,
       { photographer: updatedProfile },
       PHOTOGRAPHER_MESSAGES.PACKAGE_ADDED,
-      HttpStatus.CREATED
+      HttpStatus.CREATED,
     );
   }
 
@@ -184,7 +187,7 @@ export class PhotographerController {
     if (!packageId || !packageName || price === undefined || !description) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_DETAILS
+        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_DETAILS,
       );
     }
 
@@ -200,13 +203,13 @@ export class PhotographerController {
         albumIncluded: Boolean(albumIncluded),
         videographersIncluded: Boolean(videographersIncluded),
         status: status || "active",
-      }
+      },
     );
 
     sendSuccess(
       res,
       { photographer: updatedProfile },
-      PHOTOGRAPHER_MESSAGES.PACKAGE_UPDATED
+      PHOTOGRAPHER_MESSAGES.PACKAGE_UPDATED,
     );
   }
 
@@ -220,19 +223,44 @@ export class PhotographerController {
     if (!packageId) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_ID
+        PHOTOGRAPHER_MESSAGES.MISSING_PACKAGE_ID,
       );
     }
 
     const updatedProfile = await this._photographerService.deletePackage(
       userId,
-      packageId as string
+      packageId as string,
     );
 
     sendSuccess(
       res,
       { photographer: updatedProfile },
-      PHOTOGRAPHER_MESSAGES.PACKAGE_DELETED
+      PHOTOGRAPHER_MESSAGES.PACKAGE_DELETED,
     );
+  }
+
+  async requestApproval(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
+    }
+
+    const request = await this._photographerService.requestApproval(userId);
+    sendSuccess(
+      res,
+      { request },
+      "Verification request submitted successfully.",
+      HttpStatus.CREATED,
+    );
+  }
+
+  async getApprovalHistory(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
+    }
+
+    const history = await this._photographerService.getApprovalHistory(userId);
+    sendSuccess(res, { history }, "Approval history fetched successfully.");
   }
 }

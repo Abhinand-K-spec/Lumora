@@ -2,7 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { TOAST_MESSAGES } from "../../constants/messages";
 
-import adminUserService, { type UserStats } from "../../services/adminUserService";
+import adminUserService, {
+  type UserStats,
+} from "../../services/adminUserService";
 import type { User } from "../../types/user";
 import type { accountStatus } from "../../types/user";
 
@@ -52,7 +54,14 @@ export const useUsers = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, itemsPerPage, searchQuery, filterStatus, sortField, sortOrder]);
+  }, [
+    currentPage,
+    itemsPerPage,
+    searchQuery,
+    filterStatus,
+    sortField,
+    sortOrder,
+  ]);
 
   const changeStatus = async (id: string, status: accountStatus) => {
     try {

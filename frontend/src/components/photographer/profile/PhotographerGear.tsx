@@ -39,7 +39,6 @@ const PhotographerGear = ({
 }: PhotographerGearProps) => {
   return (
     <div className="bg-[#0f1012] border border-border/20 rounded-xl p-6.5 select-none">
-      
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <h3 className="font-heading text-lg font-semibold text-text tracking-wide flex items-center gap-2">
@@ -80,13 +79,15 @@ const PhotographerGear = ({
       ) : (
         <div className="flex flex-col items-center justify-center py-8 px-4 bg-neutral-900/20 border border-dashed border-border/20 rounded-xl text-center">
           <Camera size={32} className="text-neutral-600 mb-3 stroke-[1.2]" />
-          <p className="text-xs font-semibold text-text">No equipment listed yet</p>
+          <p className="text-xs font-semibold text-text">
+            No equipment listed yet
+          </p>
           <p className="text-[10px] text-text-secondary mt-1 max-w-[280px]">
-            Click the "Edit Profile" button above to add your cameras, stabilizers, lenses, or drones.
+            Click the "Edit Profile" button above to add your cameras,
+            stabilizers, lenses, or drones.
           </p>
         </div>
       )}
-
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { ArrowUpDown } from "lucide-react";
 import type { User as UserType } from "../../../types/user";
 import type { accountStatus } from "../../../types/user";
@@ -27,7 +26,7 @@ const UserTable = ({
   currentPage = 1,
   totalPages = 1,
   sortField = "name",
-  sortOrder = "asc",
+  sortOrder: _sortOrder = "asc",
   onSort,
   onPageChange,
 }: UserTableProps) => {

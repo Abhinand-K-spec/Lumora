@@ -5,7 +5,7 @@ import type { Request, Response } from "express";
 
 export class UserManagementController {
   constructor(
-    private readonly _userManagementService: IUserManagementService
+    private readonly _userManagementService: IUserManagementService,
   ) {}
 
   async getUsers(req: Request, res: Response): Promise<void> {
@@ -25,7 +25,7 @@ export class UserManagementController {
       {
         page: isNaN(pageNum) ? 1 : pageNum,
         limit: isNaN(limitNum) ? 5 : limitNum,
-      }
+      },
     );
 
     res.status(HttpStatus.OK).json({

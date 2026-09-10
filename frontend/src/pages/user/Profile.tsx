@@ -24,10 +24,10 @@ const Profile = () => {
       if (!prev) return null;
       return {
         ...prev,
-        profilePhoto: newPhotoUrl
-      }
-    })
-  }
+        profilePhoto: newPhotoUrl,
+      };
+    });
+  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {

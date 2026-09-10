@@ -17,7 +17,7 @@ cloudinary.config({
 
 export const uploadToCloudinary = (
   fileBuffer: Buffer,
-  folder: string
+  folder: string,
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -25,7 +25,7 @@ export const uploadToCloudinary = (
       (error, result) => {
         if (error) return reject(error);
         resolve(result!.secure_url);
-      }
+      },
     );
     uploadStream.end(fileBuffer);
   });

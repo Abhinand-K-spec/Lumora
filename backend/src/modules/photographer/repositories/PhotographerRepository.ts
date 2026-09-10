@@ -17,7 +17,7 @@ export class PhotographerRepository implements IPhotographerRepository {
 
   async update(
     id: string,
-    data: Partial<IPhotographer>
+    data: Partial<IPhotographer>,
   ): Promise<IPhotographer | null> {
     return await Photographer.findByIdAndUpdate(id, data, {
       new: true,
@@ -36,12 +36,12 @@ export class PhotographerRepository implements IPhotographerRepository {
 
   async updateRefreshToken(
     id: string,
-    refreshToken: string
+    refreshToken: string,
   ): Promise<IPhotographer | null> {
     return await Photographer.findByIdAndUpdate(
       id,
       { refreshToken },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -53,7 +53,7 @@ export class PhotographerRepository implements IPhotographerRepository {
     filter: any,
     skip: number,
     limit: number,
-    sort: Record<string, 1 | -1> = { createdAt: -1 }
+    sort: Record<string, 1 | -1> = { createdAt: -1 },
   ): Promise<[IPhotographer[], number]> {
     const [photographers, total] = await Promise.all([
       Photographer.find(filter).sort(sort).skip(skip).limit(limit).exec(),

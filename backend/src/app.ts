@@ -2,6 +2,7 @@ import express, { urlencoded } from "express";
 import type { Request, Response, NextFunction } from "express";
 import authRoutes from "./modules/auth/routes/auth.routes.js";
 import userManagementRoutes from "./modules/admin/userManagement/routes/user.management.route.js";
+import adminPhotographerRoutes from "./modules/admin/photographerManagement/routes/adminPhotographer.routes.js";
 
 import cors from "cors";
 import { AppError } from "./shared/errors/AppError.js";
@@ -26,7 +27,7 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
-  })
+  }),
 );
 
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -40,6 +41,7 @@ app.use("/api/admin/auth", authRoutes);
 app.use("/api/app", appRoutes);
 app.use("/api/photographer", photographerRoutes);
 app.use("/api/admin/userManagement", userManagementRoutes);
+app.use("/api/admin/photographers", adminPhotographerRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({
@@ -47,7 +49,6 @@ app.use((req: Request, res: Response) => {
     message: COMMON_MESSAGES.ROUTE_NOT_FOUND,
   });
 });
-
 
 app.use(errorHandler);
 

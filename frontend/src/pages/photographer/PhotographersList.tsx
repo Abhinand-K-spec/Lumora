@@ -1,27 +1,34 @@
 import { useState, useEffect } from "react";
-import { Search, MapPin, Star, ChevronLeft, ChevronRight, ArrowRight, ChevronDown } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  ChevronDown,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import photographerService, { type PhotographerProfile } from "../../services/photographerService";
+import photographerService, {
+  type PhotographerProfile,
+} from "../../services/photographerService";
 import { toast } from "sonner";
 import { TOAST_MESSAGES } from "../../constants/messages";
-import { DISTRICTS as BASE_DISTRICTS, SERVICES as BASE_SERVICES } from "../../constants/profileOptions";
+import {
+  DISTRICTS as BASE_DISTRICTS,
+  SERVICES as BASE_SERVICES,
+} from "../../constants/profileOptions";
 
-const DISTRICTS = [
-  "All Districts",
-  ...BASE_DISTRICTS
-];
+const DISTRICTS = ["All Districts", ...BASE_DISTRICTS];
 
-const SERVICES = [
-  "All Services",
-  ...BASE_SERVICES
-];
+const SERVICES = ["All Services", ...BASE_SERVICES];
 
 const PRICE_TIERS = [
   { label: "All Pricing", value: "" },
   { label: "₹ (Budget)", value: "₹" },
   { label: "₹₹ (Standard)", value: "₹₹" },
   { label: "₹₹₹ (Premium)", value: "₹₹₹" },
-  { label: "₹₹₹₹ (Elite)", value: "₹₹₹₹" }
+  { label: "₹₹₹₹ (Elite)", value: "₹₹₹₹" },
 ];
 
 const FALLBACK_COVERS = [
@@ -29,25 +36,25 @@ const FALLBACK_COVERS = [
   "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&auto=format&fit=crop&q=80",
   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80",
   "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=80"
+  "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=80",
 ];
 
 const FALLBACK_THUMBNAILS = [
   [
     "https://images.unsplash.com/photo-1519741497674-611481863552?w=150&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=150&auto=format&fit=crop&q=60",
-    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=150&auto=format&fit=crop&q=60"
+    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=150&auto=format&fit=crop&q=60",
   ],
   [
     "https://images.unsplash.com/photo-1519225495810-7517c2965a7d?w=150&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1520854221256-17451cc35953?w=150&auto=format&fit=crop&q=60",
-    "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=150&auto=format&fit=crop&q=60"
+    "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=150&auto=format&fit=crop&q=60",
   ],
   [
     "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=150&auto=format&fit=crop&q=60",
     "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=150&auto=format&fit=crop&q=60",
-    "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=150&auto=format&fit=crop&q=60"
-  ]
+    "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=150&auto=format&fit=crop&q=60",
+  ],
 ];
 
 const PhotographersList = () => {
@@ -66,7 +73,7 @@ const PhotographersList = () => {
     search: "",
     district: "",
     service: "",
-    price: ""
+    price: "",
   });
 
   // Sorting & Toggles
@@ -105,7 +112,8 @@ const PhotographersList = () => {
         const res = await photographerService.getPhotographers(params);
         if (res.data && res.data.photographers) {
           setPhotographers(res.data.photographers);
-          if (res.data.totalPages !== undefined) setTotalPages(res.data.totalPages);
+          if (res.data.totalPages !== undefined)
+            setTotalPages(res.data.totalPages);
           if (res.data.total !== undefined) setTotalItems(res.data.total);
         }
       } catch {
@@ -124,7 +132,7 @@ const PhotographersList = () => {
       search,
       district,
       service,
-      price
+      price,
     });
     setCurrentPage(1);
   };
@@ -162,7 +170,8 @@ const PhotographersList = () => {
             Capturing Kerala's Grandeur
           </h1>
           <p className="text-sm md:text-base text-text-secondary leading-relaxed max-w-xl mx-auto font-body">
-            Discover elite photographers for destination weddings, traditional ceremonies , and editorial shoots.
+            Discover elite photographers for destination weddings, traditional
+            ceremonies , and editorial shoots.
           </p>
         </div>
 
@@ -177,7 +186,10 @@ const PhotographersList = () => {
               Search
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" size={12} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary"
+                size={12}
+              />
               <input
                 type="text"
                 placeholder="Name, style, or ceremony..."
@@ -205,7 +217,10 @@ const PhotographersList = () => {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" size={12} />
+              <ChevronDown
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
+                size={12}
+              />
             </div>
           </div>
 
@@ -226,7 +241,10 @@ const PhotographersList = () => {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" size={12} />
+              <ChevronDown
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
+                size={12}
+              />
             </div>
           </div>
 
@@ -247,7 +265,10 @@ const PhotographersList = () => {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" size={12} />
+              <ChevronDown
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
+                size={12}
+              />
             </div>
           </div>
 
@@ -268,17 +289,19 @@ const PhotographersList = () => {
           <div className="flex items-center gap-2">
             {/* Total Count Badge */}
             <span className="text-[10px] font-bold text-text-secondary bg-[#0f1012] border border-border/10 px-3 py-1.5 rounded-full uppercase tracking-wider">
-              {totalItems} {totalItems === 1 ? "Photographer" : "Photographers"} in Kerala
+              {totalItems} {totalItems === 1 ? "Photographer" : "Photographers"}{" "}
+              in Kerala
             </span>
 
             {/* Top Rated Toggle Chip */}
             <button
               type="button"
               onClick={handleTopRatedToggle}
-              className={`text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border transition cursor-pointer ${topRatedOnly
-                ? "bg-primary/10 border-primary/40 text-primary"
-                : "bg-[#0f1012] border-border/10 text-text-secondary hover:text-text hover:border-border/30"
-                }`}
+              className={`text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border transition cursor-pointer ${
+                topRatedOnly
+                  ? "bg-primary/10 border-primary/40 text-primary"
+                  : "bg-[#0f1012] border-border/10 text-text-secondary hover:text-text hover:border-border/30"
+              }`}
             >
               Top Rated
             </button>
@@ -295,9 +318,15 @@ const PhotographersList = () => {
               }}
               className="bg-transparent text-text font-semibold outline-none cursor-pointer hover:text-primary transition text-xs"
             >
-              <option value="Recommended" className="bg-[#0f1012]">Recommended</option>
-              <option value="Price: Low to High" className="bg-[#0f1012]">Price: Low to High</option>
-              <option value="Price: High to Low" className="bg-[#0f1012]">Price: High to Low</option>
+              <option value="Recommended" className="bg-[#0f1012]">
+                Recommended
+              </option>
+              <option value="Price: Low to High" className="bg-[#0f1012]">
+                Price: Low to High
+              </option>
+              <option value="Price: High to Low" className="bg-[#0f1012]">
+                Price: High to Low
+              </option>
             </select>
           </div>
         </div>
@@ -311,10 +340,12 @@ const PhotographersList = () => {
           ) : paginatedPhotographers.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedPhotographers.map((p, idx) => {
-                const coverUrl = p.coverPhoto || FALLBACK_COVERS[idx % FALLBACK_COVERS.length];
-                const thumbs = FALLBACK_THUMBNAILS[idx % FALLBACK_THUMBNAILS.length];
+                const coverUrl =
+                  p.coverPhoto || FALLBACK_COVERS[idx % FALLBACK_COVERS.length];
+                const thumbs =
+                  FALLBACK_THUMBNAILS[idx % FALLBACK_THUMBNAILS.length];
                 const rating = (4.8 + (idx % 3) * 0.1).toFixed(1);
-                const reviewCount = 98 + (idx * 17) % 150;
+                const reviewCount = 98 + ((idx * 17) % 150);
 
                 return (
                   <div
@@ -322,7 +353,7 @@ const PhotographersList = () => {
                     className="bg-[#0f1012]/60 border border-border/10 rounded-xl overflow-hidden flex flex-col justify-between hover:border-border/35 shadow-xl hover:shadow-2xl transition duration-300 group"
                   >
                     {/* Top Section: Cover & Overlay */}
-                    <div 
+                    <div
                       onClick={() => navigate(`/photographers/${p.id}`)}
                       className="h-40 relative overflow-hidden bg-neutral-950 cursor-pointer"
                     >
@@ -371,7 +402,10 @@ const PhotographersList = () => {
                     <div className="p-3 space-y-3">
                       <div className="grid grid-cols-3 gap-1.5">
                         {thumbs.map((thumb, index) => (
-                          <div key={index} className="h-11 rounded overflow-hidden bg-neutral-950">
+                          <div
+                            key={index}
+                            className="h-11 rounded overflow-hidden bg-neutral-950"
+                          >
                             <img
                               src={thumb}
                               alt="Portfolio Thumbnail"
@@ -429,10 +463,11 @@ const PhotographersList = () => {
                 <button
                   key={pIdx}
                   onClick={() => setCurrentPage(pIdx)}
-                  className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition cursor-pointer ${currentPage === pIdx
-                    ? "bg-primary text-neutral-950"
-                    : "text-text-secondary hover:text-text hover:bg-neutral-900/60"
-                    }`}
+                  className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition cursor-pointer ${
+                    currentPage === pIdx
+                      ? "bg-primary text-neutral-950"
+                      : "text-text-secondary hover:text-text hover:bg-neutral-900/60"
+                  }`}
                 >
                   {pIdx}
                 </button>
@@ -441,7 +476,9 @@ const PhotographersList = () => {
 
             {/* Next Page Button */}
             <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
               className="p-2 border border-border/10 hover:border-border/30 rounded-xl text-text-secondary disabled:opacity-40 disabled:pointer-events-none hover:text-text cursor-pointer transition"
             >
@@ -463,20 +500,47 @@ const PhotographersList = () => {
         </div>
 
         <div className="flex items-center gap-6 text-[10px] text-text-secondary">
-          <a href="#" className="hover:text-text transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-text transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-text transition-colors">Contact Us</a>
-          <a href="#" className="hover:text-text transition-colors">Press Kit</a>
+          <a href="#" className="hover:text-text transition-colors">
+            Privacy Policy
+          </a>
+          <a href="#" className="hover:text-text transition-colors">
+            Terms of Service
+          </a>
+          <a href="#" className="hover:text-text transition-colors">
+            Contact Us
+          </a>
+          <a href="#" className="hover:text-text transition-colors">
+            Press Kit
+          </a>
         </div>
 
         <div className="flex items-center gap-4 text-text-secondary">
-          <a href="#" className="hover:text-primary transition-colors" aria-label="Twitter">
-            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+          <a
+            href="#"
+            className="hover:text-primary transition-colors"
+            aria-label="Twitter"
+          >
+            <svg
+              className="w-4 h-4 fill-current"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
           </a>
-          <a href="#" className="hover:text-primary transition-colors" aria-label="Instagram">
-            <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <a
+            href="#"
+            className="hover:text-primary transition-colors"
+            aria-label="Instagram"
+          >
+            <svg
+              className="w-4 h-4 stroke-current fill-none"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
               <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
               <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />

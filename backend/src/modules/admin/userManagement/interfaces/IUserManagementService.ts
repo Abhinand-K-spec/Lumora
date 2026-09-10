@@ -25,7 +25,7 @@ export interface IUserManagementService {
       sortField?: string | undefined;
       sortOrder?: "asc" | "desc" | undefined;
     },
-    pagination: PaginationParams
+    pagination: PaginationParams,
   ): Promise<PaginatedUsersResult>;
   changeStatus(
     id: string,

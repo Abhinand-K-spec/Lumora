@@ -20,7 +20,6 @@ const formatPrice = (price: number): string => {
   return `₹${price}`;
 };
 
-
 const PhotographerServices = ({
   packages = [],
   onAddClick,
@@ -29,7 +28,6 @@ const PhotographerServices = ({
 }: PhotographerServicesProps) => {
   return (
     <div className="bg-[#0f1012] border border-border/20 rounded-xl p-6 select-none flex flex-col">
-      
       {/* Title & Action */}
       <div className="flex items-center justify-between mb-4.5">
         <h3 className="font-heading text-lg font-semibold text-text tracking-wide">
@@ -97,9 +95,11 @@ const PhotographerServices = ({
                   {pkg.description}
                 </p>
 
-
                 {/* Inclusions Badges Row */}
-                {(pkg.albumIncluded || pkg.droneIncluded || pkg.framesIncluded || pkg.videographersIncluded) && (
+                {(pkg.albumIncluded ||
+                  pkg.droneIncluded ||
+                  pkg.framesIncluded ||
+                  pkg.videographersIncluded) && (
                   <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-2.5 border-t border-border/5">
                     {pkg.albumIncluded && (
                       <span className="bg-primary/5 border border-primary/15 text-primary text-[8px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-widest">
@@ -123,13 +123,14 @@ const PhotographerServices = ({
                     )}
                   </div>
                 )}
-
               </div>
             );
           })
         ) : (
           <div className="flex flex-col items-center justify-center py-6 text-center border border-dashed border-border/20 rounded-xl bg-neutral-900/10">
-            <span className="text-xs text-text-secondary">No service packages added yet.</span>
+            <span className="text-xs text-text-secondary">
+              No service packages added yet.
+            </span>
             <button
               onClick={onAddClick}
               className="mt-2 text-[10px] font-bold text-primary uppercase tracking-wider hover:underline cursor-pointer"
@@ -139,7 +140,6 @@ const PhotographerServices = ({
           </div>
         )}
       </div>
-
     </div>
   );
 };

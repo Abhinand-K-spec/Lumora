@@ -26,297 +26,368 @@ import type { IOTPRepository } from "../interfaces/IOTPRepository.js";
 import { otpPurpose } from "../../../shared/enums/OTPPurpose.js";
 
 export class AuthService implements IAuthService {
-    constructor(
-        private readonly _userRepository: IUserRepository,
-        private readonly _passwordService: IPasswordService,
-        private readonly _tokenService: ITokenService,
-        private readonly _emailService: IEmailService,
-        private readonly _otpService: IOTPService,
-        private readonly _googleAuthService: IGoogleAuthService,
-        private readonly _photographerRepository: IPhotographerRepository,
-        private readonly _userProfileRepository: IUserProfileRepository,
-        private readonly _otpRepository: IOTPRepository
-    ) { }
+  constructor(
+    private readonly _userRepository: IUserRepository,
+    private readonly _passwordService: IPasswordService,
+    private readonly _tokenService: ITokenService,
+    private readonly _emailService: IEmailService,
+    private readonly _otpService: IOTPService,
+    private readonly _googleAuthService: IGoogleAuthService,
+    private readonly _photographerRepository: IPhotographerRepository,
+    private readonly _userProfileRepository: IUserProfileRepository,
+    private readonly _otpRepository: IOTPRepository,
+  ) {}
 
-    async register(data: RegisterUserDto): Promise<void> {
-        const existing = await this._userRepository.findByEmail(data.email);
+  async register(data: RegisterUserDto): Promise<void> {
+    const existing = await this._userRepository.findByEmail(data.email);
 
-        if (existing) {
-            throw new AppError(HttpStatus.CONFLICT, AUTH_MESSAGES.USER_ALREADY_LOGGED);
-        }
+    if (existing) {
+      throw new AppError(
+        HttpStatus.CONFLICT,
+        AUTH_MESSAGES.USER_ALREADY_LOGGED,
+      );
+    }
 
-        const otp = this._otpService.generateOTP();
-        const hashedPassword = await this._passwordService.hashPassword(data.password);
+    const otp = this._otpService.generateOTP();
+    const hashedPassword = await this._passwordService.hashPassword(
+      data.password,
+    );
 
-        const user = await this._userRepository.create({
-            name: data.name,
-            email: data.email,
-            password: hashedPassword,
-            role: (data.role as userRole) || userRole.USER,
-            accountStatus: accountStatus.Active,
-            isEmailVerified: false,
+    const user = await this._userRepository.create({
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      role: (data.role as userRole) || userRole.USER,
+      accountStatus: accountStatus.Active,
+      isEmailVerified: false,
+    });
+
+    if (user.role === userRole.PHOTOGRAPHER) {
+      await this._photographerRepository.create({
+        userId: user._id.toString(),
+        phone: "",
+        bio: "",
+      });
+    } else {
+      await this._userProfileRepository.create({
+        userId: user._id.toString(),
+        phone: "",
+        profilePhoto: "",
+      });
+    }
+
+    await this._otpRepository.save(
+      user._id.toString(),
+      otpPurpose.Email,
+      otp,
+      900,
+    );
+
+    console.log("otp : ", otp);
+
+    const html = verificationEmail(data.name, otp);
+    this._emailService.sendEmail(
+      data.email,
+      "Verify your Lumora Account",
+      html,
+    );
+  }
+
+  async login(data: LoginUserDto): Promise<LoginUserResponseDto> {
+    const user = await this._userRepository.findByEmail(data.email);
+
+    if (!user) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        AUTH_MESSAGES.INVALID_CREDENTIALS,
+      );
+    }
+
+    if (user.accountStatus === accountStatus.Suspended) {
+      throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.SUSPENDED);
+    }
+
+    const passwordValid = await this._passwordService.comparePassword(
+      data.password,
+      user.password,
+    );
+
+    if (!passwordValid) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        AUTH_MESSAGES.INVALID_CREDENTIALS,
+      );
+    }
+
+    if (!user.isEmailVerified) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        AUTH_MESSAGES.EMAIL_NOT_VERIFIED,
+      );
+    }
+
+    const accessToken = this._tokenService.generateAccessToken({
+      id: user._id.toString(),
+      role: user.role,
+    });
+    const refreshToken = this._tokenService.generateRefreshToken({
+      id: user._id.toString(),
+      role: user.role,
+    });
+
+    await this._userRepository.updateRefreshToken(
+      user._id.toString(),
+      refreshToken,
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+      user: UserMapper.toLoginResponseUser(user),
+    };
+  }
+
+  async refresh(refreshToken: string): Promise<string> {
+    const payload = this._tokenService.verifyRefreshToken(refreshToken);
+    const user = await this._userRepository.findById(payload.id);
+
+    if (!user) {
+      throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
+    }
+
+    if (user.refreshToken !== refreshToken) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        AUTH_MESSAGES.INVALID_REFRESH_TOKEN,
+      );
+    }
+
+    const accessToken = this._tokenService.generateAccessToken({
+      id: user._id.toString(),
+      role: user.role,
+    });
+    return accessToken;
+  }
+
+  async verifyEmail(data: VerifyEmailDto): Promise<void> {
+    const user = await this._userRepository.findByEmail(data.email);
+
+    if (!user) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
+    }
+
+    if (user.isEmailVerified) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED,
+      );
+    }
+
+    const storedOtp = await this._otpRepository.get(
+      user._id.toString(),
+      otpPurpose.Email,
+    );
+
+    if (!storedOtp) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.OTP_EXPIRED);
+    }
+
+    if (data.otp !== storedOtp) {
+      throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
+    }
+
+    await this._userRepository.update(user._id.toString(), {
+      isEmailVerified: true,
+    });
+    await this._otpRepository.delete(user._id.toString(), otpPurpose.Email);
+  }
+
+  async resendOtp(data: ResendOtpDto): Promise<void> {
+    const user = await this._userRepository.findByEmail(data.email);
+
+    if (!user) {
+      throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
+    }
+
+    if (user.isEmailVerified) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED,
+      );
+    }
+
+    const otp = this._otpService.generateOTP();
+    await this._otpRepository.save(
+      user._id.toString(),
+      otpPurpose.Email,
+      otp,
+      900,
+    );
+
+    const html = verificationEmail(user.name, otp);
+    await this._emailService.sendEmail(
+      user.email,
+      "Verify your Lumora Account",
+      html,
+    );
+  }
+
+  async forgotPassword(data: ForgotPasswordDto): Promise<void> {
+    const user = await this._userRepository.findByEmail(data.email);
+
+    if (!user) {
+      throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
+    }
+
+    const otp = this._otpService.generateOTP();
+
+    await this._otpRepository.save(
+      user._id.toString(),
+      otpPurpose.Password_reset,
+      otp,
+      900,
+    );
+
+    const html = passwordResetEmail(user.name, otp);
+    await this._emailService.sendEmail(
+      user.email,
+      "Reset Your Lumora Password",
+      html,
+    );
+  }
+
+  async resetPassword(data: ResetPasswordDto): Promise<void> {
+    const user = await this._userRepository.findByEmail(data.email);
+    if (!user) {
+      throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
+    }
+
+    const storedOtp = await this._otpRepository.get(
+      user._id.toString(),
+      otpPurpose.Password_reset,
+    );
+
+    if (!storedOtp) {
+      throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.NO_OTP);
+    }
+    if (data.otp !== storedOtp) {
+      throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
+    }
+
+    const hashedPassword = await this._passwordService.hashPassword(
+      data.newPassword,
+    );
+
+    await this._otpRepository.delete(
+      user._id.toString(),
+      otpPurpose.Password_reset,
+    );
+
+    await this._userRepository.update(user._id.toString(), {
+      password: hashedPassword,
+      refreshToken: null,
+    });
+  }
+
+  async verifyResetOtp(data: VerifyEmailDto): Promise<void> {
+    const user = await this._userRepository.findByEmail(data.email);
+
+    if (!user) {
+      throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
+    }
+
+    const storedOtp = await this._otpRepository.get(
+      user._id.toString(),
+      otpPurpose.Password_reset,
+    );
+
+    if (!storedOtp) {
+      throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
+    }
+
+    if (data.otp !== storedOtp) {
+      throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.OTP_INVALID);
+    }
+  }
+
+  async logout(userId: string): Promise<void> {
+    const user = await this._userRepository.findById(userId);
+
+    if (!user) {
+      throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
+    }
+
+    await this._userRepository.updateRefreshToken(userId, null);
+  }
+
+  getGoogleAuthUrl(role: string): string {
+    return this._googleAuthService.getGoogleAuthUrl(role);
+  }
+
+  async googleLogin(
+    code: string,
+    requestedRole: string,
+  ): Promise<LoginUserResponseDto> {
+    const googleUser = await this._googleAuthService.verifyGoogleUser(code);
+    const email = googleUser.email;
+    const name = googleUser.name;
+    const googleId = googleUser.googleId;
+
+    let user = await this._userRepository.findByEmail(email);
+    let role = user ? user.role : requestedRole;
+
+    if (!user) {
+      user = await this._userRepository.create({
+        name,
+        email,
+        password: "",
+        googleId,
+        role: requestedRole as userRole,
+        isEmailVerified: true,
+        accountStatus: accountStatus.Active,
+      });
+
+      if (requestedRole === userRole.PHOTOGRAPHER) {
+        await this._photographerRepository.create({
+          userId: user._id.toString(),
+          phone: "",
+          bio: "",
         });
-
-        if (user.role === userRole.PHOTOGRAPHER) {
-            await this._photographerRepository.create({
-                userId: user._id.toString(),
-                phone: '',
-                bio: ''
-            });
-        } else {
-            await this._userProfileRepository.create({
-                userId: user._id.toString(),
-                phone: '',
-                profilePhoto: ''
-            });
-        }
-
-        await this._otpRepository.save(user._id.toString(),otpPurpose.Email,otp,900)
-
-        console.log('otp : ', otp);
-
-
-        const html = verificationEmail(data.name, otp);
-        this._emailService.sendEmail(
-            data.email,
-            "Verify your Lumora Account",
-            html
-        );
-    }
-
-    async login(data: LoginUserDto): Promise<LoginUserResponseDto> {
-        const user = await this._userRepository.findByEmail(data.email);
-
-        if (!user) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
-        }
-
-        if (user.accountStatus === accountStatus.Suspended) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.SUSPENDED);
-        }
-
-        const passwordValid = await this._passwordService.comparePassword(data.password, user.password);
-
-        if (!passwordValid) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_CREDENTIALS);
-        }
-
-        if (!user.isEmailVerified) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.EMAIL_NOT_VERIFIED);
-        }
-
-        const accessToken = this._tokenService.generateAccessToken({ id: user._id.toString(), role: user.role });
-        const refreshToken = this._tokenService.generateRefreshToken({ id: user._id.toString(), role: user.role });
-
-        await this._userRepository.updateRefreshToken(user._id.toString(), refreshToken);
-
-        return {
-            accessToken,
-            refreshToken,
-            user: UserMapper.toLoginResponseUser(user)
-        }
-    }
-
-    async refresh(refreshToken: string): Promise<string> {
-        const payload = this._tokenService.verifyRefreshToken(refreshToken);
-        const user = await this._userRepository.findById(payload.id);
-
-        if (!user) {
-            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
-        }
-
-        if (user.refreshToken !== refreshToken) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.INVALID_REFRESH_TOKEN);
-        }
-
-        const accessToken = this._tokenService.generateAccessToken({
-            id: user._id.toString(),
-            role: user.role,
+      } else {
+        await this._userProfileRepository.create({
+          userId: user._id.toString(),
+          phone: "",
+          profilePhoto: "",
         });
-        return accessToken;
+      }
     }
 
-    async verifyEmail(data: VerifyEmailDto): Promise<void> {
-        const user = await this._userRepository.findByEmail(data.email);
+    const tokenPayload = {
+      id: user._id.toString(),
+      email: user.email,
+      role: role,
+    };
 
-        if (!user) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);
-        }
+    const accessToken = this._tokenService.generateAccessToken(tokenPayload);
+    const refreshToken = this._tokenService.generateRefreshToken(tokenPayload);
 
-        if (user.isEmailVerified) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
-        }
+    await this._userRepository.updateRefreshToken(
+      user._id.toString(),
+      refreshToken,
+    );
 
-        const storedOtp = await this._otpRepository.get(user._id.toString(),otpPurpose.Email);
+    return {
+      accessToken,
+      refreshToken,
+      user: UserMapper.toLoginResponseUser(user),
+    };
+  }
 
-        if(!storedOtp){
-            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.OTP_EXPIRED);
-        }
-
-        if(data.otp !== storedOtp){
-            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_INVALID);
-        }
-
-        await this._userRepository.update(user._id.toString(),{isEmailVerified: true});
-        await this._otpRepository.delete(user._id.toString(),otpPurpose.Email);
+  async getUserById(userId: string): Promise<LoginUserResponseDto["user"]> {
+    const user = await this._userRepository.findById(userId);
+    if (!user) {
+      throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
     }
-
-    async resendOtp(data: ResendOtpDto): Promise<void> {
-        const user = await this._userRepository.findByEmail(data.email);
-
-        if (!user) {
-            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
-        }
-
-        if (user.isEmailVerified) {
-            throw new AppError(HttpStatus.BAD_REQUEST, AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED);
-        }
-
-        const otp = this._otpService.generateOTP();
-        await this._otpRepository.save(user._id.toString(),otpPurpose.Email,otp,900);
-
-        const html = verificationEmail(user.name, otp);
-        await this._emailService.sendEmail(
-            user.email,
-            "Verify your Lumora Account",
-            html
-        );
-    }
-
-    async forgotPassword(data: ForgotPasswordDto): Promise<void> {
-        const user = await this._userRepository.findByEmail(data.email);
-
-        if (!user) {
-            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
-        }
-
-        const otp = this._otpService.generateOTP();
-
-        await this._otpRepository.save(user._id.toString(),otpPurpose.Password_reset,otp,900);
-
-        const html = passwordResetEmail(user.name, otp);
-        await this._emailService.sendEmail(
-            user.email,
-            "Reset Your Lumora Password",
-            html
-        );
-    }
-
-    async resetPassword(data: ResetPasswordDto): Promise<void> {
-        const user = await this._userRepository.findByEmail(data.email);
-        if (!user) {
-            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
-        }
-
-        const storedOtp = await this._otpRepository.get(user._id.toString(),otpPurpose.Password_reset);
-
-        if(!storedOtp){
-            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.NO_OTP);
-        }
-        if(data.otp !== storedOtp){
-            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_INVALID);
-        }
-
-        const hashedPassword = await this._passwordService.hashPassword(data.newPassword);
-
-        await this._otpRepository.delete(user._id.toString(),otpPurpose.Password_reset);
-
-        await this._userRepository.update(user._id.toString(), {
-            password: hashedPassword,
-            refreshToken: null
-        });
-    }
-
-    async verifyResetOtp(data: VerifyEmailDto): Promise<void> {
-        const user = await this._userRepository.findByEmail(data.email);
-
-        if (!user) {
-            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
-        }
-
-        const storedOtp = await this._otpRepository.get(user._id.toString(),otpPurpose.Password_reset);
-
-        if(!storedOtp){
-            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_EXPIRED);
-        }
-
-       if(data.otp !== storedOtp){
-        throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.OTP_INVALID);
-       }
-    }
-
-    async logout(userId: string): Promise<void> {
-        const user = await this._userRepository.findById(userId);
-
-        if (!user) {
-            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
-        }
-
-        await this._userRepository.updateRefreshToken(userId, null);
-    }
-
-    getGoogleAuthUrl(role: string): string {
-        return this._googleAuthService.getGoogleAuthUrl(role);
-    }
-
-    async googleLogin(code: string, requestedRole: string): Promise<LoginUserResponseDto> {
-        const googleUser = await this._googleAuthService.verifyGoogleUser(code);
-        const email = googleUser.email;
-        const name = googleUser.name;
-        const googleId = googleUser.googleId;
-
-        let user = await this._userRepository.findByEmail(email);
-        let role = user ? user.role : requestedRole;
-
-        if (!user) {
-            user = await this._userRepository.create({
-                name,
-                email,
-                password: '',
-                googleId,
-                role: requestedRole as userRole,
-                isEmailVerified: true,
-                accountStatus: accountStatus.Active
-            });
-
-            if (requestedRole === userRole.PHOTOGRAPHER) {
-                await this._photographerRepository.create({
-                    userId: user._id.toString(),
-                    phone: '',
-                    bio: ''
-                });
-            } else {
-                await this._userProfileRepository.create({
-                    userId: user._id.toString(),
-                    phone: '',
-                    profilePhoto: ''
-                });
-            }
-        }
-
-        const tokenPayload = {
-            id: user._id.toString(),
-            email: user.email,
-            role: role
-        };
-
-        const accessToken = this._tokenService.generateAccessToken(tokenPayload);
-        const refreshToken = this._tokenService.generateRefreshToken(tokenPayload);
-
-        await this._userRepository.updateRefreshToken(user._id.toString(), refreshToken);
-
-        return {
-            accessToken,
-            refreshToken,
-            user: UserMapper.toLoginResponseUser(user)
-        };
-    }
-
-    async getUserById(userId: string): Promise<LoginUserResponseDto["user"]> {
-        const user = await this._userRepository.findById(userId);
-        if (!user) {
-            throw new AppError(HttpStatus.NOT_FOUND, AUTH_MESSAGES.USER_NOT_FOUND);
-        }
-        return UserMapper.toLoginResponseUser(user);
-    }
+    return UserMapper.toLoginResponseUser(user);
+  }
 }

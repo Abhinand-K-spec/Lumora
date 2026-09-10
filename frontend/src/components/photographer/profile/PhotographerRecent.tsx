@@ -36,7 +36,6 @@ const PhotographerRecent = ({
 }: PhotographerRecentProps) => {
   return (
     <div className="select-none">
-      
       {/* Title + Link */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-heading text-lg font-semibold text-text tracking-wide">
@@ -69,7 +68,6 @@ const PhotographerRecent = ({
           );
         })}
       </div>
-
     </div>
   );
 };

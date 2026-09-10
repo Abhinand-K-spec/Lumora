@@ -7,7 +7,10 @@ import axios from "axios";
 
 import type { UserProfile } from "../../../types/profile";
 import userService from "../../../services/userService";
-import { profileSchema, type ProfileFormData } from "../../../schemas/profileSchema";
+import {
+  profileSchema,
+  type ProfileFormData,
+} from "../../../schemas/profileSchema";
 import Input from "../../common/Input";
 
 interface EditProfileFormProps {
@@ -54,7 +57,9 @@ const EditProfileForm = ({
       onSuccess(response.data.user);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Failed to update profile");
+        toast.error(
+          error.response?.data?.message || "Failed to update profile",
+        );
       } else {
         toast.error("Something went wrong");
       }
@@ -72,9 +77,7 @@ const EditProfileForm = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-serif text-3xl text-gray-100">
-            Edit Profile
-          </h2>
+          <h2 className="font-serif text-3xl text-gray-100">Edit Profile</h2>
 
           <p className="mt-2 text-sm text-gray-500">
             Update your personal information.

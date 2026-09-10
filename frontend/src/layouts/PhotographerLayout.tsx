@@ -11,7 +11,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import useAuth from "../hooks/useAuth";
-import photographerService, { type PhotographerProfile } from "../services/photographerService";
+import photographerService, {
+  type PhotographerProfile,
+} from "../services/photographerService";
 
 const PhotographerLayout = () => {
   const { user, logout } = useAuth();
@@ -43,13 +45,13 @@ const PhotographerLayout = () => {
   };
 
   const isProfilePage = location.pathname === "/profile";
-  const isProfileIncomplete = profile !== null && (
-    !profile.bio || 
-    !profile.phone || 
-    !profile.location || 
-    !profile.equipment || 
-    profile.equipment.length === 0
-  );
+  const isProfileIncomplete =
+    profile !== null &&
+    (!profile.bio ||
+      !profile.phone ||
+      !profile.location ||
+      !profile.equipment ||
+      profile.equipment.length === 0);
 
   const menuItems = [
     { label: "Dashboard", path: "/", icon: LayoutDashboard },
@@ -105,13 +107,15 @@ const PhotographerLayout = () => {
                 </NavLink>
               );
             })}
-
           </nav>
         </div>
 
         {/* Bottom Photographer Info Card */}
         <div className="px-6 pb-8 border-t border-border/10 pt-6 flex items-center justify-between gap-2">
-          <Link to="/profile" className="flex items-center gap-3 group min-w-0 flex-1">
+          <Link
+            to="/profile"
+            className="flex items-center gap-3 group min-w-0 flex-1"
+          >
             <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold transition-all flex-shrink-0">
               {profile?.profilePhoto ? (
                 <img
@@ -149,10 +153,19 @@ const PhotographerLayout = () => {
         {isProfileIncomplete && !isProfilePage && (
           <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-200 px-6 py-3 flex items-center justify-between text-xs select-none">
             <div className="flex items-center gap-2.5">
-              <AlertCircle size={16} className="text-amber-500 animate-pulse flex-shrink-0" />
-              <span>Your profile is incomplete! Please complete your bio, phone, location, and gear list so clients can find and book you.</span>
+              <AlertCircle
+                size={16}
+                className="text-amber-500 animate-pulse flex-shrink-0"
+              />
+              <span>
+                Your profile is incomplete! Please complete your bio, phone,
+                location, and gear list so clients can find and book you.
+              </span>
             </div>
-            <Link to="/profile" className="px-3.5 py-1.5 bg-amber-500 text-black font-bold rounded hover:bg-amber-400 transition-colors flex-shrink-0">
+            <Link
+              to="/profile"
+              className="px-3.5 py-1.5 bg-amber-500 text-black font-bold rounded hover:bg-amber-400 transition-colors flex-shrink-0"
+            >
               Complete Profile
             </Link>
           </div>

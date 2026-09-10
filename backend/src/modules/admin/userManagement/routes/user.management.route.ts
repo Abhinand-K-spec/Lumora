@@ -9,18 +9,27 @@ import { userRole } from "../../../../shared/enums/UserRole.js";
 const router = Router();
 
 const userRepository = new UserRepository();
-const userManagementService = new UserManagementService(
-    userRepository
-);
+const userManagementService = new UserManagementService(userRepository);
 
-const userManagementController = new UserManagementController(userManagementService);
+const userManagementController = new UserManagementController(
+  userManagementService,
+);
 
 // Secure all admin user management routes
 router.use(authenticate);
 router.use(authorize(userRole.ADMIN));
 
-router.get('/users', userManagementController.getUsers.bind(userManagementController));
-router.patch('/users/:id/status', userManagementController.changeStatus.bind(userManagementController));
-router.delete('/users/:id/delete', userManagementController.delete.bind(userManagementController));
+router.get(
+  "/users",
+  userManagementController.getUsers.bind(userManagementController),
+);
+router.patch(
+  "/users/:id/status",
+  userManagementController.changeStatus.bind(userManagementController),
+);
+router.delete(
+  "/users/:id/delete",
+  userManagementController.delete.bind(userManagementController),
+);
 
 export default router;

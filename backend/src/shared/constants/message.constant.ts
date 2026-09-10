@@ -94,6 +94,31 @@ export const PHOTOGRAPHER_MESSAGES = {
   USER_ID_REQUIRED: COMMON_MESSAGES.USER_ID_REQUIRED,
 } as const;
 
+export const APPROVAL_MESSAGES = {
+  // Submission
+  APPROVAL_REQUESTED:
+    "Verification request submitted successfully. Our team will review your profile.",
+  APPROVAL_HISTORY_FETCHED: "Approval history fetched successfully.",
+  // Validation errors
+  INSTAGRAM_URL_REQUIRED:
+    "Instagram profile URL is required before requesting verification.",
+  BIO_REQUIRED: "Please add a bio before requesting verification.",
+  LOCATION_REQUIRED: "Please add your location before requesting verification.",
+  PHONE_REQUIRED: "Please add a phone number before requesting verification.",
+  PENDING_REQUEST_EXISTS:
+    "You already have a pending verification request. Please wait for it to be reviewed.",
+  // Admin actions
+  REQUESTS_FETCHED: "Verification requests fetched successfully.",
+  METRICS_FETCHED: "Dashboard metrics fetched successfully.",
+  REQUEST_NOT_FOUND: "Verification request not found.",
+  REQUEST_APPROVED: "Photographer application approved successfully.",
+  REQUEST_REJECTED: "Photographer application rejected.",
+  REJECTION_REASON_REQUIRED:
+    "A rejection reason must be provided when rejecting an application.",
+  REQUEST_ALREADY_REVIEWED: "This request has already been reviewed.",
+  REQUEST_ID_REQUIRED: "Request ID is required.",
+} as const;
+
 export const MESSAGES = {
   COMMON: COMMON_MESSAGES,
   AUTH: AUTH_MESSAGES,

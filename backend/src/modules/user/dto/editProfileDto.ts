@@ -1,5 +1,5 @@
-export interface editProfileDto{
-    name?:string,
-    phone?:string,
-    profilePhoto?:string
+export interface editProfileDto {
+  name?: string;
+  phone?: string;
+  profilePhoto?: string;
 }

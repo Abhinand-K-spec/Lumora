@@ -5,7 +5,7 @@ import { accountStatus } from "../enums/accountStatus.js";
 import { HttpStatus } from "../enums/HTTP.status.code.js";
 import { AUTH_MESSAGES } from "../constants/message.constant.js";
 import Users from "../models/users.model.js";
-import type{IUsers}from '../../shared/interfaces/IUsers.js';
+import type { IUsers } from "../../shared/interfaces/IUsers.js";
 
 const tokenService = new TokenService();
 
@@ -22,14 +22,11 @@ export const authenticate = async (
     }
 
     const decoded = tokenService.verifyAccessToken(token);
-    let user: IUsers|null = null;
+    let user: IUsers | null = null;
 
     req.user = decoded;
 
-
     user = await Users.findById(req.user.id);
-
-
 
     if (!user) {
       throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.USER_NOT_FOUND);

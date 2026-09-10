@@ -3,8 +3,8 @@ import type { IAdmin } from "../interfaces/IAdmin.js";
 
 const adminSchema = new Schema<IAdmin>(
   {
-    userId:{
-      type:String,
+    userId: {
+      type: String,
     },
   },
   {

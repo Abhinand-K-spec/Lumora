@@ -17,11 +17,23 @@ const userService = new UserService(userRepository, userProfileRepository);
 
 const userController = new UserController(userService);
 
+router.get(
+  "/profile",
+  authenticate,
+  userController.getProfile.bind(userController),
+);
+router.patch(
+  "/profile",
+  authenticate,
+  userController.editProfile.bind(userController),
+);
 
-
-router.get('/profile',authenticate,userController.getProfile.bind(userController));
-router.patch('/profile',authenticate,userController.editProfile.bind(userController));
-
-router.post('/profile/upload',authenticate,uploadProfilePhoto.single('photo'),uploadToCloudinaryMiddleware('profile_photos'),userController.uploadProfilePhoto.bind(userController));
+router.post(
+  "/profile/upload",
+  authenticate,
+  uploadProfilePhoto.single("photo"),
+  uploadToCloudinaryMiddleware("profile_photos"),
+  userController.uploadProfilePhoto.bind(userController),
+);
 
 export default router;

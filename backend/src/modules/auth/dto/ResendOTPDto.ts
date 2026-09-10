@@ -1,3 +1,3 @@
 export interface ResendOtpDto {
-    email: string;
+  email: string;
 }

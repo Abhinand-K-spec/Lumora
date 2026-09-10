@@ -28,11 +28,11 @@ export interface GetUsersParams {
 
 const adminUserService = {
   getUsers: async (
-    params?: GetUsersParams
+    params?: GetUsersParams,
   ): Promise<ApiResponse<PaginatedUsersResponse>> => {
     const response = await api.get<ApiResponse<PaginatedUsersResponse>>(
       "/admin/userManagement/users",
-      { params }
+      { params },
     );
     return response.data;
   },

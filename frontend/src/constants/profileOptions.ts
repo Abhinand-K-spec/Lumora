@@ -10,7 +10,7 @@ export const DISTRICTS = [
   "Kannur",
   "Palakkad",
   "Kottayam",
-  "Idukki"
+  "Idukki",
 ];
 
 export const SERVICES = [
@@ -22,5 +22,5 @@ export const SERVICES = [
   "Event",
   "Commercial",
   "Cinematic",
-  "Modern"
+  "Modern",
 ];

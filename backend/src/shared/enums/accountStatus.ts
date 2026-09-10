@@ -1,5 +1,5 @@
-export enum accountStatus{
-    Active= 'ACTIVE',
-    Suspended = 'SUSPENDED',
-    Deleted = 'DELETED'
+export enum accountStatus {
+  Active = "ACTIVE",
+  Suspended = "SUSPENDED",
+  Deleted = "DELETED",
 }

@@ -35,7 +35,7 @@ export class AuthController {
     if (!refreshToken) {
       throw new AppError(
         HttpStatus.UNAUTHORIZED,
-        AUTH_MESSAGES.INVALID_REFRESH_TOKEN
+        AUTH_MESSAGES.INVALID_REFRESH_TOKEN,
       );
     }
 
@@ -101,7 +101,7 @@ export class AuthController {
     if (typeof code !== "string") {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        AUTH_MESSAGES.GOOGLE_AUTH_CODE_REQUIRED
+        AUTH_MESSAGES.GOOGLE_AUTH_CODE_REQUIRED,
       );
     }
 

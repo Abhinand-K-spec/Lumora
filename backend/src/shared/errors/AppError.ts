@@ -2,7 +2,7 @@ export class AppError extends Error {
   constructor(
     public statusCode: number,
     message: string,
-    public readonly isOperational: boolean = true
+    public readonly isOperational: boolean = true,
   ) {
     super(message);
 

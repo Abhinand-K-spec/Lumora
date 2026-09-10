@@ -1,8 +1,5 @@
-export const verificationEmail = (
-    name: string,
-    otp: string
-): string => {
-    return `
+export const verificationEmail = (name: string, otp: string): string => {
+  return `
         <div style="font-family: Arial, Helvetica, sans-serif; background-color: #f5f5f5; padding: 40px;">
             <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 

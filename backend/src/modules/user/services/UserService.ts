@@ -12,7 +12,7 @@ import type { IUser } from "../../../shared/interfaces/IUser.js";
 export class UserService implements IUserService {
   constructor(
     private readonly _userRepository: IUserRepository,
-    private readonly _userProfileRepository: IUserProfileRepository
+    private readonly _userProfileRepository: IUserProfileRepository,
   ) {}
 
   async getProfile(userId: string): Promise<profileResponseDto> {
@@ -33,7 +33,7 @@ export class UserService implements IUserService {
 
   async editProfile(
     userId: string,
-    data: editProfileDto
+    data: editProfileDto,
   ): Promise<profileResponseDto> {
     let user = await this._userRepository.findById(userId);
 
@@ -42,7 +42,7 @@ export class UserService implements IUserService {
       throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
     }
 
-    if (data.name!==undefined) {
+    if (data.name !== undefined) {
       user = await this._userRepository.update(userId, { name: data.name });
     }
 
@@ -56,7 +56,6 @@ export class UserService implements IUserService {
         phone: phone || "",
         profilePhoto: profilePhoto || "",
       });
-
     } else if (hasChanges) {
       const profileData: Partial<IUser> = {};
 
@@ -70,7 +69,7 @@ export class UserService implements IUserService {
 
       profile = await this._userProfileRepository.update(
         profile._id.toString(),
-        profileData
+        profileData,
       );
     }
 

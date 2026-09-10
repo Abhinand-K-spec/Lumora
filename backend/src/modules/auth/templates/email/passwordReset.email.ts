@@ -1,8 +1,5 @@
-export const passwordResetEmail = (
-    name: string,
-    otp: string
-): string => {
-    return `
+export const passwordResetEmail = (name: string, otp: string): string => {
+  return `
     <!DOCTYPE html>
     <html lang="en">
     <head>

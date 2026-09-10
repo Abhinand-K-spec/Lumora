@@ -1,12 +1,16 @@
 import type { editPhotographerProfileDto } from "../dto/editPhotographerProfileDto";
 import type { photographerProfileResponseDto } from "../dto/photographerProfileResponseDto";
-import type { PaginationParams,PaginatedResult } from "../../../shared/types/pagination.types";
+import type {
+  PaginationParams,
+  PaginatedResult,
+} from "../../../shared/types/pagination.types";
+import type { IPhotographerApprovalRequest } from "../../../shared/interfaces/IPhotographerApprovalRequest";
 
 export interface IPhotographerService {
   getProfile(userId: string): Promise<photographerProfileResponseDto>;
   editProfile(
     userId: string,
-    data: editPhotographerProfileDto
+    data: editPhotographerProfileDto,
   ): Promise<photographerProfileResponseDto>;
   getPhotographers(
     filters: {
@@ -16,7 +20,7 @@ export interface IPhotographerService {
       price?: string | undefined;
       sortBy?: string | undefined;
     },
-    pagination: PaginationParams
+    pagination: PaginationParams,
   ): Promise<PaginatedResult<photographerProfileResponseDto>>;
   addPackage(
     userId: string,
@@ -29,7 +33,7 @@ export interface IPhotographerService {
       albumIncluded: boolean;
       status: string;
       videographersIncluded: boolean;
-    }
+    },
   ): Promise<photographerProfileResponseDto>;
   editPackage(
     userId: string,
@@ -43,10 +47,12 @@ export interface IPhotographerService {
       albumIncluded: boolean;
       status: string;
       videographersIncluded: boolean;
-    }
+    },
   ): Promise<photographerProfileResponseDto>;
   deletePackage(
     userId: string,
-    packageId: string
+    packageId: string,
   ): Promise<photographerProfileResponseDto>;
+  requestApproval(userId: string): Promise<IPhotographerApprovalRequest>;
+  getApprovalHistory(userId: string): Promise<IPhotographerApprovalRequest[]>;
 }

@@ -4,7 +4,7 @@ export const errorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (res.headersSent) {
     return next(err);
@@ -28,7 +28,10 @@ export const errorHandler = (
     statusCode = 409;
     const field = Object.keys(err.keyValue || {})[0];
     message = `${field || "Field"} already exists`;
-  } else if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+  } else if (
+    err.name === "JsonWebTokenError" ||
+    err.name === "TokenExpiredError"
+  ) {
     statusCode = 401;
     message = "Invalid or expired token";
   } else if (!isOperational) {

@@ -11,7 +11,6 @@ const PhotographerSubscription = ({
 }: PhotographerSubscriptionProps) => {
   return (
     <div className="bg-[#0f1012] border border-border/20 rounded-xl p-6.5 select-none">
-      
       {/* Title */}
       <h3 className="font-heading text-lg font-semibold text-text tracking-wide mb-4">
         Subscription Plan
@@ -19,7 +18,6 @@ const PhotographerSubscription = ({
 
       {/* Subscription details */}
       <div className="space-y-3.5">
-        
         {/* Row 1 */}
         <div className="flex items-center justify-between text-xs pb-2.5 border-b border-border/10">
           <span className="text-text-secondary">Current Plan</span>
@@ -37,14 +35,12 @@ const PhotographerSubscription = ({
           <span className="text-text-secondary">Next Renewal</span>
           <span className="font-semibold text-text">{nextRenewal}</span>
         </div>
-
       </div>
 
       {/* Manage Plan Button */}
       <button className="w-full mt-6 py-2.5 bg-transparent border border-primary text-primary hover:bg-primary/5 active:scale-[0.99] transition font-bold text-xs rounded-lg cursor-pointer">
         MANAGE PLAN
       </button>
-
     </div>
   );
 };

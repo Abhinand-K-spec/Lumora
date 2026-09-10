@@ -22,7 +22,7 @@ export class UserManagementService implements IUserManagementService {
       sortField?: string | undefined;
       sortOrder?: "asc" | "desc" | undefined;
     },
-    pagination: PaginationParams
+    pagination: PaginationParams,
   ): Promise<PaginatedUsersResult> {
     const query: any = {
       role: userRole.USER,
@@ -42,8 +42,8 @@ export class UserManagementService implements IUserManagementService {
       filters.sortField === "email"
         ? "email"
         : filters.sortField === "name"
-        ? "name"
-        : "createdAt";
+          ? "name"
+          : "createdAt";
     const sortOrder: 1 | -1 = filters.sortOrder === "desc" ? -1 : 1;
     const sort: Record<string, 1 | -1> = { [sortField]: sortOrder };
 
