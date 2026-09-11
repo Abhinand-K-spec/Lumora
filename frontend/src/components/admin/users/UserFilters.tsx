@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 interface UserFiltersProps {
   statusValue: string;
   onStatusChange: (status: string) => void;
@@ -13,6 +15,16 @@ const UserFilters = ({
   onSearchChange,
   totalCount,
 }: UserFiltersProps) => {
+  const [localSearch,setLocalSearch] = useState(searchValue);
+
+  useEffect(()=>{
+    const timer = setTimeout(()=>{
+      onSearchChange(localSearch)
+    },500)
+    return(()=>{
+      clearTimeout(timer);
+    })
+  },[localSearch,onSearchChange]);
   return (
     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border border-border/40 bg-[#121214]/20 rounded-lg px-6 py-3.5 shadow-sm">
       {/* Left: Status Pills */}
@@ -67,8 +79,8 @@ const UserFilters = ({
         <div className="relative w-full">
           <input
             type="text"
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
             placeholder="Search name..."
             className="w-full bg-transparent text-text text-sm py-1.5 outline-none placeholder:text-text-secondary/60 focus:border-b focus:border-primary/40 transition-colors"
           />
