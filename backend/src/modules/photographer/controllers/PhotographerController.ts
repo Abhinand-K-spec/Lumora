@@ -263,4 +263,27 @@ export class PhotographerController {
     const history = await this._photographerService.getApprovalHistory(userId);
     sendSuccess(res, { history }, "Approval history fetched successfully.");
   }
+
+  async updateServiceAreas(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+  
+    if (!userId) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        COMMON_MESSAGES.UNAUTHORIZED,
+      );
+    }
+  
+    const updatedProfile =
+      await this._photographerService.updateServiceAreas(
+        userId,
+        req.body.serviceAreas,
+      );
+  
+    sendSuccess(
+      res,
+      { photographer: updatedProfile },
+      PHOTOGRAPHER_MESSAGES.PROFILE_UPDATED,
+    );
+  }
 }

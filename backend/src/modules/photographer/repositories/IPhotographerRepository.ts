@@ -1,4 +1,4 @@
-import type { IPhotographer } from "../../../shared/interfaces/IPhotographer.js";
+import type { IPhotographer, IServiceArea } from "../../../shared/interfaces/IPhotographer.js";
 
 export interface IPhotographerRepository {
   create(photographer: Partial<IPhotographer>): Promise<IPhotographer>;
@@ -21,4 +21,5 @@ export interface IPhotographerRepository {
     limit: number,
     sort?: Record<string, 1 | -1>,
   ): Promise<[IPhotographer[], number]>;
+  updateServiceAreas(userId:string,serviceAreas:IServiceArea[],):Promise<IPhotographer|null>;
 }

@@ -1,6 +1,40 @@
 import { Schema, model } from "mongoose";
 import type { IPhotographer } from "../interfaces/IPhotographer.js";
 
+
+const serviceAreaSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    center: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        required: true,
+      },
+
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
+    },
+
+    radiusKm: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 200,
+    },
+  },
+  {
+    _id: true,
+  }
+);
+
 const photographerSchema = new Schema<IPhotographer>(
   {
     phone: {
@@ -43,6 +77,10 @@ const photographerSchema = new Schema<IPhotographer>(
       type: [String],
       default: [],
     },
+    serviceAreas:{
+      type:[serviceAreaSchema],
+      default:[]
+    },
     startingPrice: {
       type: Number,
       default: 0,
@@ -71,6 +109,10 @@ const photographerSchema = new Schema<IPhotographer>(
     timestamps: true,
   },
 );
+
+photographerSchema.index({
+  "serviceAreas.center": "2dsphere",
+});
 
 const Photographer = model<IPhotographer>("Photographer", photographerSchema);
 export default Photographer;

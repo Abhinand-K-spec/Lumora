@@ -5,6 +5,7 @@ import type {
   PaginatedResult,
 } from "../../../shared/types/pagination.types";
 import type { IPhotographerApprovalRequest } from "../../../shared/interfaces/IPhotographerApprovalRequest";
+import type { IPhotographer, IServiceArea } from "../../../shared/interfaces/IPhotographer";
 
 export interface IPhotographerService {
   getProfile(userId: string): Promise<photographerProfileResponseDto>;
@@ -55,4 +56,8 @@ export interface IPhotographerService {
   ): Promise<photographerProfileResponseDto>;
   requestApproval(userId: string): Promise<IPhotographerApprovalRequest>;
   getApprovalHistory(userId: string): Promise<IPhotographerApprovalRequest[]>;
+  updateServiceAreas(
+    userId: string,
+    serviceAreas: IServiceArea[],
+  ): Promise<IPhotographer>;
 }

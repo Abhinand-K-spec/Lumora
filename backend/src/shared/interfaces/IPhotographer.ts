@@ -14,7 +14,7 @@ export interface IPhotographer {
   specialities?: string[];
   equipment?: string[];
   serviceRegions?: string[];
-  ServiceArea? :IServiceArea[];
+  serviceAreas? :IServiceArea[];
   updatedAt: Date;
   createdAt: Date;
   phone: string;

@@ -1,5 +1,5 @@
 import Photographer from "../../../shared/models/photographer.model.js";
-import type { IPhotographer } from "../../../shared/interfaces/IPhotographer.js";
+import type { IPhotographer, IServiceArea } from "../../../shared/interfaces/IPhotographer.js";
 import type { IPhotographerRepository } from "./IPhotographerRepository.js";
 
 export class PhotographerRepository implements IPhotographerRepository {
@@ -60,5 +60,12 @@ export class PhotographerRepository implements IPhotographerRepository {
       Photographer.countDocuments(filter).exec(),
     ]);
     return [photographers, total];
+  }
+  async updateServiceAreas(userId: string, serviceAreas: IServiceArea[]): Promise<IPhotographer | null> {
+    return await Photographer.findOneAndUpdate(
+      {userId},
+      {$set:{serviceAreas}},
+      {new:true},
+    )
   }
 }

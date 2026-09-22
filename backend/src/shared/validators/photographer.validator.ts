@@ -97,3 +97,46 @@ export const reviewApprovalRequestSchema = z
       path: ["rejectionReason"],
     },
   );
+
+
+  const geoPointSchema = z.object({
+    type: z.literal("Point"),
+
+    coordinates: z
+    .tuple([z.number(), z.number()])
+    .refine(
+      ([longitude]) => longitude >= -180 && longitude <= 180,
+      "Longitude must be between -180 and 180",
+    )
+    .refine(
+      ([, latitude]) => latitude >= -90 && latitude <= 90,
+      "Latitude must be between -90 and 90",
+    ),
+  });
+  
+  export const updateServiceAreasSchema = z.object({
+    serviceAreas: z
+      .array(
+        z.object({
+          name: z
+            .string()
+            .trim()
+            .min(2, "Service area name must be at least 2 characters")
+            .max(100, "Service area name cannot exceed 100 characters"),
+  
+          center: geoPointSchema,
+  
+          radiusKm: z
+            .number()
+            .min(1, "Radius must be at least 1 km")
+            .max(200, "Radius cannot exceed 200 km"),
+        }),
+      )
+      .max(10, "Maximum 10 service areas allowed"),
+  });
+
+
+
+  export type UpdateServiceAreasInput = z.infer<
+  typeof updateServiceAreasSchema
+>;
