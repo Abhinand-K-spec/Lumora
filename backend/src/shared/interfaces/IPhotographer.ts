@@ -14,6 +14,7 @@ export interface IPhotographer {
   specialities?: string[];
   equipment?: string[];
   serviceRegions?: string[];
+  ServiceArea? :IServiceArea[];
   updatedAt: Date;
   createdAt: Date;
   phone: string;
@@ -22,4 +23,17 @@ export interface IPhotographer {
   approvalStatus: PhotographerApprovalStatus;
   approvedAt?: Date;
   rejectionReason?: string;
+}
+
+export interface IGeoPoint{
+  type:'point';
+  coordinates:[number,number];
+}
+
+
+export interface IServiceArea{
+  _id:Types.ObjectId | string;
+  name:string;
+  center:IGeoPoint;
+  radiusKe:number;
 }
