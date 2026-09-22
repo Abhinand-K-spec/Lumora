@@ -1,7 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
 import { AppError } from "../errors/AppError.js";
-export const errorHandler = (
-  err: any,
+import { HttpStatus } from "../enums/HTTP.status.code.js";
+import {
+  isMongooseCastError,
+  isMongoDuplicateError,
+  isJwtError } from '../errors/error.gaurds.js';
+  
+  
+  export const errorHandler = (
+  err: unknown,
   req: Request,
   res: Response,
   next: NextFunction,
@@ -11,36 +18,55 @@ export const errorHandler = (
   }
 
   console.error("Error:", err);
-  let statusCode = err.statusCode || 500;
-  let message = err.message || "Internal server error";
 
-  const isOperational = err instanceof AppError || err.isOperational === true;
-
-  if (err.name === "CastError") {
-    statusCode = 400;
-    message = `Invalid format for ${err.path || "field"}`;
-  } else if (err.name === "ValidationError" && err.errors) {
-    statusCode = 400;
-    message = Object.values(err.errors)
-      .map((val: any) => val.message)
-      .join(", ");
-  } else if (err.code === 11000) {
-    statusCode = 409;
-    const field = Object.keys(err.keyValue || {})[0];
-    message = `${field || "Field"} already exists`;
-  } else if (
-    err.name === "JsonWebTokenError" ||
-    err.name === "TokenExpiredError"
-  ) {
-    statusCode = 401;
-    message = "Invalid or expired token";
-  } else if (!isOperational) {
-    message = "Internal server error";
+  // 1. Application error
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+    });
   }
 
-  return res.status(statusCode).json({
+  // 2. Mongoose CastError
+  if (isMongooseCastError(err)) {
+    return res.status(HttpStatus.BAD_REQUEST).json({
+      success: false,
+      message: `Invalid format for ${err.path ?? "field"}`,
+    });
+  }
+
+
+
+
+  // 4. Mongo duplicate key
+  if (isMongoDuplicateError(err)) {
+    const field = Object.keys(err.keyValue ?? {})[0];
+
+    return res.status(HttpStatus.CONFLICT).json({
+      success: false,
+      message: `${field ?? "Field"} already exists`,
+    });
+  }
+
+  // 5. JWT error
+  if (isJwtError(err)) {
+    return res.status(HttpStatus.UNAUTHORIZED).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
+
+  // 6. Generic Error
+  if (err instanceof Error) {
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+
+  // 7. Completely unknown value
+  return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
     success: false,
-    message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    message: "Internal Server Error",
   });
 };
