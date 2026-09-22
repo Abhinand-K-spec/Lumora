@@ -35,5 +35,5 @@ export interface IServiceArea{
   _id:Types.ObjectId | string;
   name:string;
   center:IGeoPoint;
-  radiusKe:number;
+  radiusKm:number;
 }
