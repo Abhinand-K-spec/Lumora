@@ -70,11 +70,6 @@ export const editPhotographerProfileSchema = z.object({
     .array(z.string().trim().min(2).max(60))
     .max(20, "Maximum 20 equipment items allowed")
     .optional(),
-
-  serviceRegions: z
-    .array(z.string().trim().min(2))
-    .max(20, "Maximum 20 service regions allowed")
-    .optional(),
 });
 
 export const reviewApprovalRequestSchema = z
@@ -118,14 +113,15 @@ export const reviewApprovalRequestSchema = z
     serviceAreas: z
       .array(
         z.object({
+          _id: z.string().optional(),
           name: z
             .string()
             .trim()
             .min(2, "Service area name must be at least 2 characters")
             .max(100, "Service area name cannot exceed 100 characters"),
-  
+
           center: geoPointSchema,
-  
+
           radiusKm: z
             .number()
             .min(1, "Radius must be at least 1 km")

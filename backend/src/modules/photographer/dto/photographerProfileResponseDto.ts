@@ -1,5 +1,8 @@
 import type { IPackage } from "../../../shared/interfaces/IPackage.js";
-import type { PhotographerApprovalStatus } from "../../../shared/interfaces/IPhotographer.js";
+import type {
+  PhotographerApprovalStatus,
+  IServiceArea,
+} from "../../../shared/interfaces/IPhotographer.js";
 
 export interface photographerProfileResponseDto {
   id: string;
@@ -13,7 +16,7 @@ export interface photographerProfileResponseDto {
   languages: string[];
   specialities: string[];
   equipment: string[];
-  serviceRegions: string[];
+  serviceAreas?: IServiceArea[];
   packages: IPackage[];
   instagramUrl?: string;
   approvalStatus: PhotographerApprovalStatus;

@@ -87,11 +87,6 @@ export const photographerEditSchema = z.object({
     )
     .max(20, "You can add up to 20 gear items")
     .default([]),
-
-  serviceRegions: z
-    .array(z.string().trim().min(2))
-    .max(20, "You can add up to 20 service regions")
-    .default([]),
 });
 
 export type PhotographerEditFormData = z.infer<typeof photographerEditSchema>;

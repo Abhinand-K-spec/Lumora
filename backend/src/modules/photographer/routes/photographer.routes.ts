@@ -39,7 +39,13 @@ router.patch(
   "/profile",
   authenticate,
   validate(editPhotographerProfileSchema),
-  photographerController.editProfile.bind(photographerController)
+  photographerController.editProfile.bind(photographerController),
+);
+router.put(
+  "/profile/service-areas",
+  authenticate,
+  validate(updateServiceAreasSchema),
+  photographerController.updateServiceAreas.bind(photographerController),
 );
 
 // Verification approval routes
@@ -91,15 +97,7 @@ router.delete(
 router.get(
   "/:userId",
   authenticate,
-  photographerController.getPhotographerById.bind(photographerController)
-);
-
-// Service area updation
-router.put(
-  "/profile/service-areas",
-  authenticate,
-  validate(updateServiceAreasSchema),
-  photographerController.updateServiceAreas.bind(photographerController)
+  photographerController.getPhotographerById.bind(photographerController),
 );
 
 export default router;

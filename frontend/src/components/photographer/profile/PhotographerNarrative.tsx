@@ -1,8 +1,10 @@
+import type { IServiceArea } from "../../../types/serviceArea";
+
 interface PhotographerNarrativeProps {
   visionStatement: string;
   basedIn: string;
   languages: string[];
-  serviceRegions?: string[];
+  serviceAreas?: IServiceArea[];
   phone?: string;
 }
 
@@ -10,7 +12,7 @@ const PhotographerNarrative = ({
   visionStatement,
   basedIn,
   languages = [],
-  serviceRegions = [],
+  serviceAreas = [],
   phone,
 }: PhotographerNarrativeProps) => {
   const displayVision =
@@ -22,8 +24,8 @@ const PhotographerNarrative = ({
       ? languages.join(", ")
       : "Not set (Click 'Edit Profile' to add)";
   const displayRegions =
-    serviceRegions && serviceRegions.length > 0
-      ? serviceRegions.join(", ")
+    serviceAreas && serviceAreas.length > 0
+      ? serviceAreas.map((a) => a.name).join(", ")
       : "Not set (Click 'Edit Profile' to add)";
   const displayPhone = phone || "Not set (Click 'Edit Profile' to add)";
 

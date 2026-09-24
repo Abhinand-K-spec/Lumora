@@ -1,6 +1,7 @@
 import api from "../api/axios";
 import type { ApiResponse } from "../types/api";
 import type { UserProfile } from "../types/profile";
+import type { IServiceArea } from "../types/serviceArea";
 
 export type PhotographerApprovalStatus =
   "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
@@ -37,7 +38,7 @@ export interface PhotographerProfile extends UserProfile {
   languages?: string[];
   specialities?: string[];
   equipment?: string[];
-  serviceRegions?: string[];
+  serviceAreas?: IServiceArea[];
   packages?: PackageItem[];
   experienceYears?: number;
   rating?: number;
@@ -60,7 +61,6 @@ export interface UpdatePhotographerRequest {
   languages?: string[];
   specialities?: string[];
   equipment?: string[];
-  serviceRegions?: string[];
   instagramUrl?: string;
 }
 
@@ -200,6 +200,15 @@ const photographerService = {
     const response = await api.get<ApiResponse<{ history: ApprovalRequest[] }>>(
       "/photographer/approval-requests",
     );
+    return response.data;
+  },
+
+  updateServiceAreas: async (
+    serviceAreas: IServiceArea[],
+  ): Promise<ApiResponse<{ photographer: PhotographerProfile }>> => {
+    const response = await api.put<
+      ApiResponse<{ photographer: PhotographerProfile }>
+    >("/photographer/profile/service-areas", { serviceAreas });
     return response.data;
   },
 };

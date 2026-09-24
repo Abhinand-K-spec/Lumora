@@ -13,8 +13,7 @@ export interface IPhotographer {
   languages?: string[];
   specialities?: string[];
   equipment?: string[];
-  serviceRegions?: string[];
-  serviceAreas? :IServiceArea[];
+  serviceAreas?: IServiceArea[];
   updatedAt: Date;
   createdAt: Date;
   phone: string;
@@ -25,15 +24,14 @@ export interface IPhotographer {
   rejectionReason?: string;
 }
 
-export interface IGeoPoint{
-  type:'point';
-  coordinates:[number,number];
+export interface IGeoPoint {
+  type: "Point";
+  coordinates: [number, number];
 }
 
-
-export interface IServiceArea{
-  _id:Types.ObjectId | string;
-  name:string;
-  center:IGeoPoint;
-  radiusKm:number;
+export interface IServiceArea {
+  _id?: Types.ObjectId | string;
+  name: string;
+  center: IGeoPoint;
+  radiusKm: number;
 }

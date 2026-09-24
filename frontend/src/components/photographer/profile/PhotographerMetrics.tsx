@@ -1,3 +1,5 @@
+import type { IServiceArea } from "../../../types/serviceArea";
+
 interface MetricCardProps {
   label: string;
   value: string;
@@ -36,7 +38,7 @@ interface PhotographerMetricsProps {
   bookingsThisMonth: number;
   experienceYears: number;
   completionRate: number;
-  serviceRegions: string[];
+  serviceAreas: IServiceArea[];
 }
 
 const PhotographerMetrics = ({
@@ -44,7 +46,7 @@ const PhotographerMetrics = ({
   bookingsThisMonth = 12,
   experienceYears = 8,
   completionRate = 98,
-  serviceRegions = ["Kerala", "UAE"],
+  serviceAreas = [],
 }: PhotographerMetricsProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-8 mt-4 select-none">
@@ -69,16 +71,12 @@ const PhotographerMetrics = ({
       />
 
       <MetricCard
-        label="Service Region"
-        value={
-          serviceRegions && serviceRegions.length > 0
-            ? serviceRegions[0]
-            : "Not Specified"
-        }
+        label="Service Areas"
+        value={serviceAreas.length > 0 ? String(serviceAreas.length) : "—"}
         subValue={
-          serviceRegions && serviceRegions.length > 1
-            ? `& ${serviceRegions.slice(1).join(", ")}`
-            : ""
+          serviceAreas.length > 0
+            ? serviceAreas.map((a) => a.name).slice(0, 2).join(", ")
+            : "No service areas set"
         }
       />
     </div>

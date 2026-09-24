@@ -59,5 +59,5 @@ export interface IPhotographerService {
   updateServiceAreas(
     userId: string,
     serviceAreas: IServiceArea[],
-  ): Promise<IPhotographer>;
+  ): Promise<photographerProfileResponseDto>;
 }

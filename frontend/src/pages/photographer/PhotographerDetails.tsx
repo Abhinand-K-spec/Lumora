@@ -18,6 +18,7 @@ import photographerService, {
   type PhotographerProfile,
   type PackageItem,
 } from "../../services/photographerService";
+import type { IServiceArea } from "../../types/serviceArea";
 
 // Curated default photographer details in case DB profile lacks information
 const MOCK_PROFILE = {
@@ -38,7 +39,7 @@ const MOCK_PROFILE = {
     "At Lumora Studio, we believe photography is more than just capturing images; it's about preserving the rhythm of a heartbeat. Our signature \"Golden Hour\" style blends traditional warmth with modern editorial precision. We don't just attend your events—we curate your legacy through frames that feel like stills from a classic film.",
   equipmentSummary: "Dual Sony Alpha a7R V, Zeiss Optics",
   deliverySummary: "30-45 Day Turnaround Guaranteed",
-  serviceRegions: ["Pan-India", "Kochi"],
+  serviceAreas: [] as IServiceArea[],
   packages: [
     {
       packageName: "Essential",
@@ -215,10 +216,10 @@ const PhotographerDetails = () => {
                 ? pg.equipment.join(", ")
                 : MOCK_PROFILE.equipmentSummary,
             deliverySummary: MOCK_PROFILE.deliverySummary,
-            serviceRegions:
-              pg.serviceRegions && pg.serviceRegions.length > 0
-                ? pg.serviceRegions
-                : MOCK_PROFILE.serviceRegions,
+            serviceAreas:
+              pg.serviceAreas && pg.serviceAreas.length > 0
+                ? pg.serviceAreas
+                : MOCK_PROFILE.serviceAreas,
             packages: dbPackages,
             gallery: MOCK_PROFILE.gallery, // Gallery falls back to our beautiful curated photoshoot list
             original: pg,
@@ -498,8 +499,9 @@ const PhotographerDetails = () => {
               <div className="z-10 bg-[#070708]/90 border border-white/5 py-2.5 px-4 rounded-xl flex items-center justify-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-xs text-gray-300 font-medium">
-                  Serving {profile.serviceRegions.join(", ")}, based in{" "}
-                  {profile.location}
+                  {profile.serviceAreas && profile.serviceAreas.length > 0
+                    ? `Serving ${profile.serviceAreas.map((a) => a.name).join(", ")}, based in ${profile.location}`
+                    : `Based in ${profile.location}`}
                 </span>
               </div>
             </div>

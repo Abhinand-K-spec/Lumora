@@ -16,7 +16,6 @@ interface PhotographerEditModalProps {
     location: string;
     languages: string[];
     equipment: string[];
-    serviceRegions?: string[];
     instagramUrl?: string;
   };
   onSave: (updatedData: {
@@ -27,7 +26,6 @@ interface PhotographerEditModalProps {
     location: string;
     languages: string[];
     equipment: string[];
-    serviceRegions?: string[];
     instagramUrl?: string;
   }) => void;
 }
@@ -54,14 +52,10 @@ const PhotographerEditModal = ({
   const [equipment, setEquipment] = useState<string[]>([
     ...profileData.equipment,
   ]);
-  const [serviceRegions, setServiceRegions] = useState<string[]>([
-    ...(profileData.serviceRegions || []),
-  ]);
 
   const [newSpeciality, setNewSpeciality] = useState("");
   const [newLanguage, setNewLanguage] = useState("");
   const [newGear, setNewGear] = useState("");
-  const [newRegion, setNewRegion] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [tagErrors, setTagErrors] = useState<Record<string, string>>({});
@@ -76,7 +70,6 @@ const PhotographerEditModal = ({
     setSpecialities([...profileData.specialities]);
     setLanguages([...profileData.languages]);
     setEquipment([...profileData.equipment]);
-    setServiceRegions([...(profileData.serviceRegions || [])]);
     setErrors({});
     setTagErrors({});
   }, [profileData, isOpen]);
@@ -105,7 +98,6 @@ const PhotographerEditModal = ({
       specialities,
       languages,
       equipment,
-      serviceRegions,
     };
 
     const validationResult = photographerEditSchema.safeParse(formData);
@@ -133,37 +125,8 @@ const PhotographerEditModal = ({
       specialities,
       languages,
       equipment,
-      serviceRegions,
     });
     onClose();
-  };
-
-  const addRegion = () => {
-    setTagErrors((prev) => ({ ...prev, region: "" }));
-    const trimmed = newRegion.trim();
-    if (!trimmed) return;
-
-    if (serviceRegions.includes(trimmed)) {
-      setTagErrors((prev) => ({
-        ...prev,
-        region: "Service area is already added",
-      }));
-      return;
-    }
-    if (serviceRegions.length >= 20) {
-      setTagErrors((prev) => ({
-        ...prev,
-        region: "Maximum 20 service areas allowed",
-      }));
-      return;
-    }
-
-    setServiceRegions([...serviceRegions, trimmed]);
-    setNewRegion("");
-  };
-
-  const removeRegion = (item: string) => {
-    setServiceRegions(serviceRegions.filter((r) => r !== item));
   };
 
   const addSpeciality = () => {
@@ -440,62 +403,6 @@ const PhotographerEditModal = ({
             )}
           </div>
 
-          {/* Service Areas */}
-          <div>
-            <label className="block text-[10px] text-text-secondary font-bold uppercase tracking-widest mb-2">
-              Service Areas / Regions ({serviceRegions.length}/20)
-            </label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {serviceRegions.map((region) => (
-                <span
-                  key={region}
-                  className="inline-flex items-center gap-1 text-[10px] font-semibold bg-neutral-950 text-text border border-border/20 px-2 py-0.5 rounded"
-                >
-                  {region}
-                  <button
-                    type="button"
-                    onClick={() => removeRegion(region)}
-                    className="text-text-secondary hover:text-red-400 font-bold ml-1 cursor-pointer"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              <select
-                value={newRegion}
-                onChange={(e) => {
-                  setNewRegion(e.target.value);
-                  setTagErrors((prev) => ({ ...prev, region: "" }));
-                }}
-                className="flex-1 bg-neutral-950 border border-border/20 rounded-lg px-3 py-2 text-xs text-text outline-none cursor-pointer focus:border-primary/50 transition"
-              >
-                <option value="">Select Service Area...</option>
-                {DISTRICTS.filter((d) => !serviceRegions.includes(d)).map(
-                  (d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ),
-                )}
-              </select>
-              <button
-                type="button"
-                onClick={addRegion}
-                disabled={!newRegion}
-                className="px-4 py-2 bg-neutral-950 hover:bg-neutral-900 border border-border/20 disabled:opacity-50 disabled:hover:bg-neutral-950 text-text font-bold text-xs rounded-lg transition cursor-pointer"
-              >
-                Add
-              </button>
-            </div>
-            {tagErrors.region && (
-              <p className="text-[10px] text-red-400 mt-1.5 flex items-center gap-1">
-                <AlertCircle size={12} /> {tagErrors.region}
-              </p>
-            )}
-          </div>
 
           {/* Narrative statement (Bio) */}
           <div>

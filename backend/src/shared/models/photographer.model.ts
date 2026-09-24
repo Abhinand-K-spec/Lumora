@@ -73,13 +73,9 @@ const photographerSchema = new Schema<IPhotographer>(
       type: [String],
       default: [],
     },
-    serviceRegions: {
-      type: [String],
+    serviceAreas: {
+      type: [serviceAreaSchema],
       default: [],
-    },
-    serviceAreas:{
-      type:[serviceAreaSchema],
-      default:[]
     },
     startingPrice: {
       type: Number,

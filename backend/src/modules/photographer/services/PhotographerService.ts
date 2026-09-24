@@ -195,7 +195,6 @@ export class PhotographerService implements IPhotographerService {
         languages: data.languages || [],
         specialities: data.specialities || [],
         equipment: data.equipment || [],
-        serviceRegions: data.serviceRegions || [],
       });
       if (data.phone) {
         await this._userRepository.update(userId, { phone: data.phone });
@@ -217,8 +216,6 @@ export class PhotographerService implements IPhotographerService {
       if (data.specialities !== undefined)
         profileData.specialities = data.specialities;
       if (data.equipment !== undefined) profileData.equipment = data.equipment;
-      if (data.serviceRegions !== undefined)
-        profileData.serviceRegions = data.serviceRegions;
       if (data.instagramUrl !== undefined)
         profileData.instagramUrl = data.instagramUrl;
 
@@ -267,7 +264,6 @@ export class PhotographerService implements IPhotographerService {
         languages: [],
         specialities: [],
         equipment: [],
-        serviceRegions: [],
       });
     }
 
@@ -472,30 +468,43 @@ export class PhotographerService implements IPhotographerService {
 
   async updateServiceAreas(
     userId: string,
-    serviceAreas: IServiceArea[]
-  ): Promise<IPhotographer> {
+    serviceAreas: IServiceArea[],
+  ): Promise<photographerProfileResponseDto> {
+    const user = await this._userRepository.findById(userId);
+    if (!user) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    }
+
     const photographer =
       await this._photographerRepository.findByUserId(userId);
 
     if (!photographer) {
       throw new AppError(
         HttpStatus.NOT_FOUND,
-        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND,
       );
     }
 
     const updatedPhotographer =
       await this._photographerRepository.updateServiceAreas(
         userId,
-        serviceAreas
+        serviceAreas,
       );
     if (!updatedPhotographer) {
       throw new AppError(
         HttpStatus.INTERNAL_SERVER_ERROR,
-        COMMON_MESSAGES.INTERNAL_SERVER_ERROR
+        COMMON_MESSAGES.INTERNAL_SERVER_ERROR,
       );
     }
 
-    return updatedPhotographer;
+    const packages = await this._packageRepository.findByPhotographerId(
+      updatedPhotographer._id.toString(),
+    );
+
+    return photographerProfileMapper.toProfileResponse(
+      user,
+      updatedPhotographer,
+      packages,
+    );
   }
 }

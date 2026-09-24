@@ -9,6 +9,9 @@ import { ShieldCheck, Clock, AlertTriangle, Loader2 } from "lucide-react";
 import { InstagramIcon } from "../../components/common/InstagramIcon";
 
 // Subcomponent Imports
+import type { IServiceArea } from "../../types/serviceArea";
+import PhotographerServiceAreas from "../../components/photographer/profile/PhotographerServiceAreas";
+import ServiceAreaModal from "../../components/photographer/profile/ServiceAreaModal";
 import PhotographerHero from "../../components/photographer/profile/PhotographerHero";
 import PhotographerMetrics from "../../components/photographer/profile/PhotographerMetrics";
 import PhotographerNarrative from "../../components/photographer/profile/PhotographerNarrative";
@@ -39,7 +42,7 @@ const PhotographerProfile = () => {
     bookingsThisMonth: number;
     experienceYears: number;
     completionRate: number;
-    serviceRegions: string[];
+    serviceAreas: IServiceArea[];
     packages: PackageItem[];
     instagramUrl: string;
     approvalStatus: PhotographerApprovalStatus;
@@ -62,7 +65,7 @@ const PhotographerProfile = () => {
     bookingsThisMonth: 12,
     experienceYears: 8,
     completionRate: 98,
-    serviceRegions: ["Kerala", "UAE"],
+    serviceAreas: [],
     packages: [],
     instagramUrl: "",
     approvalStatus: "DRAFT",
@@ -76,6 +79,9 @@ const PhotographerProfile = () => {
     null,
   );
   const [isRequestingApproval, setIsRequestingApproval] = useState(false);
+  const [isServiceAreaModalOpen, setIsServiceAreaModalOpen] = useState(false);
+  const [editingServiceArea, setEditingServiceArea] =
+    useState<IServiceArea | null>(null);
 
   // Sync profile details if DB returns any
   useEffect(() => {
@@ -100,7 +106,7 @@ const PhotographerProfile = () => {
             languages: dbData.languages || prev.languages,
             specialities: dbData.specialities || prev.specialities,
             equipment: dbData.equipment || prev.equipment,
-            serviceRegions: dbData.serviceRegions || prev.serviceRegions,
+            serviceAreas: dbData.serviceAreas || [],
             packages: dbData.packages || prev.packages,
             instagramUrl: dbData.instagramUrl || prev.instagramUrl,
             approvalStatus: dbData.approvalStatus || prev.approvalStatus,
@@ -125,7 +131,6 @@ const PhotographerProfile = () => {
     location: string;
     languages: string[];
     equipment: string[];
-    serviceRegions?: string[];
     phone?: string;
     profilePhoto?: string;
     coverPhoto?: string;
@@ -167,10 +172,6 @@ const PhotographerProfile = () => {
           updatedData.equipment !== undefined
             ? updatedData.equipment
             : profile.equipment,
-        serviceRegions:
-          updatedData.serviceRegions !== undefined
-            ? updatedData.serviceRegions
-            : profile.serviceRegions,
         instagramUrl: updatedData.instagramUrl,
       });
 
@@ -315,6 +316,79 @@ const PhotographerProfile = () => {
     }
   };
 
+  const handleAddServiceAreaClick = () => {
+    setEditingServiceArea(null);
+    setIsServiceAreaModalOpen(true);
+  };
+
+  const handleEditServiceAreaClick = (area: IServiceArea) => {
+    setEditingServiceArea(area);
+    setIsServiceAreaModalOpen(true);
+  };
+
+  const handleSaveServiceArea = async (areaData: {
+    _id?: string;
+    name: string;
+    center: { type: "Point"; coordinates: [number, number] };
+    radiusKm: number;
+  }) => {
+    try {
+      let updatedAreas: IServiceArea[];
+      if (editingServiceArea) {
+        updatedAreas = (profile.serviceAreas || []).map((area) =>
+          (editingServiceArea._id && area._id === editingServiceArea._id) ||
+            (!editingServiceArea._id && area.name === editingServiceArea.name)
+            ? { ...area, ...areaData }
+            : area,
+        );
+      } else {
+        updatedAreas = [...(profile.serviceAreas || []), areaData];
+      }
+
+      const res = await photographerService.updateServiceAreas(updatedAreas);
+      if (res.data && res.data.photographer) {
+        setProfile((prev) => ({
+          ...prev,
+          serviceAreas: res.data.photographer.serviceAreas || [],
+        }));
+        toast.success(
+          editingServiceArea
+            ? "Service area updated successfully."
+            : "Service area added successfully.",
+        );
+      }
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || "Failed to update service areas.",
+      );
+    }
+  };
+
+  const handleDeleteServiceArea = async (areaToDelete: IServiceArea) => {
+    if (!window.confirm(`Are you sure you want to remove "${areaToDelete.name}"?`)) {
+      return;
+    }
+    try {
+      const updatedAreas = (profile.serviceAreas || []).filter((area) =>
+        areaToDelete._id
+          ? area._id !== areaToDelete._id
+          : area.name !== areaToDelete.name,
+      );
+      const res = await photographerService.updateServiceAreas(updatedAreas);
+      if (res.data && res.data.photographer) {
+        setProfile((prev) => ({
+          ...prev,
+          serviceAreas: res.data.photographer.serviceAreas || [],
+        }));
+        toast.success("Service area removed successfully.");
+      }
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || "Failed to delete service area.",
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-text flex flex-col justify-between font-body">
       {/* Container */}
@@ -448,7 +522,7 @@ const PhotographerProfile = () => {
           bookingsThisMonth={profile.bookingsThisMonth}
           experienceYears={profile.experienceYears}
           completionRate={profile.completionRate}
-          serviceRegions={profile.serviceRegions}
+          serviceAreas={profile.serviceAreas}
         />
 
         {/* 4. Main Two Column Grid */}
@@ -459,7 +533,7 @@ const PhotographerProfile = () => {
               visionStatement={profile.bio}
               basedIn={profile.location}
               languages={profile.languages}
-              serviceRegions={profile.serviceRegions}
+              serviceAreas={profile.serviceAreas}
               phone={profile.phone}
             />
 
@@ -467,48 +541,54 @@ const PhotographerProfile = () => {
               gearList={
                 profile.equipment && profile.equipment.length > 0
                   ? profile.equipment.map((item, index) => {
-                      const lower = item.toLowerCase();
-                      let category: string;
-                      let iconName: "camera" | "stabilizer" | "drone";
-                      if (lower.includes("drone") || lower.includes("dji")) {
-                        category = "Aerial Drone";
-                        iconName = "drone";
-                      } else if (
-                        lower.includes("stabilizer") ||
-                        lower.includes("ronin") ||
-                        lower.includes("gimbal")
-                      ) {
-                        category = "Stabilizer";
-                        iconName = "stabilizer";
-                      } else if (lower.includes("lens")) {
-                        category = "Lens";
-                        iconName = "camera";
-                      } else {
-                        category = "Camera Body";
-                        iconName = "camera";
-                      }
+                    const lower = item.toLowerCase();
+                    let category: string;
+                    let iconName: "camera" | "stabilizer" | "drone";
+                    if (lower.includes("drone") || lower.includes("dji")) {
+                      category = "Aerial Drone";
+                      iconName = "drone";
+                    } else if (
+                      lower.includes("stabilizer") ||
+                      lower.includes("ronin") ||
+                      lower.includes("gimbal")
+                    ) {
+                      category = "Stabilizer";
+                      iconName = "stabilizer";
+                    } else if (lower.includes("lens")) {
+                      category = "Lens";
+                      iconName = "camera";
+                    } else {
+                      category = "Camera Body";
+                      iconName = "camera";
+                    }
 
-                      return {
-                        id: `g-${index}`,
-                        name: item,
-                        category: category,
-                        description:
-                          "Professional grade equipment listed by the photographer.",
-                        iconName: iconName,
-                      };
-                    })
+                    return {
+                      id: `g-${index}`,
+                      name: item,
+                      category: category,
+                      description:
+                        "Professional grade equipment listed by the photographer.",
+                      iconName: iconName,
+                    };
+                  })
                   : []
               }
             />
           </div>
 
-          {/* Right Column: Packages & Subscription */}
+          {/* Right Column: Packages, Service Areas & Subscription */}
           <div className="space-y-6.5 flex flex-col">
             <PhotographerServices
               packages={profile.packages}
               onAddClick={handleAddPackageClick}
               onEditClick={handleEditPackageClick}
               onDeleteClick={handleDeletePackage}
+            />
+            <PhotographerServiceAreas
+              serviceAreas={profile.serviceAreas}
+              onAddClick={handleAddServiceAreaClick}
+              onEditClick={handleEditServiceAreaClick}
+              onDeleteClick={handleDeleteServiceArea}
             />
             <PhotographerSubscription />
           </div>
@@ -550,7 +630,6 @@ const PhotographerProfile = () => {
           location: profile.location,
           languages: profile.languages,
           equipment: profile.equipment,
-          serviceRegions: profile.serviceRegions,
           instagramUrl: profile.instagramUrl,
         }}
         onSave={handleSaveProfile}
@@ -562,6 +641,14 @@ const PhotographerProfile = () => {
         onClose={() => setIsPackageModalOpen(false)}
         packageData={editingPackage}
         onSave={handleSavePackage}
+      />
+
+      {/* 9. Service Area Modal */}
+      <ServiceAreaModal
+        isOpen={isServiceAreaModalOpen}
+        onClose={() => setIsServiceAreaModalOpen(false)}
+        areaData={editingServiceArea}
+        onSave={handleSaveServiceArea}
       />
     </div>
   );

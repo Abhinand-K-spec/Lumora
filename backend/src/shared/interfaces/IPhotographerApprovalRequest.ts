@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import type { IPackage } from "./IPackage.js";
+import type { IServiceArea } from "./IPhotographer.js";
 
 export type ApprovalRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -22,7 +23,7 @@ export interface PopulatedPhotographerData {
   languages?: string[];
   specialities?: string[];
   equipment?: string[];
-  serviceRegions?: string[];
+  serviceAreas?: IServiceArea[];
   instagramUrl?: string;
   approvalStatus: string;
   startingPrice?: number;

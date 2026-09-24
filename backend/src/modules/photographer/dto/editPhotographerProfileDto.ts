@@ -8,6 +8,5 @@ export interface editPhotographerProfileDto {
   languages?: string[];
   specialities?: string[];
   equipment?: string[];
-  serviceRegions?: string[];
   instagramUrl?: string;
 }

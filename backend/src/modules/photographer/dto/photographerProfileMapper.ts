@@ -21,7 +21,7 @@ export class photographerProfileMapper {
       languages: profile.languages || [],
       specialities: profile.specialities || [],
       equipment: profile.equipment || [],
-      serviceRegions: profile.serviceRegions || [],
+      serviceAreas: profile.serviceAreas || [],
       packages: packages,
       approvalStatus: profile.approvalStatus || "DRAFT",
     };

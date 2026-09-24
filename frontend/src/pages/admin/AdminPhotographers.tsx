@@ -402,7 +402,7 @@ const AdminPhotographers = () => {
       toast.success("Application approved successfully!");
       await fetchRequests();
       await fetchMetrics();
-    } catch (err) {
+    } catch (err: any) {
       toast.error(
         err?.response?.data?.message || "Failed to approve application.",
       );
@@ -423,7 +423,7 @@ const AdminPhotographers = () => {
       setRejectTarget(null);
       await fetchRequests();
       await fetchMetrics();
-    } catch (err) {
+    } catch (err: any) {
       toast.error(
         err?.response?.data?.message || "Failed to reject application.",
       );
