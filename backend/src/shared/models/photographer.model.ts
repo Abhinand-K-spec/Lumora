@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
 import type { IPhotographer } from "../interfaces/IPhotographer.js";
 
-
 const serviceAreaSchema = new Schema(
   {
     name: {
@@ -32,7 +31,7 @@ const serviceAreaSchema = new Schema(
   },
   {
     _id: true,
-  }
+  },
 );
 
 const photographerSchema = new Schema<IPhotographer>(

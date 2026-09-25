@@ -30,7 +30,7 @@ export class PhotographerService implements IPhotographerService {
     private readonly _userRepository: IUserRepository,
     private readonly _photographerRepository: IPhotographerRepository,
     private readonly _packageRepository: IPackageRepository,
-    private readonly _approvalRequestRepository: IPhotographerApprovalRequestRepository
+    private readonly _approvalRequestRepository: IPhotographerApprovalRequestRepository,
   ) {}
 
   async getProfile(userId: string): Promise<photographerProfileResponseDto> {
@@ -44,12 +44,12 @@ export class PhotographerService implements IPhotographerService {
     if (!profile) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND,
       );
     }
 
     const packages = await this._packageRepository.findByPhotographerId(
-      profile._id.toString()
+      profile._id.toString(),
     );
     return photographerProfileMapper.toProfileResponse(user, profile, packages);
   }
@@ -62,7 +62,7 @@ export class PhotographerService implements IPhotographerService {
       price?: string | undefined;
       sortBy?: string | undefined;
     },
-    pagination: PaginationParams
+    pagination: PaginationParams,
   ): Promise<PaginatedResult<photographerProfileResponseDto>> {
     const query: any = { approvalStatus: "APPROVED" };
     const page = Math.max(1, pagination?.page || 1);
@@ -125,7 +125,7 @@ export class PhotographerService implements IPhotographerService {
       const matchingPhotographerIds =
         await this._packageRepository.findPhotographerIdsByPriceRange(
           minPrice,
-          maxPrice
+          maxPrice,
         );
 
       if (query._id) {
@@ -149,7 +149,7 @@ export class PhotographerService implements IPhotographerService {
         query,
         skip,
         limit,
-        sortCriteria
+        sortCriteria,
       );
 
     // 6. Map to DTOs and lazily sync startingPrice for unindexed profiles
@@ -158,13 +158,13 @@ export class PhotographerService implements IPhotographerService {
       const user = await this._userRepository.findById(pg.userId);
       if (user) {
         const packages = await this._packageRepository.findByPhotographerId(
-          pg._id.toString()
+          pg._id.toString(),
         );
         if (pg.startingPrice === undefined || pg.startingPrice === 0) {
           this._syncStartingPrice(pg._id.toString(), packages);
         }
         dtos.push(
-          photographerProfileMapper.toProfileResponse(user, pg, packages)
+          photographerProfileMapper.toProfileResponse(user, pg, packages),
         );
       }
     }
@@ -182,7 +182,7 @@ export class PhotographerService implements IPhotographerService {
 
   async editProfile(
     userId: string,
-    data: editPhotographerProfileDto
+    data: editPhotographerProfileDto,
   ): Promise<photographerProfileResponseDto> {
     let user = await this._userRepository.findById(userId);
     if (!user) {
@@ -232,16 +232,16 @@ export class PhotographerService implements IPhotographerService {
 
       profile = await this._photographerRepository.update(
         profile._id.toString(),
-        profileData
+        profileData,
       );
     }
     const packages = await this._packageRepository.findByPhotographerId(
-      profile!._id.toString()
+      profile!._id.toString(),
     );
     return photographerProfileMapper.toProfileResponse(
       user!,
       profile!,
-      packages
+      packages,
     );
   }
 
@@ -256,7 +256,7 @@ export class PhotographerService implements IPhotographerService {
       albumIncluded: boolean;
       status: string;
       videographersIncluded: boolean;
-    }
+    },
   ): Promise<photographerProfileResponseDto> {
     const user = await this._userRepository.findById(userId);
     if (!user) {
@@ -291,7 +291,7 @@ export class PhotographerService implements IPhotographerService {
     });
 
     const packages = await this._packageRepository.findByPhotographerId(
-      profile._id.toString()
+      profile._id.toString(),
     );
     await this._syncStartingPrice(profile._id.toString(), packages);
     return photographerProfileMapper.toProfileResponse(user, profile, packages);
@@ -309,7 +309,7 @@ export class PhotographerService implements IPhotographerService {
       albumIncluded: boolean;
       status: string;
       videographersIncluded: boolean;
-    }
+    },
   ): Promise<photographerProfileResponseDto> {
     const user = await this._userRepository.findById(userId);
     if (!user) {
@@ -320,7 +320,7 @@ export class PhotographerService implements IPhotographerService {
     if (!profile) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND,
       );
     }
 
@@ -328,7 +328,7 @@ export class PhotographerService implements IPhotographerService {
     if (!pkg || pkg.photographerId.toString() !== profile._id.toString()) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.PACKAGE_NOT_FOUND
+        PHOTOGRAPHER_MESSAGES.PACKAGE_NOT_FOUND,
       );
     }
 
@@ -344,7 +344,7 @@ export class PhotographerService implements IPhotographerService {
     });
 
     const packages = await this._packageRepository.findByPhotographerId(
-      profile._id.toString()
+      profile._id.toString(),
     );
     await this._syncStartingPrice(profile._id.toString(), packages);
     return photographerProfileMapper.toProfileResponse(user, profile, packages);
@@ -352,7 +352,7 @@ export class PhotographerService implements IPhotographerService {
 
   async deletePackage(
     userId: string,
-    packageId: string
+    packageId: string,
   ): Promise<photographerProfileResponseDto> {
     const user = await this._userRepository.findById(userId);
     if (!user) {
@@ -363,7 +363,7 @@ export class PhotographerService implements IPhotographerService {
     if (!profile) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND,
       );
     }
 
@@ -371,14 +371,14 @@ export class PhotographerService implements IPhotographerService {
     if (!pkg || pkg.photographerId.toString() !== profile._id.toString()) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.PACKAGE_NOT_FOUND
+        PHOTOGRAPHER_MESSAGES.PACKAGE_NOT_FOUND,
       );
     }
 
     await this._packageRepository.delete(packageId);
 
     const packages = await this._packageRepository.findByPhotographerId(
-      profile._id.toString()
+      profile._id.toString(),
     );
     await this._syncStartingPrice(profile._id.toString(), packages);
     return photographerProfileMapper.toProfileResponse(user, profile, packages);
@@ -389,7 +389,7 @@ export class PhotographerService implements IPhotographerService {
     if (!profile) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND,
       );
     }
 
@@ -397,37 +397,37 @@ export class PhotographerService implements IPhotographerService {
     if (!profile.instagramUrl) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        APPROVAL_MESSAGES.INSTAGRAM_URL_REQUIRED
+        APPROVAL_MESSAGES.INSTAGRAM_URL_REQUIRED,
       );
     }
     if (!profile.bio) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        APPROVAL_MESSAGES.BIO_REQUIRED
+        APPROVAL_MESSAGES.BIO_REQUIRED,
       );
     }
     if (!profile.location) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        APPROVAL_MESSAGES.LOCATION_REQUIRED
+        APPROVAL_MESSAGES.LOCATION_REQUIRED,
       );
     }
     if (!profile.phone) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        APPROVAL_MESSAGES.PHONE_REQUIRED
+        APPROVAL_MESSAGES.PHONE_REQUIRED,
       );
     }
 
     // Guard: only one pending request at a time
     const existing =
       await this._approvalRequestRepository.findPendingByPhotographerId(
-        profile._id.toString()
+        profile._id.toString(),
       );
     if (existing) {
       throw new AppError(
         HttpStatus.CONFLICT,
-        APPROVAL_MESSAGES.PENDING_REQUEST_EXISTS
+        APPROVAL_MESSAGES.PENDING_REQUEST_EXISTS,
       );
     }
 
@@ -447,23 +447,23 @@ export class PhotographerService implements IPhotographerService {
   }
 
   async getApprovalHistory(
-    userId: string
+    userId: string,
   ): Promise<IPhotographerApprovalRequest[]> {
     const profile = await this._photographerRepository.findByUserId(userId);
     if (!profile) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND
+        PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND,
       );
     }
     return this._approvalRequestRepository.findByPhotographerId(
-      profile._id.toString()
+      profile._id.toString(),
     );
   }
 
   private async _syncStartingPrice(
     photographerId: string,
-    packages?: IPackage[]
+    packages?: IPackage[],
   ): Promise<number> {
     const pkgs =
       packages ||

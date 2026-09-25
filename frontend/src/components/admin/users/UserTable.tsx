@@ -117,7 +117,9 @@ const UserTable = ({
           <div className="flex items-center justify-end">
             <UserActions
               status={user.accountStatus}
-              onChangeStatus={(newStatus) => onChangeStatus(user._id, newStatus)}
+              onChangeStatus={(newStatus) =>
+                onChangeStatus(user._id, newStatus)
+              }
               onDelete={() => onDelete(user)}
               disabled={disabled}
             />

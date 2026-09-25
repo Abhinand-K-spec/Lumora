@@ -5,7 +5,10 @@ import type {
   PaginatedResult,
 } from "../../../shared/types/pagination.types";
 import type { IPhotographerApprovalRequest } from "../../../shared/interfaces/IPhotographerApprovalRequest";
-import type { IPhotographer, IServiceArea } from "../../../shared/interfaces/IPhotographer";
+import type {
+  IPhotographer,
+  IServiceArea,
+} from "../../../shared/interfaces/IPhotographer";
 
 export interface IPhotographerService {
   getProfile(userId: string): Promise<photographerProfileResponseDto>;

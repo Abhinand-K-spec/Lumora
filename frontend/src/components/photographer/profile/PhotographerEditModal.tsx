@@ -403,7 +403,6 @@ const PhotographerEditModal = ({
             )}
           </div>
 
-
           {/* Narrative statement (Bio) */}
           <div>
             <div className="flex items-center justify-between mb-2">

@@ -337,7 +337,7 @@ const PhotographerProfile = () => {
       if (editingServiceArea) {
         updatedAreas = (profile.serviceAreas || []).map((area) =>
           (editingServiceArea._id && area._id === editingServiceArea._id) ||
-            (!editingServiceArea._id && area.name === editingServiceArea.name)
+          (!editingServiceArea._id && area.name === editingServiceArea.name)
             ? { ...area, ...areaData }
             : area,
         );
@@ -365,7 +365,9 @@ const PhotographerProfile = () => {
   };
 
   const handleDeleteServiceArea = async (areaToDelete: IServiceArea) => {
-    if (!window.confirm(`Are you sure you want to remove "${areaToDelete.name}"?`)) {
+    if (
+      !window.confirm(`Are you sure you want to remove "${areaToDelete.name}"?`)
+    ) {
       return;
     }
     try {
@@ -541,36 +543,36 @@ const PhotographerProfile = () => {
               gearList={
                 profile.equipment && profile.equipment.length > 0
                   ? profile.equipment.map((item, index) => {
-                    const lower = item.toLowerCase();
-                    let category: string;
-                    let iconName: "camera" | "stabilizer" | "drone";
-                    if (lower.includes("drone") || lower.includes("dji")) {
-                      category = "Aerial Drone";
-                      iconName = "drone";
-                    } else if (
-                      lower.includes("stabilizer") ||
-                      lower.includes("ronin") ||
-                      lower.includes("gimbal")
-                    ) {
-                      category = "Stabilizer";
-                      iconName = "stabilizer";
-                    } else if (lower.includes("lens")) {
-                      category = "Lens";
-                      iconName = "camera";
-                    } else {
-                      category = "Camera Body";
-                      iconName = "camera";
-                    }
+                      const lower = item.toLowerCase();
+                      let category: string;
+                      let iconName: "camera" | "stabilizer" | "drone";
+                      if (lower.includes("drone") || lower.includes("dji")) {
+                        category = "Aerial Drone";
+                        iconName = "drone";
+                      } else if (
+                        lower.includes("stabilizer") ||
+                        lower.includes("ronin") ||
+                        lower.includes("gimbal")
+                      ) {
+                        category = "Stabilizer";
+                        iconName = "stabilizer";
+                      } else if (lower.includes("lens")) {
+                        category = "Lens";
+                        iconName = "camera";
+                      } else {
+                        category = "Camera Body";
+                        iconName = "camera";
+                      }
 
-                    return {
-                      id: `g-${index}`,
-                      name: item,
-                      category: category,
-                      description:
-                        "Professional grade equipment listed by the photographer.",
-                      iconName: iconName,
-                    };
-                  })
+                      return {
+                        id: `g-${index}`,
+                        name: item,
+                        category: category,
+                        description:
+                          "Professional grade equipment listed by the photographer.",
+                        iconName: iconName,
+                      };
+                    })
                   : []
               }
             />

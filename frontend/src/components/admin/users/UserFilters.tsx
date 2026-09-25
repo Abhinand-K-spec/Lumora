@@ -15,16 +15,16 @@ const UserFilters = ({
   onSearchChange,
   totalCount,
 }: UserFiltersProps) => {
-  const [localSearch,setLocalSearch] = useState(searchValue);
+  const [localSearch, setLocalSearch] = useState(searchValue);
 
-  useEffect(()=>{
-    const timer = setTimeout(()=>{
-      onSearchChange(localSearch)
-    },500)
-    return(()=>{
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onSearchChange(localSearch);
+    }, 500);
+    return () => {
       clearTimeout(timer);
-    })
-  },[localSearch,onSearchChange]);
+    };
+  }, [localSearch, onSearchChange]);
   return (
     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border border-border/40 bg-[#121214]/20 rounded-lg px-6 py-3.5 shadow-sm">
       {/* Left: Status Pills */}

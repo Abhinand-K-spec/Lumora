@@ -75,7 +75,10 @@ const PhotographerMetrics = ({
         value={serviceAreas.length > 0 ? String(serviceAreas.length) : "—"}
         subValue={
           serviceAreas.length > 0
-            ? serviceAreas.map((a) => a.name).slice(0, 2).join(", ")
+            ? serviceAreas
+                .map((a) => a.name)
+                .slice(0, 2)
+                .join(", ")
             : "No service areas set"
         }
       />

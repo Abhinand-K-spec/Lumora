@@ -172,7 +172,9 @@ export function Table<T>({
                 <td colSpan={columns.length} className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center justify-center gap-3 text-text-secondary">
                     <Loader2 size={24} className="animate-spin text-primary" />
-                    <span className="text-xs font-medium">{loadingMessage}</span>
+                    <span className="text-xs font-medium">
+                      {loadingMessage}
+                    </span>
                   </div>
                 </td>
               </tr>

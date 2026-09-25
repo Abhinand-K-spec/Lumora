@@ -4,10 +4,10 @@ import { HttpStatus } from "../enums/HTTP.status.code.js";
 import {
   isMongooseCastError,
   isMongoDuplicateError,
-  isJwtError } from '../errors/error.gaurds.js';
-  
-  
-  export const errorHandler = (
+  isJwtError,
+} from "../errors/error.gaurds.js";
+
+export const errorHandler = (
   err: unknown,
   req: Request,
   res: Response,
@@ -34,9 +34,6 @@ import {
       message: `Invalid format for ${err.path ?? "field"}`,
     });
   }
-
-
-
 
   // 4. Mongo duplicate key
   if (isMongoDuplicateError(err)) {

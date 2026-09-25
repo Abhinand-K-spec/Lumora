@@ -111,35 +111,31 @@ const ServiceAreaModal = ({
   }, [areaData, isOpen]);
 
   // Reverse geocoding helper
-  const reverseGeocode = useCallback(
-    async (lng: number, lat: number) => {
-      if (!MAPBOX_TOKEN) return;
-      setIsReverseGeocoding(true);
-      try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&types=locality,place,district,neighborhood&limit=1`,
-        );
-        const data = await res.json();
-        if (data.features && data.features.length > 0) {
-          const place = data.features[0].place_name;
-          setName(place);
-          setSearchQuery(place);
-        }
-      } catch (err) {
-        console.error("Reverse geocoding error:", err);
-      } finally {
-        setIsReverseGeocoding(false);
+  const reverseGeocode = useCallback(async (lng: number, lat: number) => {
+    if (!MAPBOX_TOKEN) return;
+    setIsReverseGeocoding(true);
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&types=locality,place,district,neighborhood&limit=1`,
+      );
+      const data = await res.json();
+      if (data.features && data.features.length > 0) {
+        const place = data.features[0].place_name;
+        setName(place);
+        setSearchQuery(place);
       }
-    },
-    [],
-  );
+    } catch (err) {
+      console.error("Reverse geocoding error:", err);
+    } finally {
+      setIsReverseGeocoding(false);
+    }
+  }, []);
 
   // Update or add circle layer to map
   const updateMapCircle = useCallback(
     (map: mapboxgl.Map, center: [number, number], radius: number) => {
-      const source = map.getSource(
-        "service-area-circle",
-      ) as mapboxgl.GeoJSONSource | undefined;
+      const source = map.getSource("service-area-circle") as
+        mapboxgl.GeoJSONSource | undefined;
       const circleData = createGeoJSONCircle(center, radius);
 
       if (source) {
@@ -180,10 +176,10 @@ const ServiceAreaModal = ({
     if (!isOpen || !mapContainerRef.current) return;
 
     const initialCenter = areaData
-      ? ([
-          areaData.center.coordinates[0],
-          areaData.center.coordinates[1],
-        ] as [number, number])
+      ? ([areaData.center.coordinates[0], areaData.center.coordinates[1]] as [
+          number,
+          number,
+        ])
       : ([76.2711, 10.8505] as [number, number]);
 
     const initialRadius = areaData ? areaData.radiusKm : 30;
@@ -460,7 +456,9 @@ const ServiceAreaModal = ({
 
             {/* Quick preset chips */}
             <div className="flex items-center gap-2 pt-1">
-              <span className="text-[10px] text-text-secondary mr-1">Presets:</span>
+              <span className="text-[10px] text-text-secondary mr-1">
+                Presets:
+              </span>
               {[15, 30, 50, 75, 100].map((preset) => (
                 <button
                   key={preset}

@@ -98,7 +98,8 @@ const PhotographerServiceAreas = ({
               No service areas configured yet
             </p>
             <p className="text-[11px] text-text-secondary/70 mt-1 max-w-xs">
-              Add your coverage zones with an interactive map and radius to help local clients find you.
+              Add your coverage zones with an interactive map and radius to help
+              local clients find you.
             </p>
             <button
               onClick={onAddClick}

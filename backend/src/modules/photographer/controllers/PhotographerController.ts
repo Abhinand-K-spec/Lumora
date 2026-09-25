@@ -266,20 +266,16 @@ export class PhotographerController {
 
   async updateServiceAreas(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
-  
+
     if (!userId) {
-      throw new AppError(
-        HttpStatus.UNAUTHORIZED,
-        COMMON_MESSAGES.UNAUTHORIZED,
-      );
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
     }
-  
-    const updatedProfile =
-      await this._photographerService.updateServiceAreas(
-        userId,
-        req.body.serviceAreas,
-      );
-  
+
+    const updatedProfile = await this._photographerService.updateServiceAreas(
+      userId,
+      req.body.serviceAreas,
+    );
+
     sendSuccess(
       res,
       { photographer: updatedProfile },
