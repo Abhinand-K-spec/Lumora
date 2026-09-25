@@ -25,10 +25,10 @@ const SERVICES = ["All Services", ...BASE_SERVICES];
 
 const PRICE_TIERS = [
   { label: "All Pricing", value: "" },
-  { label: "₹ (Budget)", value: "₹" },
-  { label: "₹₹ (Standard)", value: "₹₹" },
-  { label: "₹₹₹ (Premium)", value: "₹₹₹" },
-  { label: "₹₹₹₹ (Elite)", value: "₹₹₹₹" },
+  { label: "₹5K – ₹10K", value: "5k-10k" },
+  { label: "₹10K – ₹30K", value: "10k-30k" },
+  { label: "₹30K – ₹50K", value: "30k-50k" },
+  { label: "₹50K+", value: "50k+" },
 ];
 
 const FALLBACK_COVERS = [

@@ -99,7 +99,18 @@ export class PhotographerService implements IPhotographerService {
       let minPrice = 0;
       let maxPrice = Infinity;
 
-      if (filters.price === "₹") {
+      if (filters.price === "5k-10k") {
+        minPrice = 5000;
+        maxPrice = 10000;
+      } else if (filters.price === "10k-30k") {
+        minPrice = 10000;
+        maxPrice = 30000;
+      } else if (filters.price === "30k-50k") {
+        minPrice = 30000;
+        maxPrice = 50000;
+      } else if (filters.price === "50k+") {
+        minPrice = 50000;
+      } else if (filters.price === "₹") {
         maxPrice = 15000;
       } else if (filters.price === "₹₹") {
         minPrice = 15000;
