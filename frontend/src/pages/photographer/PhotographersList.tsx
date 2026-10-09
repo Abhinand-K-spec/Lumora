@@ -15,11 +15,9 @@ import photographerService, {
 import { toast } from "sonner";
 import { TOAST_MESSAGES } from "../../constants/messages";
 import {
-  DISTRICTS as BASE_DISTRICTS,
   SERVICES as BASE_SERVICES,
 } from "../../constants/profileOptions";
-
-const DISTRICTS = ["All Districts", ...BASE_DISTRICTS];
+import LocationPickerModal from "../../components/common/LocationPickerModal";
 
 const SERVICES = ["All Services", ...BASE_SERVICES];
 
@@ -64,17 +62,30 @@ const PhotographersList = () => {
 
   // Filters State
   const [search, setSearch] = useState("");
-  const [district, setDistrict] = useState("");
   const [service, setService] = useState("");
   const [price, setPrice] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<{
+    name: string;
+    coordinates: [number, number];
+  } | null>(null);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   // Visual filter state applied on backend search
-  const [activeFilters, setActiveFilters] = useState({
+  const [activeFilters, setActiveFilters] = useState<{
+    search: string;
+    service: string;
+    price: string;
+    location: {
+      name: string;
+      coordinates: [number, number];
+    } | null;
+  }>({
     search: "",
-    district: "",
     service: "",
     price: "",
+    location: null,
   });
+  
 
   // Sorting & Toggles
   const [topRatedOnly, setTopRatedOnly] = useState(false);
@@ -93,18 +104,20 @@ const PhotographersList = () => {
         setLoading(true);
         const params: {
           search?: string;
-          district?: string;
           service?: string;
           price?: string;
+          lng?:number;
+          lat?:number;
           sortBy?: string;
           page?: number;
           limit?: number;
         } = {
           page: currentPage,
           limit: itemsPerPage,
+          lng: activeFilters.location?.coordinates[0],
+          lat: activeFilters.location?.coordinates[1],
         };
         if (activeFilters.search) params.search = activeFilters.search;
-        if (activeFilters.district) params.district = activeFilters.district;
         if (activeFilters.service) params.service = activeFilters.service;
         if (activeFilters.price) params.price = activeFilters.price;
         if (sortBy) params.sortBy = sortBy;
@@ -130,9 +143,9 @@ const PhotographersList = () => {
     if (e) e.preventDefault();
     setActiveFilters({
       search,
-      district,
       service,
       price,
+      location:selectedLocation
     });
     setCurrentPage(1);
   };
@@ -200,28 +213,23 @@ const PhotographersList = () => {
             </div>
           </div>
 
-          {/* District Select */}
+          {/* Location Selector */}
           <div className="sm:col-span-2 space-y-1">
             <label className="block text-[9px] text-primary font-bold uppercase tracking-widest">
-              District
+              Location
             </label>
-            <div className="relative">
-              <select
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                className="w-full appearance-none bg-neutral-950/80 border border-border/20 rounded-lg pl-3 pr-8 py-1.5 text-[11px] text-text outline-none focus:border-primary/50 transition cursor-pointer h-9"
-              >
-                {DISTRICTS.map((d) => (
-                  <option key={d} value={d === "All Districts" ? "" : d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
-                size={12}
-              />
-            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsLocationModalOpen(true)}
+              className="w-full bg-neutral-950/80 border border-border/20 rounded-lg px-3 py-1.5 text-[11px] text-text outline-none focus:border-primary/50 transition cursor-pointer h-9 flex items-center gap-2"
+            >
+              <MapPin size={12} className="text-primary shrink-0" />
+
+              <span className="truncate">
+                {selectedLocation?.name || "Select location"}
+              </span>
+            </button>
           </div>
 
           {/* Service Select */}
@@ -548,8 +556,18 @@ const PhotographersList = () => {
           </a>
         </div>
       </footer>
+<LocationPickerModal
+  isOpen={isLocationModalOpen}
+  onClose={() => setIsLocationModalOpen(false)}
+  selectedLocation={selectedLocation}
+  onSelect={(location) => {
+    setSelectedLocation(location);
+    setIsLocationModalOpen(false);
+  }}
+/>
     </div>
   );
 };
+
 
 export default PhotographersList;
