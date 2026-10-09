@@ -76,9 +76,10 @@ const photographerService = {
 
   getPhotographers: async (params?: {
     search?: string;
-    district?: string;
     service?: string;
     price?: string;
+    lng?:number;
+    lat?:number;
     sortBy?: string;
     page?: number;
     limit?: number;

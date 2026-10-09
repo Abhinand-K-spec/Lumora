@@ -53,7 +53,7 @@ export class PhotographerController {
   }
 
   async getPhotographers(req: Request, res: Response): Promise<void> {
-    const { search, district, service, price, sortBy, page, limit } = req.query;
+    const { search, service, price, lng, lat, sortBy, page, limit } = req.query;
 
     const pageNum = page ? parseInt(String(page), 10) : 1;
     const limitNum = limit ? parseInt(String(limit), 10) : 8;
@@ -61,9 +61,10 @@ export class PhotographerController {
     const result = await this._photographerService.getPhotographers(
       {
         search: search ? String(search) : undefined,
-        district: district ? String(district) : undefined,
         service: service ? String(service) : undefined,
         price: price ? String(price) : undefined,
+        lng: lng !== undefined ? Number(lng) : undefined,
+        lat: lat !== undefined ? Number(lat) : undefined,
         sortBy: sortBy ? String(sortBy) : undefined,
       },
       {

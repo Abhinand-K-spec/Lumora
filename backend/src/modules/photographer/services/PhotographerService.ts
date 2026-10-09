@@ -57,9 +57,10 @@ export class PhotographerService implements IPhotographerService {
   async getPhotographers(
     filters: {
       search?: string | undefined;
-      district?: string | undefined;
       service?: string | undefined;
       price?: string | undefined;
+      lng? :number;
+      lat? : number;
       sortBy?: string | undefined;
     },
     pagination: PaginationParams,
@@ -68,11 +69,6 @@ export class PhotographerService implements IPhotographerService {
     const page = Math.max(1, pagination?.page || 1);
     const limit = Math.max(1, Math.min(100, pagination?.limit || 10));
     const skip = (page - 1) * limit;
-
-    // 1. Filter by location (District)
-    if (filters.district) {
-      query.location = { $regex: new RegExp(filters.district, "i") };
-    }
 
     // 2. Filter by specialities (Service)
     if (filters.service) {
@@ -143,6 +139,13 @@ export class PhotographerService implements IPhotographerService {
       sortCriteria = { startingPrice: -1 };
     }
 
+    const location = filters.lng !== undefined && filters.lat !== undefined
+      ? {
+          longitude: filters.lng,
+          latitude: filters.lat,
+        }
+      : undefined;
+
     // 5. Fetch matching photographer profiles with database pagination and sorting
     const [photographers, total] =
       await this._photographerRepository.findAllPaginated(
@@ -150,6 +153,7 @@ export class PhotographerService implements IPhotographerService {
         skip,
         limit,
         sortCriteria,
+        location
       );
 
     // 6. Map to DTOs and lazily sync startingPrice for unindexed profiles

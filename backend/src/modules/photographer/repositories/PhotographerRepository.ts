@@ -52,18 +52,45 @@ export class PhotographerRepository implements IPhotographerRepository {
     return await Photographer.findOne({ userId });
   }
 
+
   async findAllPaginated(
     filter: any,
     skip: number,
     limit: number,
     sort: Record<string, 1 | -1> = { createdAt: -1 },
+    location?: {
+      longitude: number;
+      latitude: number;
+    },
   ): Promise<[IPhotographer[], number]> {
+    const query = { ...filter };
+  
+    if (location) {
+      const maxDistanceRadians = 50 / 6378.1;
+  
+      query["serviceAreas.center"] = {
+        $geoWithin: {
+          $centerSphere: [
+            [location.longitude, location.latitude],
+            maxDistanceRadians,
+          ],
+        },
+      };
+    }
+  
     const [photographers, total] = await Promise.all([
-      Photographer.find(filter).sort(sort).skip(skip).limit(limit).exec(),
-      Photographer.countDocuments(filter).exec(),
+      Photographer.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+  
+      Photographer.countDocuments(query).exec(),
     ]);
+  
     return [photographers, total];
   }
+  
   async updateServiceAreas(
     userId: string,
     serviceAreas: IServiceArea[],

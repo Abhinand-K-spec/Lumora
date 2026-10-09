@@ -19,9 +19,10 @@ export interface IPhotographerService {
   getPhotographers(
     filters: {
       search?: string | undefined;
-      district?: string | undefined;
       service?: string | undefined;
       price?: string | undefined;
+      lng? : number|undefined;
+      lat? : number | undefined;
       sortBy?: string | undefined;
     },
     pagination: PaginationParams,

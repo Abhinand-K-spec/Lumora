@@ -23,6 +23,10 @@ export interface IPhotographerRepository {
     skip: number,
     limit: number,
     sort?: Record<string, 1 | -1>,
+    location?:{
+      longitude:number,
+      latitude:number
+    }
   ): Promise<[IPhotographer[], number]>;
   updateServiceAreas(
     userId: string,
