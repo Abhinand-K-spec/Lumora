@@ -30,7 +30,7 @@ const photographerService = new PhotographerService(
 const photographerController = new PhotographerController(photographerService);
 
 router.get(
-  "/",
+  "/",authenticate,
   photographerController.getPhotographers.bind(photographerController),
 );
 router.get(
