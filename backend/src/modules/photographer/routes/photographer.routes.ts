@@ -13,6 +13,8 @@ import {
 } from "../../../shared/validators/photographer.validator.js";
 import { uploadProfilePhoto } from "../../../shared/middlewares/upload.middleware.js";
 import { uploadToCloudinaryMiddleware } from "../../../shared/middlewares/cloudinaryUpload.middleware.js";
+import { PhotographerUploadController } from "../controllers/PhotographerUploadController.js";
+import { r2StorageService } from "../../../shared/services/R2StorageService.js";
 
 const router = Router();
 
@@ -28,6 +30,7 @@ const photographerService = new PhotographerService(
   approvalRequestRepository,
 );
 const photographerController = new PhotographerController(photographerService);
+const photographerUploadController = new PhotographerUploadController(r2StorageService);
 
 router.get(
   "/",authenticate,
@@ -101,6 +104,13 @@ router.get(
   "/:userId",
   authenticate,
   photographerController.getPhotographerById.bind(photographerController),
+);
+
+// Feed upload — presign URL for R2 direct upload
+router.post(
+  "/uploads/presign",
+  authenticate,
+  photographerUploadController.createUploadUrl.bind(photographerUploadController),
 );
 
 export default router;
