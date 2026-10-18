@@ -29,12 +29,11 @@ export class FeedService implements IFeedService {
     const { photographerId, mediaKeys } = input;
     const caption = input.caption?.trim() ?? "";
 
-    // 1. Validate the caption.
+
     if (caption.length > MAX_CAPTION_LENGTH) {
       throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.MAX_CAPTION);
     }
 
-    // 2. Validate the number of images.
     if (
       !Array.isArray(mediaKeys) ||
       mediaKeys.length < 1 ||
@@ -43,12 +42,11 @@ export class FeedService implements IFeedService {
       throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.MIN_IMAGES);
     }
 
-    // 3. Reject duplicate object keys.
     if (new Set(mediaKeys).size !== mediaKeys.length) {
       throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.DUPLICATE_IMAGES);
     }
 
-    // 4. Validate ownership before checking objects in R2.
+
     const expectedPrefix = `photographers/${photographerId}/feed/`;
 
     for (const key of mediaKeys) {
@@ -61,7 +59,7 @@ export class FeedService implements IFeedService {
       }
     }
 
-    // 5. Verify all uploaded objects and build trusted metadata.
+
     const media = await Promise.all(
       mediaKeys.map(async (key, order) => {
         const object = await this._r2StorageService.verifyObject(key);
@@ -79,7 +77,7 @@ export class FeedService implements IFeedService {
       })
     );
 
-    // 6. Persist the post through the repository.
+
     const post = await this._feedRepository.create({
       photographerId: new Types.ObjectId(photographerId),
       caption,

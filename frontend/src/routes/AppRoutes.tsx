@@ -22,6 +22,7 @@ import PhotographersList from "../pages/photographer/PhotographersList";
 import PhotographerDetails from "../pages/photographer/PhotographerDetails";
 import NotFound from "../pages/error/NotFound";
 import useAuth from "../hooks/useAuth";
+import CreateFeedPost from "../components/feed/CreateFeedPost";
 
 const RoleBasedLayout = () => {
   const { user } = useAuth();
@@ -64,6 +65,7 @@ const AppRoutes = () => {
               path="/photographers/:id"
               element={<PhotographerDetails />}
             />
+            <Route path="/feedPostUpload" element={<CreateFeedPost/>}/>
           </Route>
         </Route>
 

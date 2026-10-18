@@ -85,7 +85,7 @@ const PhotographersList = () => {
     price: "",
     location: null,
   });
-  
+
 
   // Sorting & Toggles
   const [topRatedOnly, setTopRatedOnly] = useState(false);
@@ -106,8 +106,8 @@ const PhotographersList = () => {
           search?: string;
           service?: string;
           price?: string;
-          lng?:number;
-          lat?:number;
+          lng?: number;
+          lat?: number;
           sortBy?: string;
           page?: number;
           limit?: number;
@@ -145,7 +145,7 @@ const PhotographersList = () => {
       search,
       service,
       price,
-      location:selectedLocation
+      location: selectedLocation
     });
     setCurrentPage(1);
   };
@@ -305,11 +305,10 @@ const PhotographersList = () => {
             <button
               type="button"
               onClick={handleTopRatedToggle}
-              className={`text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border transition cursor-pointer ${
-                topRatedOnly
+              className={`text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider border transition cursor-pointer ${topRatedOnly
                   ? "bg-primary/10 border-primary/40 text-primary"
                   : "bg-[#0f1012] border-border/10 text-text-secondary hover:text-text hover:border-border/30"
-              }`}
+                }`}
             >
               Top Rated
             </button>
@@ -471,11 +470,10 @@ const PhotographersList = () => {
                 <button
                   key={pIdx}
                   onClick={() => setCurrentPage(pIdx)}
-                  className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition cursor-pointer ${
-                    currentPage === pIdx
+                  className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition cursor-pointer ${currentPage === pIdx
                       ? "bg-primary text-neutral-950"
                       : "text-text-secondary hover:text-text hover:bg-neutral-900/60"
-                  }`}
+                    }`}
                 >
                   {pIdx}
                 </button>
@@ -556,15 +554,15 @@ const PhotographersList = () => {
           </a>
         </div>
       </footer>
-<LocationPickerModal
-  isOpen={isLocationModalOpen}
-  onClose={() => setIsLocationModalOpen(false)}
-  selectedLocation={selectedLocation}
-  onSelect={(location) => {
-    setSelectedLocation(location);
-    setIsLocationModalOpen(false);
-  }}
-/>
+      <LocationPickerModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        selectedLocation={selectedLocation}
+        onSelect={(location) => {
+          setSelectedLocation(location);
+          setIsLocationModalOpen(false);
+        }}
+      />
     </div>
   );
 };

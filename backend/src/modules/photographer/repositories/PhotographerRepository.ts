@@ -66,7 +66,7 @@ async findAllPaginated(
   const query = { ...filter };
 
   if (location) {
-    const maxDistanceRadians = 100 / 6378.1;
+    const maxDistanceRadians = 10 / 6378.1;
 
     query["serviceAreas.center"] = {
       $geoWithin: {

@@ -30,7 +30,10 @@ const photographerService = new PhotographerService(
   approvalRequestRepository,
 );
 const photographerController = new PhotographerController(photographerService);
-const photographerUploadController = new PhotographerUploadController(r2StorageService);
+const photographerUploadController = new PhotographerUploadController(
+  r2StorageService,
+  photographerRepository,
+);
 
 router.get(
   "/",authenticate,
@@ -99,18 +102,18 @@ router.delete(
   photographerController.deletePackage.bind(photographerController),
 );
 
-// Public profile by userId (must come last to avoid shadowing named routes)
-router.get(
-  "/:userId",
-  authenticate,
-  photographerController.getPhotographerById.bind(photographerController),
-);
-
 // Feed upload — presign URL for R2 direct upload
 router.post(
   "/uploads/presign",
   authenticate,
   photographerUploadController.createUploadUrl.bind(photographerUploadController),
+);
+
+// Public profile by userId (must come last to avoid shadowing named routes)
+router.get(
+  "/:userId",
+  authenticate,
+  photographerController.getPhotographerById.bind(photographerController),
 );
 
 export default router;

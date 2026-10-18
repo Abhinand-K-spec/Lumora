@@ -5,9 +5,14 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-import { r2Client, R2_BUCKET } from "../config/r2.js";
 import { AppError } from "../errors/AppError.js";
 import { HttpStatus } from "../enums/HTTP.status.code.js";
+
+import {
+  r2Client,
+  R2_BUCKET,
+  R2_PUBLIC_BASE_URL,
+} from "../config/r2.js";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
@@ -32,13 +37,15 @@ export interface IR2StorageService {
   verifyObject(
     key: string
   ): Promise<{ key: string; size: number; contentType: string | undefined }>;
+  getPublicUrl(key: string): string;
+
 }
 
 export class R2StorageService implements IR2StorageService {
   async createUploadUrl(input: CreateUploadUrlInput) {
     const { photographerId, contentType, size } = input;
 
-    if (!(contentType in ALLOWED_TYPES)) {
+    if (!Object.hasOwn(ALLOWED_TYPES, contentType)) {
       throw new AppError(HttpStatus.BAD_REQUEST, "Unsupported image type");
     }
 
@@ -94,6 +101,22 @@ export class R2StorageService implements IR2StorageService {
       size: result.ContentLength,
       contentType: result.ContentType,
     };
+  }
+
+  getPublicUrl(key: string): string {
+    if (!R2_PUBLIC_BASE_URL) {
+      throw new AppError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Feed image delivery is not configured",
+      );
+    }
+  
+    const encodedKey = key
+      .split("/")
+      .map((segment) => encodeURIComponent(segment))
+      .join("/");
+  
+    return `${R2_PUBLIC_BASE_URL}/${encodedKey}`;
   }
 }
 

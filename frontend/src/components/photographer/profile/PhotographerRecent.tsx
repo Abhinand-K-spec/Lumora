@@ -1,3 +1,6 @@
+import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+
 interface NarrativeImage {
   id: string;
   url: string;
@@ -41,12 +44,21 @@ const PhotographerRecent = ({
         <h3 className="font-heading text-lg font-semibold text-text tracking-wide">
           Recent Narratives
         </h3>
-        <button
-          onClick={onViewPortfolioClick}
-          className="text-xs text-text-secondary hover:text-primary transition-colors flex items-center gap-1 cursor-pointer font-semibold"
-        >
-          View Full Portfolio →
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/feedPostUpload"
+            className="text-xs bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 font-semibold cursor-pointer"
+          >
+            <Plus size={14} />
+            New Post
+          </Link>
+          <button
+            onClick={onViewPortfolioClick}
+            className="text-xs text-text-secondary hover:text-primary transition-colors flex items-center gap-1 cursor-pointer font-semibold"
+          >
+            View Full Portfolio →
+          </button>
+        </div>
       </div>
 
       {/* Grid of Images */}

@@ -90,10 +90,6 @@ const PhotographerProfile = () => {
         const res = await photographerService.getProfile();
         if (res.data && res.data.photographer) {
           const dbData = res.data.photographer;
-          console.log(
-            "log from use effect fetchprofile of photographer",
-            dbData,
-          );
           setProfile((prev) => ({
             ...prev,
             name: dbData.name || prev.name,
