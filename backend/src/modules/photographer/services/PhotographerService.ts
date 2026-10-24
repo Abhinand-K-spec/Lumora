@@ -59,8 +59,8 @@ export class PhotographerService implements IPhotographerService {
       search?: string | undefined;
       service?: string | undefined;
       price?: string | undefined;
-      lng? :number;
-      lat? : number;
+      lng?: number;
+      lat?: number;
       sortBy?: string | undefined;
     },
     pagination: PaginationParams,
@@ -139,12 +139,13 @@ export class PhotographerService implements IPhotographerService {
       sortCriteria = { startingPrice: -1 };
     }
 
-    const location = filters.lng !== undefined && filters.lat !== undefined
-      ? {
-          longitude: filters.lng,
-          latitude: filters.lat,
-        }
-      : undefined;
+    const location =
+      filters.lng !== undefined && filters.lat !== undefined
+        ? {
+            longitude: filters.lng,
+            latitude: filters.lat,
+          }
+        : undefined;
 
     // 5. Fetch matching photographer profiles with database pagination and sorting
     const [photographers, total] =
@@ -153,7 +154,7 @@ export class PhotographerService implements IPhotographerService {
         skip,
         limit,
         sortCriteria,
-        location
+        location,
       );
 
     // 6. Map to DTOs and lazily sync startingPrice for unindexed profiles

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import {
+  GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
@@ -8,11 +9,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { AppError } from "../errors/AppError.js";
 import { HttpStatus } from "../enums/HTTP.status.code.js";
 
-import {
-  r2Client,
-  R2_BUCKET,
-  R2_PUBLIC_BASE_URL,
-} from "../config/r2.js";
+import { r2Client, R2_BUCKET, R2_PUBLIC_BASE_URL } from "../config/r2.js";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
@@ -32,13 +29,12 @@ interface CreateUploadUrlInput {
 
 export interface IR2StorageService {
   createUploadUrl(
-    input: CreateUploadUrlInput
+    input: CreateUploadUrlInput,
   ): Promise<{ key: string; uploadUrl: string; expiresIn: number }>;
   verifyObject(
-    key: string
+    key: string,
   ): Promise<{ key: string; size: number; contentType: string | undefined }>;
-  getPublicUrl(key: string): string;
-
+  getPublicUrl(key: string): Promise<string>;
 }
 
 export class R2StorageService implements IR2StorageService {
@@ -49,11 +45,7 @@ export class R2StorageService implements IR2StorageService {
       throw new AppError(HttpStatus.BAD_REQUEST, "Unsupported image type");
     }
 
-    if (
-      !Number.isSafeInteger(size) ||
-      size <= 0 ||
-      size > MAX_FILE_SIZE
-    ) {
+    if (!Number.isSafeInteger(size) || size <= 0 || size > MAX_FILE_SIZE) {
       throw new AppError(HttpStatus.BAD_REQUEST, "Image must not exceed 15 MB");
     }
 
@@ -82,7 +74,7 @@ export class R2StorageService implements IR2StorageService {
       new HeadObjectCommand({
         Bucket: R2_BUCKET,
         Key: key,
-      })
+      }),
     );
 
     if (
@@ -92,7 +84,7 @@ export class R2StorageService implements IR2StorageService {
     ) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        "Uploaded image is empty or exceeds the size limit"
+        "Uploaded image is empty or exceeds the size limit",
       );
     }
 
@@ -103,20 +95,27 @@ export class R2StorageService implements IR2StorageService {
     };
   }
 
-  getPublicUrl(key: string): string {
-    if (!R2_PUBLIC_BASE_URL) {
-      throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Feed image delivery is not configured",
-      );
+  async getPublicUrl(key: string): Promise<string> {
+    if (
+      R2_PUBLIC_BASE_URL &&
+      !R2_PUBLIC_BASE_URL.includes("r2.cloudflarestorage.com")
+    ) {
+      const encodedKey = key
+        .split("/")
+        .map((segment) => encodeURIComponent(segment))
+        .join("/");
+
+      return `${R2_PUBLIC_BASE_URL}/${encodedKey}`;
     }
-  
-    const encodedKey = key
-      .split("/")
-      .map((segment) => encodeURIComponent(segment))
-      .join("/");
-  
-    return `${R2_PUBLIC_BASE_URL}/${encodedKey}`;
+
+    const command = new GetObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+    });
+
+    return await getSignedUrl(r2Client, command, {
+      expiresIn: 86400, // 24 hours
+    });
   }
 }
 

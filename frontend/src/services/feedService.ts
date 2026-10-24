@@ -25,6 +25,33 @@ const ALLOWED_IMAGE_TYPES = [
   "image/webp",
 ];
 
+export interface FeedAuthor {
+  id: string;
+  name: string;
+  profilePhoto?: string;
+  location?: string;
+}
+
+export interface FeedMedia {
+  url: string;
+  contentType: string;
+  order: number;
+}
+
+export interface FeedPost {
+  id: string;
+  caption: string;
+  media: FeedMedia[];
+  author: FeedAuthor;
+  createdAt: string;
+}
+
+export interface GetFeedResponse {
+  posts: FeedPost[];
+  hasMore: boolean;
+  nextCursor?: string;
+}
+
 export const feedService = {
   async requestUploadUrl(
     file: File
@@ -82,5 +109,39 @@ export const feedService = {
     >("/feed/posts", payload);
 
     return response.data;
+  },
+
+  async getFeed(params?: {
+    cursor?: string;
+    limit?: number;
+    photographerId?: string;
+  }): Promise<GetFeedResponse> {
+    const response = await api.get<ApiResponse<GetFeedResponse>>("/feed", {
+      params: {
+        limit: params?.limit || 10,
+        cursor: params?.cursor,
+        photographerId: params?.photographerId,
+      },
+    });
+
+    return response.data.data;
+  },
+
+  async getMyPosts(params?: {
+    cursor?: string;
+    limit?: number;
+  }): Promise<GetFeedResponse> {
+    const response = await api.get<ApiResponse<GetFeedResponse>>("/feed/my-posts", {
+      params: {
+        limit: params?.limit || 20,
+        cursor: params?.cursor,
+      },
+    });
+
+    return response.data.data;
+  },
+
+  async deletePost(postId: string): Promise<void> {
+    await api.delete(`/feed/${postId}`);
   },
 };

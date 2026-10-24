@@ -1,6 +1,8 @@
 import type {
   IFeedService,
   CreateFeedPostInput,
+  GetFeedInputDto,
+  GetFeedResponseDto,
 } from "../interfaces/IFeedService.js";
 import { Types } from "mongoose";
 import type { IFeedPost } from "../../../shared/interfaces/IFeedPost.js";
@@ -9,6 +11,8 @@ import type { IR2StorageService } from "../../../shared/services/R2StorageServic
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
 import { AppError } from "../../../shared/errors/AppError.js";
 import { FEED_MESSAGES } from "../../../shared/constants/message.constant.js";
+import type { IUserRepository } from "../../auth/interfaces/IUserRepository.js";
+import { FeedPostMapper } from "../dto/FeedPostMapper.js";
 
 const MAX_IMAGES_PER_POST = 10;
 const MAX_CAPTION_LENGTH = 1000;
@@ -23,12 +27,12 @@ export class FeedService implements IFeedService {
   constructor(
     private readonly _feedRepository: IFeedRepository,
     private readonly _r2StorageService: IR2StorageService,
+    private readonly _userRepository?: IUserRepository,
   ) {}
 
   async createPost(input: CreateFeedPostInput): Promise<IFeedPost> {
     const { photographerId, mediaKeys } = input;
     const caption = input.caption?.trim() ?? "";
-
 
     if (caption.length > MAX_CAPTION_LENGTH) {
       throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.MAX_CAPTION);
@@ -46,7 +50,6 @@ export class FeedService implements IFeedService {
       throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.DUPLICATE_IMAGES);
     }
 
-
     const expectedPrefix = `photographers/${photographerId}/feed/`;
 
     for (const key of mediaKeys) {
@@ -58,7 +61,6 @@ export class FeedService implements IFeedService {
         throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.INVALID_IMAGE_KEY);
       }
     }
-
 
     const media = await Promise.all(
       mediaKeys.map(async (key, order) => {
@@ -74,9 +76,8 @@ export class FeedService implements IFeedService {
           size: object.size,
           order,
         };
-      })
+      }),
     );
-
 
     const post = await this._feedRepository.create({
       photographerId: new Types.ObjectId(photographerId),
@@ -86,5 +87,57 @@ export class FeedService implements IFeedService {
     } as Partial<IFeedPost>);
 
     return post;
+  }
+
+  async getFeed(input: GetFeedInputDto): Promise<GetFeedResponseDto> {
+    const limit = Math.max(1, Math.min(input.limit || 10, 50));
+
+    const result = await this._feedRepository.getFeed({
+      limit,
+      cursor: input.cursor,
+      photographerId: input.photographerId,
+    });
+
+
+    const userIds = [
+      ...new Set(
+        result.posts
+          .map((doc: any) => doc.photographerId?.userId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+
+    let userMap = new Map<string, string>();
+    if (userIds.length > 0 && this._userRepository) {
+      const users = await this._userRepository.findWithFilter({
+        _id: { $in: userIds },
+      });
+      userMap = new Map(users.map((u) => [u._id.toString(), u.name]));
+    }
+
+    const posts = await Promise.all(
+      result.posts.map(async (doc: any) => {
+        const userId = doc.photographerId?.userId;
+        const authorName =
+          (userId && userMap.get(userId.toString())) || "Photographer";
+        return await FeedPostMapper.toPostResponseDto(
+          doc,
+          authorName,
+          this._r2StorageService,
+        );
+      }),
+    );
+
+    return FeedPostMapper.toFeedResponseDto(posts, result.hasMore);
+  }
+
+  async deletePost(postId: string, photographerId: string): Promise<void> {
+    if (!Types.ObjectId.isValid(postId)) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Invalid post ID");
+    }
+    const success = await this._feedRepository.deletePost(postId, photographerId);
+    if (!success) {
+      throw new AppError(HttpStatus.NOT_FOUND, "Post not found or unauthorized");
+    }
   }
 }

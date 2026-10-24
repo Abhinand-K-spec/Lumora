@@ -120,13 +120,15 @@ export const APPROVAL_MESSAGES = {
 } as const;
 
 export const FEED_MESSAGES = {
-  MAX_CAPTION:'Caption must be less than 1000 characters',
-  MIN_IMAGES:'A post must contain minimum 1 image',
-  DUPLICATE_IMAGES:"Duplicate images are not allowed",
-  INVALID_IMAGE_KEY:"Invalid image key",
-  INVALID_TYPE:"Unsupported uploaded image type",
-  POSTED_SUCCESS:"Feed posted successfully"
-}
+  MAX_CAPTION: "Caption must be less than 1000 characters",
+  MIN_IMAGES: "A post must contain minimum 1 image",
+  DUPLICATE_IMAGES: "Duplicate images are not allowed",
+  INVALID_IMAGE_KEY: "Invalid image key",
+  INVALID_TYPE: "Unsupported uploaded image type",
+  POSTED_SUCCESS: "Feed posted successfully",
+  FETCHED_SUCCESS: "Feed fetched successfully",
+  INVALID_CURSOR: "Invalid pagination cursor",
+};
 
 export const MESSAGES = {
   COMMON: COMMON_MESSAGES,
@@ -134,5 +136,5 @@ export const MESSAGES = {
   USER: USER_MESSAGES,
   ADMIN: ADMIN_MESSAGES,
   PHOTOGRAPHER: PHOTOGRAPHER_MESSAGES,
-  FEED:FEED_MESSAGES
+  FEED: FEED_MESSAGES,
 } as const;

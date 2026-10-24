@@ -36,7 +36,8 @@ const photographerUploadController = new PhotographerUploadController(
 );
 
 router.get(
-  "/",authenticate,
+  "/",
+  authenticate,
   photographerController.getPhotographers.bind(photographerController),
 );
 router.get(
@@ -106,7 +107,9 @@ router.delete(
 router.post(
   "/uploads/presign",
   authenticate,
-  photographerUploadController.createUploadUrl.bind(photographerUploadController),
+  photographerUploadController.createUploadUrl.bind(
+    photographerUploadController,
+  ),
 );
 
 // Public profile by userId (must come last to avoid shadowing named routes)

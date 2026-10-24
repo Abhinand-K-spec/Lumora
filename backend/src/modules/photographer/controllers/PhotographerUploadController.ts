@@ -15,10 +15,7 @@ export class PhotographerUploadController {
     private readonly _photographerRepository: IPhotographerRepository,
   ) {}
 
-  async createUploadUrl(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
+  async createUploadUrl(req: Request, res: Response): Promise<void> {
     const userId = req.user?.id;
 
     if (!userId) {
@@ -28,7 +25,8 @@ export class PhotographerUploadController {
       );
     }
 
-    const photographer = await this._photographerRepository.findByUserId(userId);
+    const photographer =
+      await this._photographerRepository.findByUserId(userId);
     if (!photographer) {
       throw new AppError(
         HttpStatus.NOT_FOUND,

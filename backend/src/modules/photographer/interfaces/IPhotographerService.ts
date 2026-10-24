@@ -21,8 +21,8 @@ export interface IPhotographerService {
       search?: string | undefined;
       service?: string | undefined;
       price?: string | undefined;
-      lng? : number|undefined;
-      lat? : number | undefined;
+      lng?: number | undefined;
+      lat?: number | undefined;
       sortBy?: string | undefined;
     },
     pagination: PaginationParams,

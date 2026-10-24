@@ -32,7 +32,7 @@ const feedMediaSchema = new Schema(
       min: 0,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const feedPostSchema = new Schema<IFeedPost>(
@@ -65,7 +65,7 @@ const feedPostSchema = new Schema<IFeedPost>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 feedPostSchema.index({
@@ -73,7 +73,8 @@ feedPostSchema.index({
   createdAt: -1,
 });
 
-export const FeedPostModel = model<IFeedPost>(
-  "FeedPost",
-  feedPostSchema
-);
+
+feedPostSchema.index({ status: 1, createdAt: -1, _id: -1 });
+
+
+export const FeedPostModel = model<IFeedPost>("FeedPost", feedPostSchema);
