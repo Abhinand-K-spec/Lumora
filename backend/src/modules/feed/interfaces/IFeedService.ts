@@ -22,11 +22,9 @@ export interface CreateFeedPostInput {
 export interface GetFeedInputDto {
   limit: number;
   cursor?: { createdAt: Date; id: string } | undefined;
-  photographerId?: string | undefined;
 }
 
 export interface IFeedService {
   createPost(input: CreateFeedPostInput): Promise<IFeedPost>;
   getFeed(input: GetFeedInputDto): Promise<GetFeedResponseDto>;
-  deletePost(postId: string, photographerId: string): Promise<void>;
 }

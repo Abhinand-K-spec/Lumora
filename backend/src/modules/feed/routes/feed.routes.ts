@@ -6,16 +6,19 @@ import { PhotographerRepository } from "../../photographer/repositories/Photogra
 import { r2StorageService } from "../../../shared/services/R2StorageService.js";
 import { authenticate } from "../../../shared/middlewares/auth.middleware.js";
 import { UserRepository } from "../../auth/repositories/UserRepository.js";
+import { ContentModerationService } from "../../../shared/services/ContentModerationService.js";
 
 const router = Router();
 
 const feedPostRepository = new FeedPostRepository();
 const photographerRepository = new PhotographerRepository();
 const userRepository = new UserRepository();
+const contentModerationService = new ContentModerationService();
 const feedService = new FeedService(
   feedPostRepository,
   r2StorageService,
   userRepository,
+  contentModerationService
 );
 const feedController = new FeedController(feedService, photographerRepository);
 

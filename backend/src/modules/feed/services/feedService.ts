@@ -13,6 +13,7 @@ import { AppError } from "../../../shared/errors/AppError.js";
 import { FEED_MESSAGES } from "../../../shared/constants/message.constant.js";
 import type { IUserRepository } from "../../auth/interfaces/IUserRepository.js";
 import { FeedPostMapper } from "../dto/FeedPostMapper.js";
+import type { IContentModerationService } from "../../../shared/services/ContentModerationService.js";
 
 const MAX_IMAGES_PER_POST = 10;
 const MAX_CAPTION_LENGTH = 1000;
@@ -27,7 +28,8 @@ export class FeedService implements IFeedService {
   constructor(
     private readonly _feedRepository: IFeedRepository,
     private readonly _r2StorageService: IR2StorageService,
-    private readonly _userRepository?: IUserRepository,
+    private readonly _userRepository: IUserRepository,
+    private readonly _contentModerationService: IContentModerationService
   ) {}
 
   async createPost(input: CreateFeedPostInput): Promise<IFeedPost> {
@@ -78,6 +80,27 @@ export class FeedService implements IFeedService {
         };
       }),
     );
+
+
+    const imageUrls = await Promise.all(
+      mediaKeys.map((key) =>
+        this._r2StorageService.getModerationUrl(key),
+      ),
+    );
+
+    const moderationResult =
+      await this._contentModerationService.moderatePost(
+        caption,
+        imageUrls,
+      );
+
+
+    if (moderationResult.flagged) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        "This post cannot be published because it violates content guidelines.",
+      );
+    }
 
     const post = await this._feedRepository.create({
       photographerId: new Types.ObjectId(photographerId),

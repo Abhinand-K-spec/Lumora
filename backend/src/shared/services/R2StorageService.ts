@@ -35,6 +35,7 @@ export interface IR2StorageService {
     key: string,
   ): Promise<{ key: string; size: number; contentType: string | undefined }>;
   getPublicUrl(key: string): Promise<string>;
+  getModerationUrl(key:string):Promise<string>;
 }
 
 export class R2StorageService implements IR2StorageService {
@@ -114,7 +115,18 @@ export class R2StorageService implements IR2StorageService {
     });
 
     return await getSignedUrl(r2Client, command, {
-      expiresIn: 86400, // 24 hours
+      expiresIn: 86400, 
+    });
+  }
+
+  async getModerationUrl(key: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+    });
+  
+    return getSignedUrl(r2Client, command, {
+      expiresIn: 300,
     });
   }
 }
