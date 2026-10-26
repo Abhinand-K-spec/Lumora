@@ -22,6 +22,7 @@ import PhotographerRecent from "../../components/photographer/profile/Photograph
 import PhotographerMyPosts from "../../components/photographer/profile/PhotographerMyPosts";
 import PhotographerEditModal from "../../components/photographer/profile/PhotographerEditModal";
 import PhotographerPackageModal from "../../components/photographer/profile/PhotographerPackageModal";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 const PhotographerProfile = () => {
   const { user } = useAuth();
@@ -188,10 +189,8 @@ const PhotographerProfile = () => {
         "Verification request submitted! We'll review your profile shortly.",
       );
       setProfile((prev) => ({ ...prev, approvalStatus: "PENDING" }));
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        "Failed to submit verification request.";
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, "Failed to submit verification request.");
       toast.error(msg);
     } finally {
       setIsRequestingApproval(false);
@@ -354,10 +353,8 @@ const PhotographerProfile = () => {
             : "Service area added successfully.",
         );
       }
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || "Failed to update service areas.",
-      );
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to update service areas."));
     }
   };
 
@@ -381,10 +378,8 @@ const PhotographerProfile = () => {
         }));
         toast.success("Service area removed successfully.");
       }
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || "Failed to delete service area.",
-      );
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to delete service area."));
     }
   };
 

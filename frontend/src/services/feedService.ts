@@ -71,8 +71,8 @@ export const feedService = {
       size: file.size,
     });
 
-    const resData = response.data?.data as any;
-    const presigned = resData?.uploadUrl ? resData : (resData?.data ?? resData);
+    const resData = response.data?.data as PresignedUploadResponse & { data?: PresignedUploadResponse };
+    const presigned: PresignedUploadResponse = resData?.uploadUrl ? resData : (resData?.data ?? resData);
 
     if (!presigned?.uploadUrl || !presigned?.key) {
       throw new Error("Failed to obtain secure upload URL from server");

@@ -18,124 +18,30 @@ import {
 import { toast } from "sonner";
 import photographerService, {
   type PhotographerProfile,
-  type PackageItem,
 } from "../../services/photographerService";
-import type { IServiceArea } from "../../types/serviceArea";
+import { feedService } from "../../services/feedService";
+import { getErrorMessage } from "../../utils/errorUtils";
 
-// Curated default photographer details in case DB profile lacks information
-const MOCK_PROFILE = {
-  name: "Arjun Nair Photography",
-  bio: "Architect of Cinematic Memories. Specializing in high-end wedding documentation and editorial portraits across the Indian Subcontinent.",
-  profilePhoto:
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80",
-  coverPhoto:
-    "https://images.unsplash.com/photo-1452780212940-6f5c0d14d84a?w=1600&auto=format&fit=crop&q=80",
-  location: "Kochi, Kerala",
-  specialities: ["Premium Studio", "Elite Member"],
-  experienceYears: 12,
-  rating: 4.9,
-  reviewsCount: 124,
-  totalBookings: 250,
-  awardsCount: 15,
-  cinematicPhilosophy:
-    "At Lumora Studio, we believe photography is more than just capturing images; it's about preserving the rhythm of a heartbeat. Our signature \"Golden Hour\" style blends traditional warmth with modern editorial precision. We don't just attend your events—we curate your legacy through frames that feel like stills from a classic film.",
-  equipmentSummary: "Dual Sony Alpha a7R V, Zeiss Optics",
-  deliverySummary: "30-45 Day Turnaround Guaranteed",
-  serviceAreas: [] as IServiceArea[],
-  packages: [
-    {
-      packageName: "Essential",
-      subName: "Heritage",
-      price: 75000,
-      features: [
-        "1 Lead Photographer",
-        "8 Hours Coverage",
-        "200+ Color Graded Frames",
-        "Online Gallery Delivery",
-      ],
-      icon: "flower",
-      buttonText: "Select Plan",
-    },
-    {
-      packageName: "Signature Choice",
-      subName: "Elite Royale",
-      price: 150000,
-      features: [
-        "2 Lead Photographers",
-        "Cinematic Wedding Film",
-        "4K Drone Coverage",
-        "Premium Linen Album",
-        "Full Event Coverage",
-      ],
-      icon: "crown",
-      popular: true,
-      buttonText: "Book Signature Package",
-    },
-    {
-      packageName: "The Ultimate",
-      subName: "Infinity",
-      price: 275000,
-      features: [
-        "Multi-Day Full Team",
-        "International Travel Incl.",
-        "Live Streaming Service",
-        "Same Day Edits",
-      ],
-      icon: "diamond",
-      buttonText: "Inquire Now",
-    },
-  ],
-  gallery: [
-    {
-      url: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&auto=format&fit=crop&q=80",
-      category: "wedding",
-      caption: "Boat ride at Vembanad Lake",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&auto=format&fit=crop&q=80",
-      category: "wedding",
-      caption: "Henna ritual details",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&auto=format&fit=crop&q=80",
-      category: "bts",
-      caption: "Behind the lens with the heavy rig",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80",
-      category: "editorial",
-      caption: "Touching blessing ceremony",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&auto=format&fit=crop&q=80",
-      category: "wedding",
-      caption: "Traditional Kerala ceremony",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80",
-      category: "editorial",
-      caption: "Stunning landscape portrait",
-    },
-  ],
-};
+interface GalleryPhoto {
+  id: string;
+  url: string;
+  caption?: string;
+}
 
 const PhotographerDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Profile state populated from API and falling back to curate mockup details
-  const [profile, setProfile] = useState<
-    (typeof MOCK_PROFILE & { original?: PhotographerProfile }) | null
-  >(null);
+  // Dynamic photographer profile from API
+  const [profile, setProfile] = useState<PhotographerProfile | null>(null);
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
 
   // Page Interactivity states
   const [activeTab, setActiveTab] = useState<
     "overview" | "portfolio" | "packages" | "reviews" | "policies"
   >("overview");
-  const [galleryFilter, setGalleryFilter] = useState<
-    "all" | "wedding" | "bts" | "editorial"
-  >("all");
 
   // Modals state
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -163,83 +69,53 @@ const PhotographerDetails = () => {
   });
 
   useEffect(() => {
-    const fetchPhotographer = async () => {
+    const fetchPhotographerData = async () => {
       if (!id) return;
       try {
         setLoading(true);
+        setError(null);
+
         const res = await photographerService.getPhotographerById(id);
-        if (res.data && res.data.photographer) {
-          const pg = res.data.photographer;
-
-          // Map DB packages if any, else use the customized mock ones
-          let dbPackages = MOCK_PROFILE.packages;
-          if (pg.packages && pg.packages.length > 0) {
-            dbPackages = pg.packages.map((pkg: PackageItem, index: number) => {
-              const icons = ["flower", "crown", "diamond"];
-              const subNames = ["Heritage", "Elite Royale", "Infinity"];
-              return {
-                packageName: pkg.packageName,
-                subName: subNames[index % subNames.length],
-                price: pkg.price,
-                features: pkg.description
-                  .split(",")
-                  .map((f) => f.trim())
-                  .filter(Boolean),
-                icon: icons[index % icons.length],
-                popular: index === 1,
-                buttonText:
-                  index === 1
-                    ? "Book Signature Package"
-                    : index === 0
-                      ? "Select Plan"
-                      : "Inquire Now",
-              };
-            });
-          }
-
-          setProfile({
-            name: pg.name || MOCK_PROFILE.name,
-            bio: pg.bio || MOCK_PROFILE.bio,
-            profilePhoto: pg.profilePhoto || MOCK_PROFILE.profilePhoto,
-            coverPhoto: pg.coverPhoto || MOCK_PROFILE.coverPhoto,
-            location: pg.location || MOCK_PROFILE.location,
-            specialities:
-              pg.specialities && pg.specialities.length > 0
-                ? pg.specialities
-                : MOCK_PROFILE.specialities,
-            experienceYears: pg.experienceYears || MOCK_PROFILE.experienceYears,
-            rating: pg.rating || MOCK_PROFILE.rating,
-            reviewsCount: pg.reviewsCount || MOCK_PROFILE.reviewsCount,
-            totalBookings: pg.totalBookings || MOCK_PROFILE.totalBookings,
-            awardsCount: MOCK_PROFILE.awardsCount,
-            cinematicPhilosophy: pg.bio || MOCK_PROFILE.cinematicPhilosophy,
-            equipmentSummary:
-              pg.equipment && pg.equipment.length > 0
-                ? pg.equipment.join(", ")
-                : MOCK_PROFILE.equipmentSummary,
-            deliverySummary: MOCK_PROFILE.deliverySummary,
-            serviceAreas:
-              pg.serviceAreas && pg.serviceAreas.length > 0
-                ? pg.serviceAreas
-                : MOCK_PROFILE.serviceAreas,
-            packages: dbPackages,
-            gallery: MOCK_PROFILE.gallery, // Gallery falls back to our beautiful curated photoshoot list
-            original: pg,
-          });
+        if (res.data?.photographer) {
+          setProfile(res.data.photographer);
+        } else {
+          setError("Photographer profile not found.");
         }
-      } catch (err) {
-        console.error(
-          "Using fallback curated profile details for sandbox.",
-          err,
-        );
-        // Fallback for sandboxed profiles or errors
-        setProfile(MOCK_PROFILE);
+
+        // Fetch real portfolio moments from feedService for this photographer
+        try {
+          const feedRes = await feedService.getFeed({
+            photographerId: id,
+            limit: 30,
+          });
+          if (feedRes?.posts && feedRes.posts.length > 0) {
+            const photos: GalleryPhoto[] = [];
+            feedRes.posts.forEach((post) => {
+              post.media?.forEach((m, idx) => {
+                photos.push({
+                  id: `${post.id}-${idx}`,
+                  url: m.url,
+                  caption: post.caption,
+                });
+              });
+            });
+            setGalleryPhotos(photos);
+          } else {
+            setGalleryPhotos([]);
+          }
+        } catch {
+          // Non-blocking if feed moments fail to load
+          setGalleryPhotos([]);
+        }
+      } catch (err: unknown) {
+        const msg = getErrorMessage(err, "Failed to load photographer profile.");
+        setError(msg);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPhotographer();
+    fetchPhotographerData();
   }, [id]);
 
   const handleBookingSubmit = (e: React.FormEvent) => {
@@ -248,8 +124,9 @@ const PhotographerDetails = () => {
       toast.error("Please fill in all required fields.");
       return;
     }
+    const artistName = profile?.name || "The photographer";
     toast.success(
-      `Booking request submitted successfully for ${bookingForm.eventType}! Arjun Nair's team will contact you shortly.`,
+      `Booking request submitted successfully for ${bookingForm.eventType}! ${artistName}'s team will contact you shortly.`,
     );
     setIsBookingModalOpen(false);
     setBookingForm({
@@ -267,8 +144,9 @@ const PhotographerDetails = () => {
       toast.error("Please fill in the required contact information.");
       return;
     }
+    const artistName = profile?.name || "The photographer";
     toast.success(
-      "Quotation request submitted! We will send a detailed price breakdown to your email.",
+      `Quotation request submitted! ${artistName}'s team will send a detailed price breakdown to your email.`,
     );
     setIsQuoteModalOpen(false);
     setQuoteForm({
@@ -293,553 +171,494 @@ const PhotographerDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-text-secondary text-sm">
+      <div className="min-h-screen bg-[#070708] flex items-center justify-center text-text-secondary text-sm">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <span>Loading artist profile...</span>
         </div>
       </div>
     );
   }
 
-  if (!profile) {
+  if (error || !profile) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-text-secondary p-6">
-        <p className="text-lg">Artist profile not found.</p>
-        <button
-          onClick={() => navigate("/photographers")}
-          className="mt-4 text-primary font-bold hover:underline flex items-center gap-1"
-        >
-          Back to list <ArrowRight size={14} />
-        </button>
+      <div className="min-h-screen bg-[#070708] flex flex-col items-center justify-center text-text-secondary p-6">
+        <div className="max-w-md w-full bg-[#0f1012] border border-white/5 rounded-2xl p-8 text-center space-y-4 shadow-xl">
+          <div className="w-14 h-14 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mx-auto border border-red-500/20">
+            <Camera size={26} />
+          </div>
+          <h2 className="text-xl font-heading font-semibold text-white">
+            Photographer Not Found
+          </h2>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            {error ||
+              "The photographer profile you are looking for does not exist or may have been removed."}
+          </p>
+          <div className="pt-2 flex justify-center gap-3">
+            <button
+              onClick={() => navigate("/feed")}
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-800 text-gray-300 transition"
+            >
+              Back to Feed
+            </button>
+            <button
+              onClick={() => navigate("/photographers")}
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-black hover:bg-primary/90 transition flex items-center gap-1.5"
+            >
+              <span>Browse Photographers</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Filter gallery items based on active chip
-  const filteredGallery = profile.gallery.filter((item) =>
-    galleryFilter === "all" ? true : item.category === galleryFilter,
-  );
+  const packagesList = profile.packages || [];
 
   return (
     <div className="min-h-screen bg-[#070708] text-[#F3F4F6] flex flex-col justify-between font-body select-none">
-      {/* 1. Artist Cover & Main Details */}
-      <div className="w-full relative">
-        {/* Cover Photo */}
-        <div className="h-72 w-full bg-neutral-950 overflow-hidden relative">
-          <img
-            src={profile.coverPhoto}
-            alt={profile.name}
-            className="w-full h-full object-cover opacity-45"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#070708] via-[#070708]/40 to-transparent" />
-        </div>
-
-        {/* Profile Card Overlay Container */}
-        <div className="max-w-7xl mx-auto px-6 -mt-20 relative z-10 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 pb-6 border-b border-white/5">
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
-            {/* Round Avatar with Gold Ring border */}
-            <div className="relative w-36 h-36 rounded-full overflow-hidden bg-neutral-900 border-4 border-primary/45 shadow-2xl flex-shrink-0">
+      <div>
+        {/* 1. Artist Cover & Main Details */}
+        <div className="w-full relative">
+          {/* Cover Photo */}
+          <div className="h-72 w-full bg-neutral-950 overflow-hidden relative">
+            {profile.coverPhoto ? (
               <img
-                src={profile.profilePhoto}
+                src={profile.coverPhoto}
                 alt={profile.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover opacity-60"
               />
-            </div>
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-neutral-900 via-[#0f1012] to-neutral-950 flex items-center justify-center">
+                <Camera size={48} className="text-primary/20 stroke-[1]" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#070708] via-[#070708]/40 to-transparent" />
+          </div>
 
-            {/* Profile Info */}
-            <div className="mb-2 space-y-2">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
-                {profile.specialities.map((badge) => (
-                  <span
-                    key={badge}
-                    className="text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-[#f2c94c]/10 border border-[#f2c94c]/20 text-[#f2c94c]"
-                  >
-                    {badge}
+          {/* Profile Card Overlay Container */}
+          <div className="max-w-7xl mx-auto px-6 -mt-20 relative z-10 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
+              {/* Round Avatar with Gold Ring border */}
+              <div className="relative w-36 h-36 rounded-full overflow-hidden bg-neutral-900 border-4 border-primary/45 shadow-2xl flex-shrink-0 flex items-center justify-center">
+                {profile.profilePhoto ? (
+                  <img
+                    src={profile.profilePhoto}
+                    alt={profile.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-4xl font-heading font-bold text-primary">
+                    {profile.name ? profile.name.charAt(0).toUpperCase() : "P"}
                   </span>
-                ))}
+                )}
               </div>
-              <h1 className="font-heading text-3xl md:text-4xl font-semibold tracking-wide text-white">
-                {profile.name}
-              </h1>
-              <p className="text-xs md:text-sm text-gray-400 font-light max-w-xl leading-relaxed">
-                {profile.bio}
-              </p>
-            </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
-            <button
-              onClick={() => openBookingForPlan("Signature Choice")}
-              className="px-6 py-2.5 bg-gradient-to-r from-[#F2C94C] to-[#dfb230] text-black font-semibold text-xs rounded-full hover:brightness-110 active:scale-98 transition shadow-lg shadow-[#F2C94C]/15 cursor-pointer uppercase tracking-wider text-center"
-            >
-              Book Now
-            </button>
-            <button
-              onClick={() => setIsQuoteModalOpen(true)}
-              className="px-6 py-2.5 bg-transparent border border-white/20 text-white hover:text-black hover:bg-white font-semibold text-xs rounded-full active:scale-98 transition cursor-pointer uppercase tracking-wider text-center"
-            >
-              Request Quotation
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Metrics Counter Row */}
-      <div className="max-w-7xl mx-auto w-full px-6 py-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { value: `${profile.experienceYears}+`, label: "Years Experience" },
-            { value: `${profile.rating}★`, label: "Avg. Rating" },
-            { value: `${profile.totalBookings}+`, label: "Events Captured" },
-            { value: `${profile.awardsCount}+`, label: "Industry Awards" },
-          ].map((stat, i) => (
-            <div
-              key={i}
-              className="bg-[#0f1012] border border-white/5 rounded-xl p-5 text-center hover:border-white/10 transition-colors shadow-lg"
-            >
-              <div className="text-xl md:text-2xl font-bold text-[#F2C94C] tracking-tight">
-                {stat.value}
-              </div>
-              <div className="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest font-medium mt-1">
-                {stat.label}
+              {/* Profile Info */}
+              <div className="mb-2 space-y-2">
+                {profile.specialities && profile.specialities.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+                    {profile.specialities.map((badge) => (
+                      <span
+                        key={badge}
+                        className="text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-[#f2c94c]/10 border border-[#f2c94c]/20 text-[#f2c94c]"
+                      >
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <h1 className="font-heading text-3xl md:text-4xl font-semibold tracking-wide text-white">
+                  {profile.name}
+                </h1>
+                {profile.location && (
+                  <p className="flex items-center justify-center md:justify-start gap-1 text-xs text-text-secondary">
+                    <MapPin size={12} className="text-primary" />
+                    <span>{profile.location}</span>
+                  </p>
+                )}
+                <p className="text-xs md:text-sm text-gray-400 font-light max-w-xl leading-relaxed">
+                  {profile.bio || "No biography provided yet."}
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* 3. Section Tabs Bar */}
-      <div className="border-b border-white/5 w-full bg-[#08080a] sticky top-[72px] z-20">
-        <div className="max-w-7xl mx-auto px-6 flex overflow-x-auto gap-8 no-scrollbar scroll-smooth">
-          {(
-            [
-              "overview",
-              "portfolio",
-              "packages",
-              "reviews",
-              "policies",
-            ] as const
-          ).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-4 text-xs font-semibold uppercase tracking-widest border-b-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === tab
-                  ? "border-[#F2C94C] text-[#F2C94C]"
-                  : "border-transparent text-gray-500 hover:text-gray-300"
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
+              <button
+                onClick={() =>
+                  openBookingForPlan(
+                    packagesList[0]?.packageName || "General Inquiry",
+                  )
+                }
+                className="px-6 py-2.5 bg-gradient-to-r from-[#F2C94C] to-[#dfb230] text-black font-semibold text-xs rounded-full hover:brightness-110 active:scale-98 transition shadow-lg shadow-[#F2C94C]/15 cursor-pointer uppercase tracking-wider text-center"
+              >
+                Book Now
+              </button>
+              <button
+                onClick={() => setIsQuoteModalOpen(true)}
+                className="px-6 py-2.5 bg-transparent border border-white/20 text-white hover:text-black hover:bg-white font-semibold text-xs rounded-full active:scale-98 transition cursor-pointer uppercase tracking-wider text-center"
+              >
+                Request Quotation
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Metrics Counter Row */}
+        <div className="max-w-7xl mx-auto w-full px-6 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              {
+                value: profile.startingPrice
+                  ? `₹${profile.startingPrice.toLocaleString("en-IN")}`
+                  : "On Request",
+                label: "Starting Price",
+              },
+              {
+                value: `${packagesList.length}`,
+                label: "Curated Packages",
+              },
+              {
+                value: `${galleryPhotos.length}`,
+                label: "Moments & Frames",
+              },
+              {
+                value:
+                  profile.serviceAreas && profile.serviceAreas.length > 0
+                    ? `${profile.serviceAreas.length} Areas`
+                    : profile.location || "Kerala",
+                label: "Coverage Region",
+              },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                className="bg-[#0f1012] border border-white/5 rounded-xl p-5 text-center hover:border-white/10 transition-colors shadow-lg"
+              >
+                <div className="text-xl md:text-2xl font-bold text-[#F2C94C] tracking-tight">
+                  {stat.value}
+                </div>
+                <div className="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest font-medium mt-1">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. Section Tabs Bar */}
+        <div className="border-b border-white/5 w-full bg-[#08080a] sticky top-[72px] z-20">
+          <div className="max-w-7xl mx-auto px-6 flex overflow-x-auto gap-8 no-scrollbar scroll-smooth">
+            {(
+              [
+                "overview",
+                "portfolio",
+                "packages",
+                "reviews",
+                "policies",
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`py-4 text-xs font-semibold uppercase tracking-widest border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                  activeTab === tab
+                    ? "border-[#F2C94C] text-[#F2C94C]"
+                    : "border-transparent text-gray-500 hover:text-gray-300"
                 }`}
-            >
-              {tab}
-            </button>
-          ))}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* 4. Tab Views Content */}
-      <div className="max-w-7xl mx-auto w-full px-6 py-8 flex-1">
-        {/* TAB 1: OVERVIEW */}
-        {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
-            {/* Left Narrative details */}
-            <div className="space-y-6">
-              <div className="bg-[#0f1012]/50 border border-white/5 p-6 rounded-2xl space-y-4">
-                <h3 className="text-lg font-heading font-semibold text-white tracking-wide">
-                  The Cinematic Philosophy
+        {/* 4. Tab Views Content */}
+        <div className="max-w-7xl mx-auto w-full px-6 py-8 flex-1">
+          {/* TAB 1: OVERVIEW */}
+          {activeTab === "overview" && (
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
+              {/* Left Narrative details */}
+              <div className="space-y-6">
+                <div className="bg-[#0f1012]/50 border border-white/5 p-6 rounded-2xl space-y-4">
+                  <h3 className="text-lg font-heading font-semibold text-white tracking-wide">
+                    About the Artist
+                  </h3>
+                  <p className="text-sm text-gray-400 leading-relaxed font-light">
+                    {profile.bio ||
+                      "No biography provided yet by this photographer."}
+                  </p>
+                </div>
+
+                {/* Equipment & Languages Info Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-[#0f1012] border border-white/5 p-5 rounded-xl flex items-start gap-4">
+                    <div className="p-2.5 bg-white/5 rounded-lg text-[#F2C94C] flex-shrink-0">
+                      <Camera size={18} />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                        Equipment
+                      </h4>
+                      <p className="text-xs text-gray-300 mt-1 font-light leading-relaxed">
+                        {profile.equipment && profile.equipment.length > 0
+                          ? profile.equipment.join(", ")
+                          : "Equipment specifications available on request."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#0f1012] border border-white/5 p-5 rounded-xl flex items-start gap-4">
+                    <div className="p-2.5 bg-white/5 rounded-lg text-[#F2C94C] flex-shrink-0">
+                      <Clock size={18} />
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                        Languages Spoken
+                      </h4>
+                      <p className="text-xs text-gray-300 mt-1 font-light leading-relaxed">
+                        {profile.languages && profile.languages.length > 0
+                          ? profile.languages.join(", ")
+                          : "English, Malayalam"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Map/Region details */}
+              <div className="bg-[#0f1012]/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col justify-between h-[230px] p-5 relative group">
+                <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none group-hover:scale-105 transition-transform duration-700">
+                  <Map size={180} className="stroke-[1]" />
+                </div>
+
+                <div className="z-10 flex items-center justify-center h-full">
+                  <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-[#F2C94C] animate-pulse">
+                    <MapPin size={24} />
+                  </div>
+                </div>
+
+                <div className="z-10 bg-[#070708]/90 border border-white/5 py-2.5 px-4 rounded-xl flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs text-gray-300 font-medium">
+                    {profile.serviceAreas && profile.serviceAreas.length > 0
+                      ? `Serving ${profile.serviceAreas.map((a) => a.name).join(", ")}`
+                      : profile.location
+                        ? `Based in ${profile.location}`
+                        : "Available across Kerala"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: PORTFOLIO / GALLERY */}
+          {(activeTab === "portfolio" || activeTab === "overview") && (
+            <div className="mt-12 space-y-6">
+              <div className="border-b border-white/5 pb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-heading font-semibold text-white tracking-wide">
+                    Portfolio & Creative Work
+                  </h3>
+                  <p className="text-xs text-gray-400 font-light mt-0.5">
+                    Moments and frames published by {profile.name}.
+                  </p>
+                </div>
+                <span className="text-xs text-gray-500 font-medium">
+                  {galleryPhotos.length} {galleryPhotos.length === 1 ? "Photo" : "Photos"}
+                </span>
+              </div>
+
+              {galleryPhotos.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {galleryPhotos.map((photo) => (
+                    <div
+                      key={photo.id}
+                      className="aspect-square rounded-xl overflow-hidden relative group bg-neutral-900 border border-white/5 shadow-md"
+                    >
+                      <img
+                        src={photo.url}
+                        alt={photo.caption || "Portfolio moment"}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {photo.caption && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                          <span className="text-xs text-white/90 line-clamp-2">
+                            {photo.caption}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-16 text-center text-gray-500 text-xs border border-white/5 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2">
+                  <Camera size={28} className="opacity-40 text-primary" />
+                  <span>No portfolio moments uploaded yet.</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: PACKAGES */}
+          {(activeTab === "packages" || activeTab === "overview") && (
+            <div className="mt-16 space-y-8">
+              <div className="text-center space-y-2 max-w-md mx-auto">
+                <h3 className="text-xl md:text-2xl font-semibold tracking-wide text-white">
+                  Pricing Packages & Collections
                 </h3>
-                <p className="text-sm text-gray-400 leading-relaxed font-light">
-                  {profile.cinematicPhilosophy}
+                <p className="text-xs text-gray-400 font-light">
+                  Tailored photography coverage designed for your special occasions.
                 </p>
               </div>
 
-              {/* Equipment & Delivery Info Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-[#0f1012] border border-white/5 p-5 rounded-xl flex items-start gap-4">
-                  <div className="p-2.5 bg-white/5 rounded-lg text-[#F2C94C] flex-shrink-0">
-                    <Camera size={18} />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                      Equipment
-                    </h4>
-                    <p className="text-xs text-gray-300 mt-1 font-light leading-relaxed">
-                      {profile.equipmentSummary}
-                    </p>
-                  </div>
-                </div>
+              {packagesList.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                  {packagesList.map((pkg, idx) => {
+                    const features = [
+                      ...(pkg.description
+                        ? pkg.description
+                            .split(",")
+                            .map((f) => f.trim())
+                            .filter(Boolean)
+                        : []),
+                      ...(pkg.droneIncluded ? ["4K Drone Aerial Coverage"] : []),
+                      ...(pkg.albumIncluded ? ["Custom Designed Photo Album"] : []),
+                      ...(pkg.framesIncluded ? ["High-Quality Photo Frames"] : []),
+                      ...(pkg.videographersIncluded
+                        ? ["Dedicated Videography Team"]
+                        : []),
+                    ];
 
-                <div className="bg-[#0f1012] border border-white/5 p-5 rounded-xl flex items-start gap-4">
-                  <div className="p-2.5 bg-white/5 rounded-lg text-[#F2C94C] flex-shrink-0">
-                    <Clock size={18} />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                      Delivery
-                    </h4>
-                    <p className="text-xs text-gray-300 mt-1 font-light leading-relaxed">
-                      {profile.deliverySummary}
-                    </p>
-                  </div>
+                    return (
+                      <div
+                        key={pkg._id || idx}
+                        className="bg-[#0f1012]/80 border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 shadow-md"
+                      >
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                                Collection Tier
+                              </h4>
+                              <h5 className="text-sm font-semibold text-white tracking-wide mt-0.5">
+                                {pkg.packageName}
+                              </h5>
+                            </div>
+                            <div className="text-[#F2C94C]">
+                              <Sparkles size={16} />
+                            </div>
+                          </div>
+
+                          {features.length > 0 && (
+                            <ul className="space-y-2.5 pt-2">
+                              {features.map((feature, fIdx) => (
+                                <li
+                                  key={fIdx}
+                                  className="flex items-center gap-2.5 text-xs text-gray-400"
+                                >
+                                  <Check
+                                    size={12}
+                                    className="text-[#F2C94C] shrink-0"
+                                  />
+                                  <span className="font-light">{feature}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+
+                        <div className="pt-8 space-y-4">
+                          <div>
+                            <span className="block text-[8px] text-gray-500 uppercase tracking-widest font-bold">
+                              Package Price
+                            </span>
+                            <span className="text-xl font-extrabold text-white">
+                              ₹{pkg.price.toLocaleString("en-IN")}
+                            </span>
+                          </div>
+
+                          <button
+                            onClick={() => openBookingForPlan(pkg.packageName)}
+                            className="w-full py-2.5 text-[10px] uppercase font-bold tracking-widest rounded-lg transition-all active:scale-98 cursor-pointer text-center bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-neutral-950"
+                          >
+                            Book This Plan
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              ) : (
+                <div className="py-12 text-center text-gray-500 text-xs border border-white/5 border-dashed rounded-2xl flex flex-col items-center justify-center gap-3 max-w-xl mx-auto">
+                  <span>No fixed packages published yet by this photographer.</span>
+                  <button
+                    onClick={() => setIsQuoteModalOpen(true)}
+                    className="px-5 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 text-xs font-semibold transition cursor-pointer"
+                  >
+                    Request Custom Quotation
+                  </button>
+                </div>
+              )}
             </div>
+          )}
 
-            {/* Right Map/Region details */}
-            <div className="bg-[#0f1012]/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col justify-between h-[230px] p-5 relative group">
-              {/* Map Outline Abstract Visual representation */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none group-hover:scale-105 transition-transform duration-700">
-                <Map size={180} className="stroke-[1]" />
-              </div>
-
-              <div className="z-10 flex items-center justify-center h-full">
-                <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-[#F2C94C] animate-pulse">
-                  <MapPin size={24} />
-                </div>
-              </div>
-
-              <div className="z-10 bg-[#070708]/90 border border-white/5 py-2.5 px-4 rounded-xl flex items-center justify-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs text-gray-300 font-medium">
-                  {profile.serviceAreas && profile.serviceAreas.length > 0
-                    ? `Serving ${profile.serviceAreas.map((a) => a.name).join(", ")}, based in ${profile.location}`
-                    : `Based in ${profile.location}`}
+          {/* TAB 4: REVIEWS */}
+          {activeTab === "reviews" && (
+            <div className="space-y-6 max-w-2xl mx-auto py-6">
+              <div className="py-12 text-center text-gray-500 text-xs border border-white/5 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2">
+                <Star size={24} className="opacity-40 text-primary" />
+                <span className="text-sm text-text font-medium">No reviews yet</span>
+                <span className="text-xs text-text-secondary max-w-xs">
+                  Reviews and client ratings for {profile.name} will appear here after verified booking completions.
                 </span>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* TAB 2: PORTFOLIO */}
-        {activeTab === "portfolio" && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-heading font-semibold text-white tracking-wide">
-              Portfolio & Creative Work
-            </h3>
-            <p className="text-sm text-gray-400 font-light">
-              Explore selective frames capturing visual stories, client
-              celebrations, and editorial portraits.
-            </p>
-          </div>
-        )}
-
-        {/* TAB 3: PACKAGES */}
-        {activeTab === "packages" && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-heading font-semibold text-white tracking-wide">
-              Pricing Packages & Tiers
-            </h3>
-            <p className="text-sm text-gray-400 font-light">
-              Choose a design package below or request a custom quotation
-              tailored for your specific celebration needs.
-            </p>
-          </div>
-        )}
-
-        {/* TAB 5: REVIEWS */}
-        {activeTab === "reviews" && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4 border-b border-white/5 pb-4">
-              <div className="text-3xl font-bold text-[#F2C94C]">
-                {profile.rating}
-              </div>
-              <div>
-                <div className="flex gap-0.5 text-[#F2C94C]">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      className="fill-current animate-pulse"
-                    />
-                  ))}
-                </div>
-                <div className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-1">
-                  Based on {profile.reviewsCount} reviews
-                </div>
-              </div>
-            </div>
-            {/* Custom Review lists */}
-            <div className="space-y-4">
+          {/* TAB 5: POLICIES */}
+          {activeTab === "policies" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
-                  author: "Sneha & Rahul",
-                  date: "Jan 2026",
-                  rating: 5,
-                  comment:
-                    "Arjun and his team were absolutely incredible at our wedding in Kochi. The cinematic video brought tears to our eyes!",
+                  icon: Shield,
+                  title: "Booking & Availability",
+                  desc: "Submit a direct booking request to check availability for your event date. The photographer will confirm details directly.",
                 },
                 {
-                  author: "Vikram K.",
-                  date: "Nov 2025",
-                  rating: 5,
-                  comment:
-                    "Professional, creative, and completely unobtrusive. The photos are absolute masterpieces.",
+                  icon: Clock,
+                  title: "Timelines & Delivery",
+                  desc: "Digital previews and final curated photo albums are delivered in coordination with the photographer's schedule.",
                 },
-              ].map((rev, idx) => (
-                <div
-                  key={idx}
-                  className="bg-[#0f1012] border border-white/5 p-5 rounded-xl space-y-2"
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold text-white">
-                      {rev.author}
-                    </span>
-                    <span className="text-[10px] text-gray-500">
-                      {rev.date}
-                    </span>
-                  </div>
-                  <div className="flex gap-0.5 text-[#F2C94C]">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} size={10} className="fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-400 font-light leading-relaxed">
-                    {rev.comment}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 6: POLICIES */}
-        {activeTab === "policies" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Shield,
-                title: "Booking Confirmation",
-                desc: "50% advance payment required to lock dates. Remaining balance due on the day of event.",
-              },
-              {
-                icon: Clock,
-                title: "Delivery Timelines",
-                desc: "Digital previews sent in 7 days. Final edit reels and luxury album shipped within 45 days.",
-              },
-              {
-                icon: X,
-                title: "Cancellation Policy",
-                desc: "Refund of booking advance is subject to cancellation timelines. Free rescheduling up to 90 days before event date.",
-              },
-            ].map((p, idx) => {
-              const Icon = p.icon;
-              return (
-                <div
-                  key={idx}
-                  className="bg-[#0f1012] border border-white/5 p-5 rounded-xl space-y-3"
-                >
-                  <div className="p-2 bg-white/5 rounded-lg text-[#F2C94C] w-9 h-9 flex items-center justify-center">
-                    <Icon size={16} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-white">
-                    {p.title}
-                  </h4>
-                  <p className="text-xs text-gray-400 font-light leading-relaxed">
-                    {p.desc}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* 5. Pricing Collections Cards (Always visible below overview/packages to match mockup hierarchy) */}
-        {(activeTab === "overview" || activeTab === "packages") && (
-          <div className="mt-16 space-y-8">
-            <div className="text-center space-y-2 max-w-md mx-auto">
-              <h3 className="text-xl md:text-2xl font-semibold tracking-wide text-white">
-                Exclusive Collections
-              </h3>
-              <p className="text-xs text-gray-400 font-light">
-                Meticulously crafted tiers designed to encompass every nuance of
-                your celebration.
-              </p>
-            </div>
-
-            {/* Package Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {profile.packages.map((pkg, idx) => (
-                <div
-                  key={idx}
-                  className={`bg-[#0f1012]/80 border rounded-2xl p-6 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 relative ${pkg.popular
-                      ? "border-[#F2C94C]/60 shadow-[0_0_20px_rgba(242,201,76,0.15)] bg-gradient-to-b from-[#16171a] to-[#0f1012]"
-                      : "border-white/5 shadow-md"
-                    }`}
-                >
-                  {/* Popular Badge */}
-                  {pkg.popular && (
-                    <span className="absolute -top-2.5 right-6 bg-[#F2C94C] text-black font-extrabold text-[8px] uppercase tracking-widest px-2.5 py-1 rounded-full">
-                      Most Popular
-                    </span>
-                  )}
-
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                          {pkg.packageName}
-                        </h4>
-                        <h5 className="text-sm font-semibold text-white tracking-wide mt-0.5">
-                          {pkg.subName}
-                        </h5>
-                      </div>
-
-                      {/* Sub-Icon display matching mockup theme */}
-                      <div className="text-[#F2C94C]">
-                        <Sparkles size={16} />
-                      </div>
+                {
+                  icon: Calendar,
+                  title: "Custom Inquiries",
+                  desc: "Destination shoots, bespoke events, and multi-day coverage can be requested via the quotation form.",
+                },
+              ].map((p, idx) => {
+                const Icon = p.icon;
+                return (
+                  <div
+                    key={idx}
+                    className="bg-[#0f1012] border border-white/5 p-5 rounded-xl space-y-3"
+                  >
+                    <div className="p-2 bg-white/5 rounded-lg text-[#F2C94C] w-9 h-9 flex items-center justify-center">
+                      <Icon size={16} />
                     </div>
-
-                    {/* Features checklist */}
-                    <ul className="space-y-2.5 pt-2">
-                      {pkg.features.map((feature, fIdx) => (
-                        <li
-                          key={fIdx}
-                          className="flex items-center gap-2.5 text-xs text-gray-400"
-                        >
-                          <Check size={12} className="text-[#F2C94C]" />
-                          <span className="font-light">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <h4 className="text-xs font-semibold text-white">
+                      {p.title}
+                    </h4>
+                    <p className="text-xs text-gray-400 font-light leading-relaxed">
+                      {p.desc}
+                    </p>
                   </div>
-
-                  {/* Pricing Footer */}
-                  <div className="pt-8 space-y-4">
-                    <div>
-                      <span className="block text-[8px] text-gray-500 uppercase tracking-widest font-bold">
-                        Starting at
-                      </span>
-                      <span className="text-xl font-extrabold text-white">
-                        ₹{pkg.price.toLocaleString("en-IN")}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => openBookingForPlan(pkg.packageName)}
-                      className={`w-full py-2.5 text-[10px] uppercase font-bold tracking-widest rounded-lg transition-all active:scale-98 cursor-pointer text-center ${pkg.popular
-                          ? "bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-neutral-950 font-bold"
-                          : "bg-transparent border border-white/10 hover:border-white/20 text-gray-300"
-                        }`}
-                    >
-                      {pkg.buttonText}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-          </div>
-        )}
-
-        {/* 6. Gallery / Bottom Visual grid (Always visible below overview/portfolio to match mockup hierarchy) */}
-        {(activeTab === "overview" || activeTab === "portfolio") && (
-          <div className="mt-20 space-y-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-white/5 pb-4">
-              <div className="space-y-1 text-center sm:text-left">
-                <h3 className="text-xl font-heading font-semibold text-white tracking-wide">
-                  Gallery & BTS
-                </h3>
-                <p className="text-xs text-gray-400 font-light">
-                  A window into our cinematic world.
-                </p>
-              </div>
-
-              {/* Gallery Filter Chips */}
-              <div className="flex flex-wrap gap-2">
-                {(["all", "wedding", "bts", "editorial"] as const).map(
-                  (chip) => (
-                    <button
-                      key={chip}
-                      onClick={() => setGalleryFilter(chip)}
-                      className={`text-[9px] font-extrabold uppercase tracking-widest px-3.5 py-1.5 rounded-full border transition-all cursor-pointer ${galleryFilter === chip
-                          ? "bg-[#F2C94C] border-[#F2C94C] text-black"
-                          : "bg-transparent border-white/10 text-gray-400 hover:text-white"
-                        }`}
-                    >
-                      {chip}
-                    </button>
-                  ),
-                )}
-              </div>
-            </div>
-
-            {/* Masonry / Structured Image Grid matching the design layout */}
-            {filteredGallery.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 max-w-6xl mx-auto">
-                {/* Left Column: Tall image (5 columns wide) */}
-                {filteredGallery[0] && (
-                  <div className="md:col-span-5 h-[450px] rounded-2xl overflow-hidden relative group">
-                    <img
-                      src={filteredGallery[0].url}
-                      alt={filteredGallery[0].caption}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-5">
-                      <span className="text-xs text-white font-medium">
-                        {filteredGallery[0].caption}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Right Column: Composite grid of 3 images (7 columns wide) */}
-                <div className="md:col-span-7 flex flex-col gap-4">
-                  {/* Top sub-row: Two columns side-by-side */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-[220px]">
-                    {filteredGallery[1] && (
-                      <div className="h-full rounded-2xl overflow-hidden relative group">
-                        <img
-                          src={filteredGallery[1].url}
-                          alt={filteredGallery[1].caption}
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                          <span className="text-[10px] text-white font-medium">
-                            {filteredGallery[1].caption}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    {filteredGallery[2] && (
-                      <div className="h-full rounded-2xl overflow-hidden relative group">
-                        <img
-                          src={filteredGallery[2].url}
-                          alt={filteredGallery[2].caption}
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                          <span className="text-[10px] text-white font-medium">
-                            {filteredGallery[2].caption}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Bottom wide image in right column */}
-                  {filteredGallery[3] && (
-                    <div className="h-[214px] rounded-2xl overflow-hidden relative group">
-                      <img
-                        src={filteredGallery[3].url}
-                        alt={filteredGallery[3].caption}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                        <span className="text-[10px] text-white font-medium">
-                          {filteredGallery[3].caption}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="py-20 text-center text-gray-500 text-xs border border-white/5 border-dashed rounded-2xl">
-                No items in this gallery filter category.
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* 5. Interactive Booking Modal */}
@@ -882,7 +701,7 @@ const PhotographerDetails = () => {
                     }))
                   }
                   className="w-full bg-[#070708] border border-white/15 rounded-lg px-3.5 py-2 text-xs text-white focus:border-[#F2C94C] outline-none transition"
-                  placeholder="John Doe"
+                  placeholder="Your full name"
                 />
               </div>
 
@@ -901,7 +720,7 @@ const PhotographerDetails = () => {
                     }))
                   }
                   className="w-full bg-[#070708] border border-white/15 rounded-lg px-3.5 py-2 text-xs text-white focus:border-[#F2C94C] outline-none transition"
-                  placeholder="john@example.com"
+                  placeholder="name@example.com"
                 />
               </div>
 
@@ -991,8 +810,7 @@ const PhotographerDetails = () => {
                 Request Quotation
               </h3>
               <p className="text-xs text-gray-400">
-                Request custom pricing based on event headcount and location
-                details.
+                Request custom pricing from {profile.name} based on event headcount and location details.
               </p>
             </div>
 
@@ -1048,7 +866,7 @@ const PhotographerDetails = () => {
                     setQuoteForm((prev) => ({ ...prev, email: e.target.value }))
                   }
                   className="w-full bg-[#070708] border border-white/15 rounded-lg px-3 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
-                  placeholder="name@gmail.com"
+                  placeholder="name@example.com"
                 />
               </div>
 
@@ -1116,10 +934,11 @@ const PhotographerDetails = () => {
                               : [...prev.servicesRequired, srv],
                           }));
                         }}
-                        className={`py-1.5 px-3 rounded-lg text-left text-[10px] border transition flex items-center justify-between cursor-pointer ${isChecked
+                        className={`py-1.5 px-3 rounded-lg text-left text-[10px] border transition flex items-center justify-between cursor-pointer ${
+                          isChecked
                             ? "bg-[#F2C94C]/10 border-[#F2C94C] text-[#F2C94C]"
                             : "bg-[#070708] border-white/5 text-gray-400"
-                          }`}
+                        }`}
                       >
                         <span>{srv}</span>
                         {isChecked && <Check size={10} />}
@@ -1164,8 +983,7 @@ const PhotographerDetails = () => {
           </div>
 
           <p className="text-[10px] text-gray-600 font-light">
-            © {new Date().getFullYear()} Lumora Luxury Photography. All rights
-            reserved.
+            © {new Date().getFullYear()} Lumora Photography. All rights reserved.
           </p>
         </div>
       </footer>

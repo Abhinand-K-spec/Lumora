@@ -10,6 +10,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { feedService } from "../../services/feedService";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 const MAX_IMAGES = 10;
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
@@ -196,11 +197,8 @@ export default function CreateFeedPost({
       } else {
         navigate("/profile");
       }
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Unable to publish feed post.";
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, "Unable to publish feed post.");
       setError(message);
       toast.error(message);
     } finally {

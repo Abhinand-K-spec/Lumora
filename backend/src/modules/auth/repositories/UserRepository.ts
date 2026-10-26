@@ -35,19 +35,22 @@ export class UserRepository
     await Users.findByIdAndUpdate(id, { accountStatus: accountStatus.Deleted });
   }
 
-  async findWithFilter(filter: any): Promise<IUsers[]> {
-    return await Users.find(filter);
+  async findWithFilter(filter: Record<string, unknown>): Promise<IUsers[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return await Users.find(filter as unknown as any);
   }
 
   async findAllPaginated(
-    filter: any,
+    filter: Record<string, unknown>,
     skip: number,
     limit: number,
     sort: Record<string, 1 | -1> = { createdAt: -1 },
   ): Promise<[IUsers[], number]> {
     const [users, total] = await Promise.all([
-      Users.find(filter).sort(sort).skip(skip).limit(limit).exec(),
-      Users.countDocuments(filter).exec(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Users.find(filter as unknown as any).sort(sort).skip(skip).limit(limit).exec(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Users.countDocuments(filter as unknown as any).exec(),
     ]);
     return [users, total];
   }

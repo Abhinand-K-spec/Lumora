@@ -24,7 +24,7 @@ export class UserManagementService implements IUserManagementService {
     },
     pagination: PaginationParams,
   ): Promise<PaginatedUsersResult> {
-    const query: any = {
+    const query: Record<string, unknown> = {
       role: userRole.USER,
       accountStatus: { $ne: accountStatus.Deleted },
     };

@@ -1,5 +1,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
+import { AppError } from "../errors/AppError.js";
+import { HttpStatus } from "../enums/HTTP.status.code.js";
 
 dotenv.config();
 
@@ -17,7 +19,7 @@ if (
   !R2_SECRET_ACCESS_KEY ||
   !R2_BUCKET_NAME
 ) {
-  throw new Error("Missing required Cloudflare R2 environment variables");
+  throw new AppError(HttpStatus.INTERNAL_SERVER_ERROR, "Missing required Cloudflare R2 environment variables");
 }
 
 export const R2_BUCKET = R2_BUCKET_NAME;

@@ -31,7 +31,7 @@ export class PhotographerService implements IPhotographerService {
     private readonly _photographerRepository: IPhotographerRepository,
     private readonly _packageRepository: IPackageRepository,
     private readonly _approvalRequestRepository: IPhotographerApprovalRequestRepository,
-  ) {}
+  ) { }
 
   async getProfile(userId: string): Promise<photographerProfileResponseDto> {
     let user = await this._userRepository.findById(userId);
@@ -70,7 +70,7 @@ export class PhotographerService implements IPhotographerService {
     },
     pagination: PaginationParams,
   ): Promise<PaginatedResult<photographerProfileResponseDto>> {
-    const query: any = { approvalStatus: "APPROVED" };
+    const query: Record<string, unknown> = { approvalStatus: "APPROVED" };
     const page = Math.max(1, pagination?.page || 1);
     const limit = Math.max(1, Math.min(100, pagination?.limit || 10));
     const skip = (page - 1) * limit;
@@ -147,9 +147,9 @@ export class PhotographerService implements IPhotographerService {
     const location =
       filters.lng !== undefined && filters.lat !== undefined
         ? {
-            longitude: filters.lng,
-            latitude: filters.lat,
-          }
+          longitude: filters.lng,
+          latitude: filters.lat,
+        }
         : undefined;
 
     // 5. Fetch matching photographer profiles with database pagination and sorting

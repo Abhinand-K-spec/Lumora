@@ -21,6 +21,7 @@ import adminPhotographerService, {
   type ApprovalRequestItem,
   type ApprovalMetrics,
 } from "../../services/adminPhotographerService";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 /* ─── Reject Modal ─────────────────────────────────────────────────────────── */
 const RejectModal = ({
@@ -402,10 +403,8 @@ const AdminPhotographers = () => {
       toast.success("Application approved successfully!");
       await fetchRequests();
       await fetchMetrics();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || "Failed to approve application.",
-      );
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to approve application."));
     } finally {
       setActionLoading(null);
     }
@@ -423,10 +422,8 @@ const AdminPhotographers = () => {
       setRejectTarget(null);
       await fetchRequests();
       await fetchMetrics();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || "Failed to reject application.",
-      );
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to reject application."));
     } finally {
       setRejectSubmitting(false);
     }

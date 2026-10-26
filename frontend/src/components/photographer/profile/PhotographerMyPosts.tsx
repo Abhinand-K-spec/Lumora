@@ -16,6 +16,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { feedService, type FeedPost } from "../../../services/feedService";
+import { getErrorMessage } from "../../../utils/errorUtils";
 
 export default function PhotographerMyPosts() {
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -29,7 +30,7 @@ export default function PhotographerMyPosts() {
       setLoading(true);
       const res = await feedService.getMyPosts({ limit: 50 });
       setPosts(res.posts || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to fetch my posts:", err);
       // Fallback: don't break the page if empty or network error
       setPosts([]);
@@ -53,8 +54,8 @@ export default function PhotographerMyPosts() {
         setSelectedPost(null);
       }
       toast.success("Post removed successfully");
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || "Failed to delete post";
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, "Failed to delete post");
       toast.error(msg);
     } finally {
       setDeletingId(null);

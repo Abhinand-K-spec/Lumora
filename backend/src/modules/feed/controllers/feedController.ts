@@ -47,6 +47,48 @@ export class FeedController {
     sendSuccess(res, post, FEED_MESSAGES.POSTED_SUCCESS, HttpStatus.CREATED);
   }
 
+  private _parseCursor(
+    cursorQuery: unknown,
+    cursorCreatedAt: unknown,
+    cursorId: unknown,
+  ): { createdAt: Date; id: string } | undefined {
+    if (typeof cursorQuery === "string" && cursorQuery.trim()) {
+      try {
+        const decoded = JSON.parse(
+          Buffer.from(cursorQuery, "base64").toString("utf8"),
+        );
+        const parsedDate = new Date(decoded?.createdAt);
+
+        if (isNaN(parsedDate.getTime()) || !decoded?.id) {
+          throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.INVALID_CURSOR);
+        }
+
+        return {
+          createdAt: parsedDate,
+          id: String(decoded.id),
+        };
+      } catch (err) {
+        if (err instanceof AppError) {
+          throw err;
+        }
+        throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.INVALID_CURSOR);
+      }
+    }
+
+    if (cursorCreatedAt && cursorId) {
+      const parsedDate = new Date(String(cursorCreatedAt));
+      if (isNaN(parsedDate.getTime())) {
+        throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.INVALID_CURSOR);
+      }
+      return {
+        createdAt: parsedDate,
+        id: String(cursorId),
+      };
+    }
+
+    return undefined;
+  }
+
   async getFeed(req: Request, res: Response): Promise<void> {
     const limitQuery = req.query.limit;
     const limit =
@@ -54,36 +96,11 @@ export class FeedController {
         ? parseInt(limitQuery, 10)
         : 10;
 
-    let cursor: { createdAt: Date; id: string } | undefined = undefined;
-
-    if (typeof req.query.cursor === "string" && req.query.cursor.trim()) {
-      try {
-        const decoded = JSON.parse(
-          Buffer.from(req.query.cursor, "base64").toString("utf8"),
-        );
-        const parsedDate = new Date(decoded.createdAt);
-
-        if (isNaN(parsedDate.getTime()) || !decoded.id) {
-          throw new Error("Malformed cursor payload");
-        }
-
-        cursor = {
-          createdAt: parsedDate,
-          id: String(decoded.id),
-        };
-      } catch {
-        throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.INVALID_CURSOR);
-      }
-    } else if (req.query.cursorCreatedAt && req.query.cursorId) {
-      const parsedDate = new Date(req.query.cursorCreatedAt as string);
-      if (isNaN(parsedDate.getTime())) {
-        throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.INVALID_CURSOR);
-      }
-      cursor = {
-        createdAt: parsedDate,
-        id: String(req.query.cursorId),
-      };
-    }
+    const cursor = this._parseCursor(
+      req.query.cursor,
+      req.query.cursorCreatedAt,
+      req.query.cursorId,
+    );
 
     const photographerIdQuery = req.query.photographerId;
     let photographerId: string | undefined = undefined;
@@ -133,36 +150,11 @@ export class FeedController {
         ? parseInt(limitQuery, 10)
         : 20;
 
-    let cursor: { createdAt: Date; id: string } | undefined = undefined;
-
-    if (typeof req.query.cursor === "string" && req.query.cursor.trim()) {
-      try {
-        const decoded = JSON.parse(
-          Buffer.from(req.query.cursor, "base64").toString("utf8"),
-        );
-        const parsedDate = new Date(decoded.createdAt);
-
-        if (isNaN(parsedDate.getTime()) || !decoded.id) {
-          throw new Error("Malformed cursor payload");
-        }
-
-        cursor = {
-          createdAt: parsedDate,
-          id: String(decoded.id),
-        };
-      } catch {
-        throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.INVALID_CURSOR);
-      }
-    } else if (req.query.cursorCreatedAt && req.query.cursorId) {
-      const parsedDate = new Date(req.query.cursorCreatedAt as string);
-      if (isNaN(parsedDate.getTime())) {
-        throw new AppError(HttpStatus.BAD_REQUEST, FEED_MESSAGES.INVALID_CURSOR);
-      }
-      cursor = {
-        createdAt: parsedDate,
-        id: String(req.query.cursorId),
-      };
-    }
+    const cursor = this._parseCursor(
+      req.query.cursor,
+      req.query.cursorCreatedAt,
+      req.query.cursorId,
+    );
 
     const feedData = await this._feedService.getFeed({
       limit,

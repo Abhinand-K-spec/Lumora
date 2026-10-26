@@ -1,5 +1,8 @@
 import { BaseRepository } from "../../../shared/repository/BaseRepository.js";
-import type { IFeedPost } from "../../../shared/interfaces/IFeedPost.js";
+import type {
+  IFeedPost,
+  IPopulatedFeedPostDoc,
+} from "../../../shared/interfaces/IFeedPost.js";
 import type {
   GetFeedInput,
   GetFeedResult,
@@ -44,7 +47,7 @@ export class FeedPostRepository
     const hasMore = documents.length > limit;
     const posts = documents.slice(0, limit);
     return {
-      posts: posts as unknown as IFeedPost[],
+      posts: posts as unknown as IPopulatedFeedPostDoc[],
       hasMore,
     };
   }

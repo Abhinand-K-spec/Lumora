@@ -53,7 +53,7 @@ export class PhotographerRepository implements IPhotographerRepository {
   }
 
   async findAllPaginated(
-    filter: any,
+    filter: Record<string, unknown>,
     skip: number,
     limit: number,
     sort: Record<string, 1 | -1> = { createdAt: -1 },
@@ -62,7 +62,7 @@ export class PhotographerRepository implements IPhotographerRepository {
       latitude: number;
     },
   ): Promise<[IPhotographer[], number]> {
-    const query = { ...filter };
+    const query: Record<string, unknown> = { ...filter };
 
     if (location) {
       const maxDistanceRadians = 10 / 6378.1;

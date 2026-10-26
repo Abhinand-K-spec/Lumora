@@ -1,4 +1,7 @@
-import type { IFeedPost } from "../../../shared/interfaces/IFeedPost.js";
+import type {
+  IFeedPost,
+  IPopulatedFeedPostDoc,
+} from "../../../shared/interfaces/IFeedPost.js";
 
 export interface FeedCursor {
   createdAt: Date;
@@ -12,7 +15,7 @@ export interface GetFeedInput {
 }
 
 export interface GetFeedResult {
-  posts: IFeedPost[];
+  posts: IPopulatedFeedPostDoc[];
   hasMore: boolean;
 }
 

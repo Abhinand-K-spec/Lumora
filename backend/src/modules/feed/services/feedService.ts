@@ -3,9 +3,13 @@ import type {
   CreateFeedPostInput,
   GetFeedInputDto,
   GetFeedResponseDto,
-} from "../interfaces/IFeedService.js";
+} from '../interfaces/IFeedService.js'
 import { Types } from "mongoose";
-import type { IFeedPost } from "../../../shared/interfaces/IFeedPost.js";
+import type {
+  IFeedPost,
+  IPopulatedFeedPostDoc,
+  IPopulatedPhotographer,
+} from "../../../shared/interfaces/IFeedPost.js";
 import type { IFeedRepository } from "../interfaces/IFeedPostRepository.js";
 import type { IR2StorageService } from "../../../shared/services/R2StorageService.js";
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code.js";
@@ -30,7 +34,7 @@ export class FeedService implements IFeedService {
     private readonly _r2StorageService: IR2StorageService,
     private readonly _userRepository: IUserRepository,
     private readonly _contentModerationService: IContentModerationService
-  ) {}
+  ) { }
 
   async createPost(input: CreateFeedPostInput): Promise<IFeedPost> {
     const { photographerId, mediaKeys } = input;
@@ -125,7 +129,15 @@ export class FeedService implements IFeedService {
     const userIds = [
       ...new Set(
         result.posts
-          .map((doc: any) => doc.photographerId?.userId)
+          .map((doc: IPopulatedFeedPostDoc) => {
+            const pg =
+              typeof doc.photographerId === "object" &&
+                doc.photographerId !== null &&
+                "userId" in doc.photographerId
+                ? (doc.photographerId as IPopulatedPhotographer)
+                : null;
+            return pg?.userId?.toString();
+          })
           .filter((id): id is string => Boolean(id)),
       ),
     ];
@@ -139,10 +151,16 @@ export class FeedService implements IFeedService {
     }
 
     const posts = await Promise.all(
-      result.posts.map(async (doc: any) => {
-        const userId = doc.photographerId?.userId;
+      result.posts.map(async (doc: IPopulatedFeedPostDoc) => {
+        const pg =
+          typeof doc.photographerId === "object" &&
+            doc.photographerId !== null &&
+            "userId" in doc.photographerId
+            ? (doc.photographerId as IPopulatedPhotographer)
+            : null;
+        const userId = pg?.userId?.toString();
         const authorName =
-          (userId && userMap.get(userId.toString())) || "Photographer";
+          (userId && userMap.get(userId)) || "Photographer";
         return await FeedPostMapper.toPostResponseDto(
           doc,
           authorName,

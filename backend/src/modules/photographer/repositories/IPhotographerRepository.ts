@@ -19,7 +19,7 @@ export interface IPhotographerRepository {
   ): Promise<IPhotographer | null>;
   findByUserId(id: string): Promise<IPhotographer | null>;
   findAllPaginated(
-    filter: any,
+    filter: Record<string, unknown>,
     skip: number,
     limit: number,
     sort?: Record<string, 1 | -1>,

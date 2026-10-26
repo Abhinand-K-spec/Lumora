@@ -28,10 +28,10 @@ export class PackageRepository implements IPackageRepository {
     minPrice: number,
     maxPrice: number,
   ): Promise<string[]> {
-    const query: any = { status: "active", price: { $gte: minPrice } };
-    if (maxPrice !== Infinity) {
-      query.price.$lte = maxPrice;
-    }
+    const query: Record<string, unknown> = {
+      status: "active",
+      price: maxPrice !== Infinity ? { $gte: minPrice, $lte: maxPrice } : { $gte: minPrice },
+    };
     const packages = await Package.find(query, { photographerId: 1 }).lean();
     const ids = packages.map((p) => p.photographerId.toString());
     return [...new Set(ids)];

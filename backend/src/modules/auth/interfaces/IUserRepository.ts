@@ -14,9 +14,9 @@ export interface IUserRepository extends IBaseRepository<IUsers> {
   changeStatus(id: string, status: accountStatus): Promise<void>;
 
   delete(id: string): Promise<void>;
-  findWithFilter(filter: any): Promise<IUsers[]>;
+  findWithFilter(filter: Record<string, unknown>): Promise<IUsers[]>;
   findAllPaginated(
-    filter: any,
+    filter: Record<string, unknown>,
     skip: number,
     limit: number,
     sort?: Record<string, 1 | -1>,

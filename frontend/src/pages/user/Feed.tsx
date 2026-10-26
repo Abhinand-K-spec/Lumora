@@ -15,6 +15,7 @@ import {
   Layers,
 } from "lucide-react";
 import { feedService, type FeedPost } from "../../services/feedService";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 interface FeedPostCardProps {
   post: FeedPost;
@@ -56,8 +57,8 @@ const FeedPostCard = ({
           text: post.caption || "Check out this photo on Lumora",
           url: shareUrl,
         });
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== "AbortError") {
           toast.error("Failed to share post");
         }
       }
@@ -322,11 +323,8 @@ const Feed = () => {
       setPosts(data.posts || []);
       setHasMore(Boolean(data.hasMore));
       setNextCursor(data.nextCursor);
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to load feed moments";
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err, "Failed to load feed moments");
       setError(msg);
       toast.error(msg);
     } finally {
@@ -345,10 +343,8 @@ const Feed = () => {
       setPosts((prev) => [...prev, ...(data.posts || [])]);
       setHasMore(Boolean(data.hasMore));
       setNextCursor(data.nextCursor);
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || "Failed to load older moments",
-      );
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to load older moments"));
     } finally {
       setIsLoadingMore(false);
     }
