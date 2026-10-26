@@ -23,6 +23,7 @@ import PhotographerDetails from "../pages/photographer/PhotographerDetails";
 import NotFound from "../pages/error/NotFound";
 import useAuth from "../hooks/useAuth";
 import CreateFeedPost from "../components/feed/CreateFeedPost";
+import Feed from "../pages/user/Feed";
 
 const RoleBasedLayout = () => {
   const { user } = useAuth();
@@ -38,6 +39,14 @@ const ProfileRouteSelector = () => {
     return <PhotographerProfile />;
   }
   return <Profile />;
+};
+
+const HomeRouteSelector = () => {
+  const { user } = useAuth();
+  if (user?.role === "PHOTOGRAPHER") {
+    return <Home />;
+  }
+  return <Feed />;
 };
 
 const AppRoutes = () => {
@@ -58,14 +67,15 @@ const AppRoutes = () => {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<RoleBasedLayout />}>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<HomeRouteSelector />} />
+            <Route path="/feed" element={<Feed />} />
             <Route path="/profile" element={<ProfileRouteSelector />} />
             <Route path="/photographers" element={<PhotographersList />} />
             <Route
               path="/photographers/:id"
               element={<PhotographerDetails />}
             />
-            <Route path="/feedPostUpload" element={<CreateFeedPost/>}/>
+            <Route path="/feedPostUpload" element={<CreateFeedPost />} />
           </Route>
         </Route>
 

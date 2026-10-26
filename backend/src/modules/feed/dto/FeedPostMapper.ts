@@ -34,7 +34,7 @@ export class FeedPostMapper {
         doc.createdAt instanceof Date ? doc.createdAt : new Date(doc.createdAt),
       media,
       author: {
-        id: photographerId,
+        id: photographer?.userId ? photographer.userId.toString() : photographerId,
         name: authorName || "Photographer",
         profilePhoto: photographer?.profilePhoto || undefined,
         location: photographer?.location || undefined,

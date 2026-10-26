@@ -34,16 +34,21 @@ export class PhotographerService implements IPhotographerService {
   ) {}
 
   async getProfile(userId: string): Promise<photographerProfileResponseDto> {
-    const user = await this._userRepository.findById(userId);
-    if (!user) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    let user = await this._userRepository.findById(userId);
+    let profile: IPhotographer | null = null;
+
+    if (user) {
+      profile = await this._photographerRepository.findByUserId(userId);
+    } else {
+      profile = await this._photographerRepository.findById(userId);
+      if (profile) {
+        user = await this._userRepository.findById(profile.userId);
+      }
     }
 
-    const profile = await this._photographerRepository.findByUserId(userId);
-
-    if (!profile) {
+    if (!user || !profile) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.NOT_FOUND,
         PHOTOGRAPHER_MESSAGES.PROFILE_NOT_FOUND,
       );
     }

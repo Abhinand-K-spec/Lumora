@@ -12,6 +12,8 @@ import {
   Send,
   ArrowRight,
   Shield,
+  Loader2,
+  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import photographerService, {
@@ -423,11 +425,10 @@ const PhotographerDetails = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`py-4 text-xs font-semibold uppercase tracking-widest border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === tab
+              className={`py-4 text-xs font-semibold uppercase tracking-widest border-b-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === tab
                   ? "border-[#F2C94C] text-[#F2C94C]"
                   : "border-transparent text-gray-500 hover:text-gray-300"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -659,11 +660,10 @@ const PhotographerDetails = () => {
               {profile.packages.map((pkg, idx) => (
                 <div
                   key={idx}
-                  className={`bg-[#0f1012]/80 border rounded-2xl p-6 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 relative ${
-                    pkg.popular
+                  className={`bg-[#0f1012]/80 border rounded-2xl p-6 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 relative ${pkg.popular
                       ? "border-[#F2C94C]/60 shadow-[0_0_20px_rgba(242,201,76,0.15)] bg-gradient-to-b from-[#16171a] to-[#0f1012]"
                       : "border-white/5 shadow-md"
-                  }`}
+                    }`}
                 >
                   {/* Popular Badge */}
                   {pkg.popular && (
@@ -717,11 +717,10 @@ const PhotographerDetails = () => {
 
                     <button
                       onClick={() => openBookingForPlan(pkg.packageName)}
-                      className={`w-full py-2.5 text-[10px] uppercase font-bold tracking-widest rounded-lg transition-all active:scale-98 cursor-pointer text-center ${
-                        pkg.popular
+                      className={`w-full py-2.5 text-[10px] uppercase font-bold tracking-widest rounded-lg transition-all active:scale-98 cursor-pointer text-center ${pkg.popular
                           ? "bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-neutral-950 font-bold"
                           : "bg-transparent border border-white/10 hover:border-white/20 text-gray-300"
-                      }`}
+                        }`}
                     >
                       {pkg.buttonText}
                     </button>
@@ -752,11 +751,10 @@ const PhotographerDetails = () => {
                     <button
                       key={chip}
                       onClick={() => setGalleryFilter(chip)}
-                      className={`text-[9px] font-extrabold uppercase tracking-widest px-3.5 py-1.5 rounded-full border transition-all cursor-pointer ${
-                        galleryFilter === chip
+                      className={`text-[9px] font-extrabold uppercase tracking-widest px-3.5 py-1.5 rounded-full border transition-all cursor-pointer ${galleryFilter === chip
                           ? "bg-[#F2C94C] border-[#F2C94C] text-black"
                           : "bg-transparent border-white/10 text-gray-400 hover:text-white"
-                      }`}
+                        }`}
                     >
                       {chip}
                     </button>
@@ -1118,11 +1116,10 @@ const PhotographerDetails = () => {
                               : [...prev.servicesRequired, srv],
                           }));
                         }}
-                        className={`py-1.5 px-3 rounded-lg text-left text-[10px] border transition flex items-center justify-between cursor-pointer ${
-                          isChecked
+                        className={`py-1.5 px-3 rounded-lg text-left text-[10px] border transition flex items-center justify-between cursor-pointer ${isChecked
                             ? "bg-[#F2C94C]/10 border-[#F2C94C] text-[#F2C94C]"
                             : "bg-[#070708] border-white/5 text-gray-400"
-                        }`}
+                          }`}
                       >
                         <span>{srv}</span>
                         {isChecked && <Check size={10} />}

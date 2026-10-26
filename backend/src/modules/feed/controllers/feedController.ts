@@ -88,7 +88,9 @@ export class FeedController {
     const photographerIdQuery = req.query.photographerId;
     let photographerId: string | undefined = undefined;
     if (typeof photographerIdQuery === "string" && photographerIdQuery.trim()) {
-      photographerId = photographerIdQuery.trim();
+      const trimmed = photographerIdQuery.trim();
+      const byUser = await this._photographerRepository.findByUserId(trimmed);
+      photographerId = byUser ? byUser._id.toString() : trimmed;
     }
 
     const feedData = await this._feedService.getFeed({

@@ -72,7 +72,6 @@ export const feedService = {
     });
 
     const resData = response.data?.data as any;
-    // Support both direct object { key, uploadUrl } and nested { data: { key, uploadUrl } }
     const presigned = resData?.uploadUrl ? resData : (resData?.data ?? resData);
 
     if (!presigned?.uploadUrl || !presigned?.key) {
