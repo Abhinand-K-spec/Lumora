@@ -13,21 +13,42 @@ export class BookingService implements IBookingService {
     userId: string,
     data: CreateBookingDTO
   ): Promise<IBooking> {
-    const eventDate = new Date(data.eventDate);
-    if (eventDate.getTime() <= Date.now()) {
-      throw new AppError(HttpStatus.BAD_REQUEST, BOOKING_MESSAGES.DATE_INVALID);
+    const { photographerId, packageId, events, notes } = data;
+
+    if (!events || events.length === 0) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "At least one event is required");
     }
-    const { photographerId, packageId, eventType, location, notes, totalPrice } = data;
+
+    const parsedEvents = events.map((ev) => {
+      const eventDate = new Date(ev.eventDate);
+      if (eventDate.getTime() <= Date.now()) {
+        throw new AppError(HttpStatus.BAD_REQUEST, BOOKING_MESSAGES.DATE_INVALID);
+      }
+      return {
+        eventType: ev.eventType,
+        eventDate,
+        location: ev.location,
+      };
+    });
+
+    const eventDates = parsedEvents.map((e) => e.eventDate);
+    const conflict = await this._bookingRepository.findConflict(
+      photographerId,
+      eventDates
+    );
+    if (conflict) {
+      throw new AppError(
+        HttpStatus.CONFLICT,
+        "Photographer already has a booking or pending request on one of the selected dates"
+      );
+    }
 
     const bookingPayload: Partial<IBooking> = {
       userId: new Types.ObjectId(userId),
       photographerId: new Types.ObjectId(photographerId),
-      eventType,
-      eventDate,
+      events: parsedEvents,
       status: "PENDING",
-      location,
       notes,
-      totalPrice,
     };
 
     if (packageId) {

@@ -1,6 +1,25 @@
 import { Schema, model } from "mongoose";
 import type { IBooking } from "../interfaces/IBooking.js";
 
+const subEventSchema = new Schema(
+  {
+    eventType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    eventDate: {
+      type: Date,
+      required: true,
+    },
+    location: {
+      type: String,
+      trim: true,
+    },
+  },
+  { _id: false }
+);
+
 const bookingSchema = new Schema<IBooking>(
   {
     userId: {
@@ -20,26 +39,17 @@ const bookingSchema = new Schema<IBooking>(
       ref: "Package",
       default: null,
     },
-    eventType: {
-      type: String,
+    events: {
+      type: [subEventSchema],
       required: true,
-      trim: true,
-    },
-    eventDate: {
-      type: Date,
-      required: true,
-    },
-    location: {
-      type: String,
-      trim: true,
+      validate: [
+        (val: unknown[]) => val && val.length > 0,
+        "At least one event is required",
+      ],
     },
     notes: {
       type: String,
       trim: true,
-    },
-    totalPrice: {
-      type: Number,
-      default: 0,
     },
     status: {
       type: String,
@@ -57,7 +67,7 @@ const bookingSchema = new Schema<IBooking>(
   }
 );
 
-bookingSchema.index({ photographerId: 1, eventDate: 1, status: 1 });
+bookingSchema.index({ photographerId: 1, "events.eventDate": 1, status: 1 });
 
 const Booking = model<IBooking>("Booking", bookingSchema);
 export default Booking;

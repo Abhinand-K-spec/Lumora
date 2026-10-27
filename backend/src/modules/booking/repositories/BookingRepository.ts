@@ -26,10 +26,10 @@ export class BookingRepository
       .sort({ createdAt: -1 });
   }
 
-  async findConflict(photographerId: string, eventDate: Date): Promise<IBooking | null> {
+  async findConflict(photographerId: string, eventDates: Date[]): Promise<IBooking | null> {
     return await this._model.findOne({
       photographerId,
-      eventDate,
+      "events.eventDate": { $in: eventDates },
       status: { $in: ['PENDING', 'ACCEPTED'] },
     });
   }

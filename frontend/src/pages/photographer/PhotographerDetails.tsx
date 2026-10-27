@@ -15,6 +15,8 @@ import {
   Loader2,
   Calendar,
   Bookmark,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import photographerService, {
@@ -58,11 +60,10 @@ const PhotographerDetails = () => {
 
   // Booking Form State
   const [bookingForm, setBookingForm] = useState({
-    name: "",
-    email: "",
-    date: "",
-    eventType: "Wedding",
     notes: "",
+    events: [
+      { eventType: "Wedding", eventDate: "", location: "" },
+    ],
   });
 
   // Quotation Form State
@@ -168,13 +169,62 @@ const PhotographerDetails = () => {
     }
   };
 
+  const handleAddEvent = () => {
+    setBookingForm((prev) => ({
+      ...prev,
+      events: [
+        ...prev.events,
+        { eventType: "Reception", eventDate: "", location: "" },
+      ],
+    }));
+  };
+
+  const handleRemoveEvent = (indexToRemove: number) => {
+    if (bookingForm.events.length <= 1) return;
+    setBookingForm((prev) => ({
+      ...prev,
+      events: prev.events.filter((_, idx) => idx !== indexToRemove),
+    }));
+  };
+
+  const handleEventChange = (
+    index: number,
+    field: "eventType" | "eventDate" | "location",
+    value: string
+  ) => {
+    setBookingForm((prev) => {
+      const updated = [...prev.events];
+      const target = updated[index];
+      if (target) {
+        updated[index] = { ...target, [field]: value };
+      }
+      return { ...prev, events: updated };
+    });
+  };
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isSubmittingBooking) return;
 
-    if (!bookingForm.date || !bookingForm.eventType) {
-      toast.error("Please select an event date and event type.");
+    if (!bookingForm.events || bookingForm.events.length === 0) {
+      toast.error("Please add at least one event.");
+      return;
+    }
+
+    const missingDate = bookingForm.events.find((ev) => !ev.eventDate);
+    if (missingDate) {
+      toast.error(`Please select a date for ${missingDate.eventType}.`);
+      return;
+    }
+
+    const missingLocation = bookingForm.events.find(
+      (ev) => !ev.location || ev.location.trim().length < 2
+    );
+    if (missingLocation) {
+      toast.error(
+        `Please enter the shoot location/venue for ${missingLocation.eventType}.`
+      );
       return;
     }
 
@@ -189,8 +239,7 @@ const PhotographerDetails = () => {
       await bookingService.createBooking({
         photographerId: id,
         packageId: selectedPackageId,
-        eventType: bookingForm.eventType,
-        eventDate: bookingForm.date,
+        events: bookingForm.events,
         notes: bookingForm.notes,
       });
 
@@ -203,11 +252,8 @@ const PhotographerDetails = () => {
       setIsBookingModalOpen(false);
 
       setBookingForm({
-        name: "",
-        email: "",
-        date: "",
-        eventType: "Wedding",
         notes: "",
+        events: [{ eventType: "Wedding", eventDate: "", location: "" }],
       });
 
       setSelectedPackageId(undefined);
@@ -803,82 +849,101 @@ const PhotographerDetails = () => {
             </div>
 
             <form onSubmit={handleBookingSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                  Your Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={bookingForm.name}
-                  onChange={(e) =>
-                    setBookingForm((prev) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
-                  }
-                  className="w-full bg-[#070708] border border-white/15 rounded-lg px-3.5 py-2 text-xs text-white focus:border-[#F2C94C] outline-none transition"
-                  placeholder="Your full name"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={bookingForm.email}
-                  onChange={(e) =>
-                    setBookingForm((prev) => ({
-                      ...prev,
-                      email: e.target.value,
-                    }))
-                  }
-                  className="w-full bg-[#070708] border border-white/15 rounded-lg px-3.5 py-2 text-xs text-white focus:border-[#F2C94C] outline-none transition"
-                  placeholder="name@example.com"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                    Event Date *
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold flex items-center gap-1">
+                    <Calendar size={11} className="text-[#F2C94C]" />
+                    <span>Events & Dates *</span>
                   </label>
-                  <input
-                    type="date"
-                    required
-                    value={bookingForm.date}
-                    onChange={(e) =>
-                      setBookingForm((prev) => ({
-                        ...prev,
-                        date: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-[#070708] border border-white/15 rounded-lg px-3.5 py-2 text-xs text-white focus:border-[#F2C94C] outline-none transition"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                    Event Type
-                  </label>
-                  <select
-                    value={bookingForm.eventType}
-                    onChange={(e) =>
-                      setBookingForm((prev) => ({
-                        ...prev,
-                        eventType: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-[#070708] border border-white/15 rounded-lg px-3.5 py-2 text-xs text-white focus:border-[#F2C94C] outline-none cursor-pointer transition"
+                  <button
+                    type="button"
+                    onClick={handleAddEvent}
+                    className="text-[10px] text-[#F2C94C] hover:text-[#F2C94C]/80 font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition"
                   >
-                    <option value="Wedding">Wedding</option>
-                    <option value="Pre-Wedding">Pre-Wedding</option>
-                    <option value="Engagement">Engagement</option>
-                    <option value="Editorial">Editorial</option>
-                    <option value="Corporate">Corporate</option>
-                  </select>
+                    <Plus size={11} />
+                    <span>Add Event</span>
+                  </button>
+                </div>
+
+                <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                  {bookingForm.events.map((ev, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl bg-[#070708] border border-white/10 space-y-2.5 relative"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-gray-300">
+                          Event #{idx + 1}
+                        </span>
+                        {bookingForm.events.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEvent(idx)}
+                            className="text-red-400 hover:text-red-300 transition cursor-pointer p-0.5"
+                            title="Remove event"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-gray-500 uppercase tracking-wider">
+                            Type *
+                          </label>
+                          <select
+                            value={ev.eventType}
+                            onChange={(e) =>
+                              handleEventChange(idx, "eventType", e.target.value)
+                            }
+                            className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none cursor-pointer"
+                          >
+                            <option value="Wedding">Wedding</option>
+                            <option value="Reception">Reception</option>
+                            <option value="Pre-Wedding">Pre-Wedding</option>
+                            <option value="Engagement">Engagement</option>
+                            <option value="Haldi / Mehendi">Haldi / Mehendi</option>
+                            <option value="Sangeet">Sangeet</option>
+                            <option value="Post-Wedding">Post-Wedding</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-gray-500 uppercase tracking-wider">
+                            Date *
+                          </label>
+                          <input
+                            type="date"
+                             
+                            min={new Date().toISOString().split("T")[0]}
+                            value={ev.eventDate}
+                            onChange={(e) =>
+                              handleEventChange(idx, "eventDate", e.target.value)
+                            }
+                            className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[9px] text-gray-500 uppercase tracking-wider">
+                          Shoot Location / Venue *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={ev.location || ""}
+                          onChange={(e) =>
+                            handleEventChange(idx, "location", e.target.value)
+                          }
+                          className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
+                          placeholder="e.g. Grand Hyatt, Kochi"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -950,7 +1015,7 @@ const PhotographerDetails = () => {
                   </label>
                   <input
                     type="text"
-                    required
+                     
                     value={quoteForm.name}
                     onChange={(e) =>
                       setQuoteForm((prev) => ({
@@ -968,7 +1033,7 @@ const PhotographerDetails = () => {
                   </label>
                   <input
                     type="text"
-                    required
+                     
                     value={quoteForm.phone}
                     onChange={(e) =>
                       setQuoteForm((prev) => ({
@@ -988,7 +1053,7 @@ const PhotographerDetails = () => {
                 </label>
                 <input
                   type="email"
-                  required
+                   
                   value={quoteForm.email}
                   onChange={(e) =>
                     setQuoteForm((prev) => ({ ...prev, email: e.target.value }))

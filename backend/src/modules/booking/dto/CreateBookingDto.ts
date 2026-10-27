@@ -1,9 +1,12 @@
+export interface SubEventDTO {
+  eventType: string;
+  eventDate: string;
+  location?: string;
+}
+
 export interface CreateBookingDTO {
-    photographerId: string;
-    packageId?: string;
-    eventType: string;
-    eventDate: string;
-    location?: string;
-    notes?: string;
-    totalPrice?: number;
-  }
+  photographerId: string;
+  packageId?: string;
+  events: SubEventDTO[];
+  notes?: string;
+}

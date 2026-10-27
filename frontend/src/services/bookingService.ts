@@ -1,14 +1,17 @@
 
 import api from "../api/axios";
 
-export interface CreateBookingPayload {
-  photographerId: string;
-  packageId?: string;
+export interface BookingEventItem {
   eventType: string;
   eventDate: string;
   location?: string;
+}
+
+export interface CreateBookingPayload {
+  photographerId: string;
+  packageId?: string;
+  events: BookingEventItem[];
   notes?: string;
-  totalPrice?: number;
 }
 
 export interface BookingItem {
@@ -17,7 +20,8 @@ export interface BookingItem {
   photographerId: {
     _id: string;
     name: string;
-    profilePicture?: string;
+    email?: string;
+    phone?: string;
   };
 
   packageId?: {
@@ -26,8 +30,7 @@ export interface BookingItem {
     price: number;
   };
 
-  eventType: string;
-  eventDate: string;
+  events: BookingEventItem[];
 
   status:
     | "PENDING"
