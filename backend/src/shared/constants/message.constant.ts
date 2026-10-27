@@ -133,6 +133,14 @@ export const FEED_MESSAGES = {
   INVALID_CURSOR: "Invalid pagination cursor",
 };
 
+export const BOOKING_MESSAGES ={
+  DATE_INVALID : 'Enter a valid date',
+  BOOKING_NOT_FOUND: 'Booking not found',
+  BOOKING_CREATED :'Booking created successfully',
+  BOOKINGS_FETCHED:'Bookings fetched successfully',
+  BOOKING_STATUS_UPDATED:'Booking status updated successfully'
+}
+
 export const MESSAGES = {
   COMMON: COMMON_MESSAGES,
   AUTH: AUTH_MESSAGES,
