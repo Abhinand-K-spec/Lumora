@@ -23,6 +23,7 @@ import photographerService, {
 import { feedService } from "../../services/feedService";
 import userService from "../../services/userService";
 import { getErrorMessage } from "../../utils/errorUtils";
+import bookingService from "../../services/bookingService";
 
 interface GalleryPhoto {
   id: string;
@@ -35,6 +36,11 @@ const PhotographerDetails = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmittingBooking, setIsSubmittingBooking] =
+    useState<boolean>(false);
+  const [selectedPackageId, setSelectedPackageId] = useState<
+    string | undefined
+  >(undefined);
 
   // Dynamic photographer profile from API
   const [profile, setProfile] = useState<PhotographerProfile | null>(null);
@@ -124,7 +130,10 @@ const PhotographerDetails = () => {
           setGalleryPhotos([]);
         }
       } catch (err: unknown) {
-        const msg = getErrorMessage(err, "Failed to load photographer profile.");
+        const msg = getErrorMessage(
+          err,
+          "Failed to load photographer profile."
+        );
         setError(msg);
       } finally {
         setLoading(false);
@@ -146,7 +155,7 @@ const PhotographerDetails = () => {
       setIsSaved(newState);
       if (newState) {
         toast.success(
-          `${profile?.name || "Photographer"} saved to your collection!`,
+          `${profile?.name || "Photographer"} saved to your collection!`
         );
       } else {
         toast.info("Removed from saved photographers.");
@@ -159,24 +168,54 @@ const PhotographerDetails = () => {
     }
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bookingForm.name || !bookingForm.email || !bookingForm.date) {
-      toast.error("Please fill in all required fields.");
+
+    if (isSubmittingBooking) return;
+
+    if (!bookingForm.date || !bookingForm.eventType) {
+      toast.error("Please select an event date and event type.");
       return;
     }
-    const artistName = profile?.name || "The photographer";
-    toast.success(
-      `Booking request submitted successfully for ${bookingForm.eventType}! ${artistName}'s team will contact you shortly.`,
-    );
-    setIsBookingModalOpen(false);
-    setBookingForm({
-      name: "",
-      email: "",
-      date: "",
-      eventType: "Wedding",
-      notes: "",
-    });
+
+    if (!id) {
+      toast.error("Photographer not found.");
+      return;
+    }
+
+    try {
+      setIsSubmittingBooking(true);
+
+      await bookingService.createBooking({
+        photographerId: id,
+        packageId: selectedPackageId,
+        eventType: bookingForm.eventType,
+        eventDate: bookingForm.date,
+        notes: bookingForm.notes,
+      });
+
+      toast.success(
+        `Booking request submitted to ${
+          profile?.name || "photographer"
+        }! They will respond shortly.`
+      );
+
+      setIsBookingModalOpen(false);
+
+      setBookingForm({
+        name: "",
+        email: "",
+        date: "",
+        eventType: "Wedding",
+        notes: "",
+      });
+
+      setSelectedPackageId(undefined);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to submit booking request."));
+    } finally {
+      setIsSubmittingBooking(false);
+    }
   };
 
   const handleQuoteSubmit = (e: React.FormEvent) => {
@@ -187,7 +226,7 @@ const PhotographerDetails = () => {
     }
     const artistName = profile?.name || "The photographer";
     toast.success(
-      `Quotation request submitted! ${artistName}'s team will send a detailed price breakdown to your email.`,
+      `Quotation request submitted! ${artistName}'s team will send a detailed price breakdown to your email.`
     );
     setIsQuoteModalOpen(false);
     setQuoteForm({
@@ -201,12 +240,15 @@ const PhotographerDetails = () => {
     });
   };
 
-  const openBookingForPlan = (packageName: string) => {
+  const openBookingForPlan = (packageName: string, packageId?: string) => {
     setSelectedPlan(packageName);
+    setSelectedPackageId(packageId);
+
     setBookingForm((prev) => ({
       ...prev,
       notes: `Interested in the ${packageName} collection.`,
     }));
+
     setIsBookingModalOpen(true);
   };
 
@@ -335,14 +377,14 @@ const PhotographerDetails = () => {
                     ? "bg-[#F2C94C]/15 border-[#F2C94C] text-[#F2C94C] shadow-lg shadow-[#F2C94C]/10"
                     : "bg-[#0f1012] border-white/20 text-gray-300 hover:text-white hover:border-white/40"
                 }`}
-                title={isSaved ? "Saved to your collection" : "Save photographer"}
+                title={
+                  isSaved ? "Saved to your collection" : "Save photographer"
+                }
               >
                 <Bookmark
                   size={14}
                   className={
-                    isSaved
-                      ? "fill-[#F2C94C] text-[#F2C94C]"
-                      : "text-gray-300"
+                    isSaved ? "fill-[#F2C94C] text-[#F2C94C]" : "text-gray-300"
                   }
                 />
                 <span>{isSaved ? "Saved" : "Save"}</span>
@@ -351,6 +393,7 @@ const PhotographerDetails = () => {
                 onClick={() =>
                   openBookingForPlan(
                     packagesList[0]?.packageName || "General Inquiry",
+                    packagesList[0]?._id
                   )
                 }
                 className="px-6 py-2.5 bg-gradient-to-r from-[#F2C94C] to-[#dfb230] text-black font-semibold text-xs rounded-full hover:brightness-110 active:scale-98 transition shadow-lg shadow-[#F2C94C]/15 cursor-pointer uppercase tracking-wider text-center"
@@ -527,7 +570,8 @@ const PhotographerDetails = () => {
                   </p>
                 </div>
                 <span className="text-xs text-gray-500 font-medium">
-                  {galleryPhotos.length} {galleryPhotos.length === 1 ? "Photo" : "Photos"}
+                  {galleryPhotos.length}{" "}
+                  {galleryPhotos.length === 1 ? "Photo" : "Photos"}
                 </span>
               </div>
 
@@ -571,7 +615,8 @@ const PhotographerDetails = () => {
                   Pricing Packages & Collections
                 </h3>
                 <p className="text-xs text-gray-400 font-light">
-                  Tailored photography coverage designed for your special occasions.
+                  Tailored photography coverage designed for your special
+                  occasions.
                 </p>
               </div>
 
@@ -585,9 +630,15 @@ const PhotographerDetails = () => {
                             .map((f) => f.trim())
                             .filter(Boolean)
                         : []),
-                      ...(pkg.droneIncluded ? ["4K Drone Aerial Coverage"] : []),
-                      ...(pkg.albumIncluded ? ["Custom Designed Photo Album"] : []),
-                      ...(pkg.framesIncluded ? ["High-Quality Photo Frames"] : []),
+                      ...(pkg.droneIncluded
+                        ? ["4K Drone Aerial Coverage"]
+                        : []),
+                      ...(pkg.albumIncluded
+                        ? ["Custom Designed Photo Album"]
+                        : []),
+                      ...(pkg.framesIncluded
+                        ? ["High-Quality Photo Frames"]
+                        : []),
                       ...(pkg.videographersIncluded
                         ? ["Dedicated Videography Team"]
                         : []),
@@ -642,7 +693,7 @@ const PhotographerDetails = () => {
                           </div>
 
                           <button
-                            onClick={() => openBookingForPlan(pkg.packageName)}
+                            onClick={() => openBookingForPlan(pkg.packageName, pkg._id)}
                             className="w-full py-2.5 text-[10px] uppercase font-bold tracking-widest rounded-lg transition-all active:scale-98 cursor-pointer text-center bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-neutral-950"
                           >
                             Book This Plan
@@ -654,7 +705,9 @@ const PhotographerDetails = () => {
                 </div>
               ) : (
                 <div className="py-12 text-center text-gray-500 text-xs border border-white/5 border-dashed rounded-2xl flex flex-col items-center justify-center gap-3 max-w-xl mx-auto">
-                  <span>No fixed packages published yet by this photographer.</span>
+                  <span>
+                    No fixed packages published yet by this photographer.
+                  </span>
                   <button
                     onClick={() => setIsQuoteModalOpen(true)}
                     className="px-5 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 text-xs font-semibold transition cursor-pointer"
@@ -671,9 +724,12 @@ const PhotographerDetails = () => {
             <div className="space-y-6 max-w-2xl mx-auto py-6">
               <div className="py-12 text-center text-gray-500 text-xs border border-white/5 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2">
                 <Star size={24} className="opacity-40 text-primary" />
-                <span className="text-sm text-text font-medium">No reviews yet</span>
+                <span className="text-sm text-text font-medium">
+                  No reviews yet
+                </span>
                 <span className="text-xs text-text-secondary max-w-xs">
-                  Reviews and client ratings for {profile.name} will appear here after verified booking completions.
+                  Reviews and client ratings for {profile.name} will appear here
+                  after verified booking completions.
                 </span>
               </div>
             </div>
@@ -846,10 +902,20 @@ const PhotographerDetails = () => {
 
               <button
                 type="submit"
-                className="w-full py-2.5 bg-[#F2C94C] hover:bg-[#F2C94C]/95 text-black font-bold uppercase tracking-widest text-[10px] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+                disabled={isSubmittingBooking}
+                className="w-full py-2.5 bg-[#F2C94C] hover:bg-[#F2C94C]/95 text-black font-bold uppercase tracking-widest text-[10px] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 disabled:opacity-50"
               >
-                <span>Confirm Booking Request</span>
-                <Send size={10} />
+                {isSubmittingBooking ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin" />
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Confirm Booking Request</span>
+                    <Send size={10} />
+                  </>
+                )}
               </button>
             </form>
           </div>
@@ -871,7 +937,8 @@ const PhotographerDetails = () => {
                 Request Quotation
               </h3>
               <p className="text-xs text-gray-400">
-                Request custom pricing from {profile.name} based on event headcount and location details.
+                Request custom pricing from {profile.name} based on event
+                headcount and location details.
               </p>
             </div>
 
@@ -1044,7 +1111,8 @@ const PhotographerDetails = () => {
           </div>
 
           <p className="text-[10px] text-gray-600 font-light">
-            © {new Date().getFullYear()} Lumora Photography. All rights reserved.
+            © {new Date().getFullYear()} Lumora Photography. All rights
+            reserved.
           </p>
         </div>
       </footer>

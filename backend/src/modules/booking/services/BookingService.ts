@@ -17,14 +17,24 @@ export class BookingService implements IBookingService {
     if (eventDate.getTime() <= Date.now()) {
       throw new AppError(HttpStatus.BAD_REQUEST, BOOKING_MESSAGES.DATE_INVALID);
     }
-    return await this._bookingRepository.create({
-      ...data,
-      userId : new Types.ObjectId(userId),
-      photographerId:  new Types.ObjectId(data.photographerId),
-      packageId: new Types.ObjectId(data.packageId),
+    const { photographerId, packageId, eventType, location, notes, totalPrice } = data;
+
+    const bookingPayload: Partial<IBooking> = {
+      userId: new Types.ObjectId(userId),
+      photographerId: new Types.ObjectId(photographerId),
+      eventType,
       eventDate,
-      status: 'PENDING',
-    });
+      status: "PENDING",
+      location,
+      notes,
+      totalPrice,
+    };
+
+    if (packageId) {
+      bookingPayload.packageId = new Types.ObjectId(packageId);
+    }
+
+    return await this._bookingRepository.create(bookingPayload);
   }
   async getUserBookings(userId: string): Promise<IBooking[]> {
     return await this._bookingRepository.findByUserId(userId);

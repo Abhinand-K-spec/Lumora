@@ -13,18 +13,15 @@ export class BookingRepository
   async findByUserId(userId: string): Promise<IBooking[]> {
     return await this._model
       .find({ userId })
-      .populate(
-        "photographerId",
-        "name profilePicture serviceAreas startingPrice"
-      )
+      .populate("photographerId", "name email phone")
       .populate("packageId")
       .sort({ createdAt: -1 });
   }
 
   async findByPhotographerId(photographerId: string): Promise<IBooking[]> {
-      return await this._model
-      .find({photographerId})
-      .populate("userId", "name email phone profilePicture")
+    return await this._model
+      .find({ photographerId })
+      .populate("userId", "name email phone")
       .populate("packageId")
       .sort({ createdAt: -1 });
   }

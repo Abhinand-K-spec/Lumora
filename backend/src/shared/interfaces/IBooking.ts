@@ -6,12 +6,12 @@ export type BookingStatus =
 export interface IBooking {
   userId: Types.ObjectId;
   photographerId: Types.ObjectId;
-  packageId?: Types.ObjectId;
+  packageId?: Types.ObjectId | undefined;
   eventType: string;
   eventDate: Date;
-  location?: string;
-  notes?: string;
-  totalPrice?: number;
+  location?: string | undefined;
+  notes?: string | undefined;
+  totalPrice?: number | undefined;
   status: BookingStatus;
   rejectionReason?: string;
   createdAt: Date;

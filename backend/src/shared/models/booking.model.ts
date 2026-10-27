@@ -5,13 +5,13 @@ const bookingSchema = new Schema<IBooking>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Users",
       required: true,
       index: true,
     },
     photographerId: {
       type: Schema.Types.ObjectId,
-      ref: "Photographer",
+      ref: "Users",
       required: true,
       index: true,
     },
