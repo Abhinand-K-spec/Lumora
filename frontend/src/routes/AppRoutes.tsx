@@ -24,6 +24,7 @@ import NotFound from "../pages/error/NotFound";
 import useAuth from "../hooks/useAuth";
 import CreateFeedPost from "../components/feed/CreateFeedPost";
 import Feed from "../pages/user/Feed";
+import Saved from "../pages/user/Saved";
 
 const RoleBasedLayout = () => {
   const { user } = useAuth();
@@ -69,6 +70,7 @@ const AppRoutes = () => {
           <Route element={<RoleBasedLayout />}>
             <Route path="/" element={<HomeRouteSelector />} />
             <Route path="/feed" element={<Feed />} />
+            <Route path="/saved" element={<Saved />} />
             <Route path="/profile" element={<ProfileRouteSelector />} />
             <Route path="/photographers" element={<PhotographersList />} />
             <Route

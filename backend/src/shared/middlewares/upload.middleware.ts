@@ -1,14 +1,10 @@
-import multer, { type Multer } from "multer";
-import { AppError } from "../errors/AppError";
-import { HttpStatus } from "../enums/HTTP.status.code";
+import multer from "multer";
+import { AppError } from "../errors/AppError.js";
+import { HttpStatus } from "../enums/HTTP.status.code.js";
 
 const storage = multer.memoryStorage();
 
-const fileFilter = (
-  req: Express.Request,
-  file: Express.Multer.File,
-  cb: multer.FileFilterCallback,
-) => {
+const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
   } else {

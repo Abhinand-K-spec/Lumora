@@ -35,7 +35,7 @@ export class PhotographerService implements IPhotographerService {
 
   async getProfile(userId: string): Promise<photographerProfileResponseDto> {
     let user = await this._userRepository.findById(userId);
-    let profile: IPhotographer | null = null;
+    let profile: IPhotographer | null;
 
     if (user) {
       profile = await this._photographerRepository.findByUserId(userId);

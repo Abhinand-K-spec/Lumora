@@ -7,11 +7,13 @@ import {
   ChevronRight,
   ArrowRight,
   ChevronDown,
+  Bookmark,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import photographerService, {
   type PhotographerProfile,
 } from "../../services/photographerService";
+import userService from "../../services/userService";
 import { toast } from "sonner";
 import { TOAST_MESSAGES } from "../../constants/messages";
 import {
@@ -96,6 +98,53 @@ const PhotographersList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 6;
+
+  // Saved Photographers State
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchSavedIds = async () => {
+      try {
+        const res = await userService.getSavedPhotographerIds();
+        if (res.data?.savedIds) {
+          setSavedIds(res.data.savedIds);
+        }
+      } catch {
+        // Non-blocking for unauthenticated or guests
+      }
+    };
+    fetchSavedIds();
+  }, []);
+
+  const handleToggleSave = async (
+    photographerId: string,
+    name: string,
+    e: React.MouseEvent,
+  ) => {
+    e.stopPropagation();
+    const wasSaved = savedIds.includes(photographerId);
+
+    // Optimistic toggle
+    setSavedIds((prev) =>
+      wasSaved ? prev.filter((id) => id !== photographerId) : [...prev, photographerId],
+    );
+
+    try {
+      const res = await userService.toggleSavePhotographer(photographerId);
+      const isSaved = res.data?.isSaved ?? !wasSaved;
+      if (isSaved) {
+        toast.success(`${name} saved to your collection!`);
+      } else {
+        toast.info(`Removed ${name} from saved.`);
+      }
+    } catch {
+      // Revert on error
+      setSavedIds((prev) =>
+        wasSaved ? [...prev, photographerId] : prev.filter((id) => id !== photographerId),
+      );
+      toast.error("Failed to update saved status.");
+    }
+  };
 
   // Fetch photographers on filters or page update
   useEffect(() => {
@@ -371,6 +420,31 @@ const PhotographersList = () => {
                       />
                       {/* Gradient Shadow Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+
+                      {/* Save / Bookmark Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleToggleSave(p.id, p.name, e)}
+                        className={`absolute top-2.5 left-2.5 z-10 w-7 h-7 rounded-full backdrop-blur-md flex items-center justify-center transition cursor-pointer border ${
+                          savedIds.includes(p.id)
+                            ? "bg-[#F2C94C]/25 border-[#F2C94C] text-[#F2C94C] shadow-lg shadow-[#F2C94C]/20"
+                            : "bg-neutral-950/70 border-white/10 text-white/70 hover:text-white hover:bg-neutral-950/90"
+                        }`}
+                        title={
+                          savedIds.includes(p.id)
+                            ? "Remove from saved"
+                            : "Save photographer"
+                        }
+                      >
+                        <Bookmark
+                          size={12}
+                          className={
+                            savedIds.includes(p.id)
+                              ? "fill-[#F2C94C] text-[#F2C94C]"
+                              : ""
+                          }
+                        />
+                      </button>
 
                       {/* Rating Badge */}
                       <div className="absolute top-2.5 right-2.5 bg-neutral-950/85 backdrop-blur-md border border-border/15 px-1.5 py-0.5 rounded flex items-center gap-1 text-[8px] font-bold text-text-secondary">

@@ -62,4 +62,94 @@ export class UserController {
       },
     });
   }
+
+  async toggleSavePhotographer(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
+    }
+
+    const rawPhotographerId = req.params.photographerId;
+    const photographerId = Array.isArray(rawPhotographerId)
+      ? rawPhotographerId[0]
+      : rawPhotographerId;
+
+    if (!photographerId) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Photographer ID is required");
+    }
+
+    const result = await this._userService.toggleSavePhotographer(
+      userId,
+      photographerId,
+    );
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: result.isSaved
+        ? USER_MESSAGES.PHOTOGRAPHER_SAVED
+        : USER_MESSAGES.PHOTOGRAPHER_UNSAVED,
+      data: result,
+    });
+  }
+
+  async checkIsPhotographerSaved(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
+    }
+
+    const rawPhotographerId = req.params.photographerId;
+    const photographerId = Array.isArray(rawPhotographerId)
+      ? rawPhotographerId[0]
+      : rawPhotographerId;
+
+    if (!photographerId) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Photographer ID is required");
+    }
+
+    const isSaved = await this._userService.isPhotographerSaved(
+      userId,
+      photographerId,
+    );
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Status fetched successfully",
+      data: { isSaved },
+    });
+  }
+
+  async getSavedPhotographers(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
+    }
+
+    const photographers = await this._userService.getSavedPhotographers(userId);
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: USER_MESSAGES.SAVED_PHOTOGRAPHERS_FETCHED,
+      data: {
+        photographers,
+      },
+    });
+  }
+
+  async getSavedPhotographerIds(req: Request, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, COMMON_MESSAGES.UNAUTHORIZED);
+    }
+
+    const savedIds = await this._userService.getSavedPhotographerIds(userId);
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Saved photographer IDs fetched successfully",
+      data: {
+        savedIds,
+      },
+    });
+  }
 }

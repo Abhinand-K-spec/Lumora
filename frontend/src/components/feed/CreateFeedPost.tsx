@@ -42,7 +42,9 @@ export default function CreateFeedPost({
   const [isDragging, setIsDragging] = useState(false);
 
   const imagesRef = useRef<SelectedImage[]>([]);
-  imagesRef.current = images;
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
 
   // Revoke all remaining object URLs on component unmount
   useEffect(() => {

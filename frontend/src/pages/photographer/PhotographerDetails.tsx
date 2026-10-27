@@ -14,12 +14,14 @@ import {
   Shield,
   Loader2,
   Calendar,
+  Bookmark,
 } from "lucide-react";
 import { toast } from "sonner";
 import photographerService, {
   type PhotographerProfile,
 } from "../../services/photographerService";
 import { feedService } from "../../services/feedService";
+import userService from "../../services/userService";
 import { getErrorMessage } from "../../utils/errorUtils";
 
 interface GalleryPhoto {
@@ -68,6 +70,10 @@ const PhotographerDetails = () => {
     servicesRequired: [] as string[],
   });
 
+  // Saved photographer state
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     const fetchPhotographerData = async () => {
       if (!id) return;
@@ -80,6 +86,16 @@ const PhotographerDetails = () => {
           setProfile(res.data.photographer);
         } else {
           setError("Photographer profile not found.");
+        }
+
+        // Fetch saved status for current user
+        try {
+          const savedRes = await userService.checkIsPhotographerSaved(id);
+          if (savedRes.data) {
+            setIsSaved(Boolean(savedRes.data.isSaved));
+          }
+        } catch {
+          // Non-blocking if check fails
         }
 
         // Fetch real portfolio moments from feedService for this photographer
@@ -117,6 +133,31 @@ const PhotographerDetails = () => {
 
     fetchPhotographerData();
   }, [id]);
+
+  const handleToggleSave = async () => {
+    if (!id || isSaving) return;
+    setIsSaving(true);
+    const prevSaved = isSaved;
+    setIsSaved(!prevSaved);
+
+    try {
+      const res = await userService.toggleSavePhotographer(id);
+      const newState = res.data?.isSaved ?? !prevSaved;
+      setIsSaved(newState);
+      if (newState) {
+        toast.success(
+          `${profile?.name || "Photographer"} saved to your collection!`,
+        );
+      } else {
+        toast.info("Removed from saved photographers.");
+      }
+    } catch (err: unknown) {
+      setIsSaved(prevSaved);
+      toast.error(getErrorMessage(err, "Failed to update saved status."));
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -285,7 +326,27 @@ const PhotographerDetails = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+              <button
+                onClick={handleToggleSave}
+                disabled={isSaving}
+                className={`px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer border ${
+                  isSaved
+                    ? "bg-[#F2C94C]/15 border-[#F2C94C] text-[#F2C94C] shadow-lg shadow-[#F2C94C]/10"
+                    : "bg-[#0f1012] border-white/20 text-gray-300 hover:text-white hover:border-white/40"
+                }`}
+                title={isSaved ? "Saved to your collection" : "Save photographer"}
+              >
+                <Bookmark
+                  size={14}
+                  className={
+                    isSaved
+                      ? "fill-[#F2C94C] text-[#F2C94C]"
+                      : "text-gray-300"
+                  }
+                />
+                <span>{isSaved ? "Saved" : "Save"}</span>
+              </button>
               <button
                 onClick={() =>
                   openBookingForPlan(

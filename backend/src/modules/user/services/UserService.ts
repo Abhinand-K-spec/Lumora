@@ -8,11 +8,19 @@ import type { IUserProfileRepository } from "../repositories/IUserProfileReposit
 import { userProfileMapper } from "../dto/userProfileMapper.js";
 import type { editProfileDto } from "../dto/editProfileDto.js";
 import type { IUser } from "../../../shared/interfaces/IUser.js";
+import type { ISavedPhotographerRepository } from "../repositories/ISavedPhotographerRepository.js";
+import type { IPhotographerRepository } from "../../photographer/repositories/IPhotographerRepository.js";
+import type { IPackageRepository } from "../../photographer/interfaces/IPackageRepository.js";
+import { photographerProfileMapper } from "../../photographer/dto/photographerProfileMapper.js";
+import type { photographerProfileResponseDto } from "../../photographer/dto/photographerProfileResponseDto.js";
 
 export class UserService implements IUserService {
   constructor(
     private readonly _userRepository: IUserRepository,
     private readonly _userProfileRepository: IUserProfileRepository,
+    private readonly _savedPhotographerRepository: ISavedPhotographerRepository,
+    private readonly _photographerRepository: IPhotographerRepository,
+    private readonly _packageRepository: IPackageRepository,
   ) {}
 
   async getProfile(userId: string): Promise<profileResponseDto> {
@@ -74,5 +82,72 @@ export class UserService implements IUserService {
     }
 
     return userProfileMapper.toUserProfileResponse(user!, profile!);
+  }
+
+  async toggleSavePhotographer(
+    userId: string,
+    photographerId: string,
+  ): Promise<{ isSaved: boolean }> {
+    const exists = await this._savedPhotographerRepository.isSaved(
+      userId,
+      photographerId,
+    );
+    if (exists) {
+      await this._savedPhotographerRepository.unsave(userId, photographerId);
+      return { isSaved: false };
+    } else {
+      await this._savedPhotographerRepository.save(userId, photographerId);
+      return { isSaved: true };
+    }
+  }
+
+  async isPhotographerSaved(
+    userId: string,
+    photographerId: string,
+  ): Promise<boolean> {
+    return await this._savedPhotographerRepository.isSaved(
+      userId,
+      photographerId,
+    );
+  }
+
+  async getSavedPhotographers(
+    userId: string,
+  ): Promise<photographerProfileResponseDto[]> {
+    const savedRecords =
+      await this._savedPhotographerRepository.findByUserId(userId);
+
+    const result: photographerProfileResponseDto[] = [];
+
+    for (const record of savedRecords) {
+      const photographer = await this._photographerRepository.findByUserId(
+        record.photographerId,
+      );
+
+      if (!photographer) continue;
+
+      const user = await this._userRepository.findById(record.photographerId);
+      if (!user) continue;
+
+      const packages = await this._packageRepository.findByPhotographerId(
+        photographer._id.toString(),
+      );
+
+      result.push(
+        photographerProfileMapper.toProfileResponse(
+          user,
+          photographer,
+          packages,
+        ),
+      );
+    }
+
+    return result;
+  }
+
+  async getSavedPhotographerIds(userId: string): Promise<string[]> {
+    return await this._savedPhotographerRepository.getSavedPhotographerIds(
+      userId,
+    );
   }
 }

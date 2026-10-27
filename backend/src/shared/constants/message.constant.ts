@@ -71,6 +71,9 @@ export const USER_MESSAGES = {
   PHOTO_UPLOADED: "Photo uploaded successfully",
   STATUS_UPDATED: "User status updated successfully.",
   USER_DELETED: "User deleted successfully",
+  PHOTOGRAPHER_SAVED: "Photographer saved successfully",
+  PHOTOGRAPHER_UNSAVED: "Photographer removed from saved successfully",
+  SAVED_PHOTOGRAPHERS_FETCHED: "Saved photographers fetched successfully",
 } as const;
 
 export const ADMIN_MESSAGES = {
