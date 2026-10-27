@@ -51,13 +51,13 @@ interface ApiResponse<T> {
 
 const bookingService = {
   createBooking: (payload: CreateBookingPayload) =>
-    api.post<ApiResponse<BookingItem>>("/bookings", payload),
+    api.post<ApiResponse<{ booking: BookingItem }>>("/bookings", payload),
 
   getUserBookings: () =>
-    api.get<ApiResponse<BookingItem[]>>("/bookings/my-bookings"),
+    api.get<ApiResponse<{ bookings: BookingItem[] }>>("/bookings/my-bookings"),
 
   getPhotographerBookings: () =>
-    api.get<ApiResponse<BookingItem[]>>(
+    api.get<ApiResponse<{ bookings: BookingItem[] }>>(
       "/bookings/photographer-requests"
     ),
 
@@ -66,7 +66,7 @@ const bookingService = {
     status: BookingItem["status"],
     reason?: string
   ) =>
-    api.patch<ApiResponse<BookingItem>>(
+    api.patch<ApiResponse<{ updated: BookingItem }>>(
       `/bookings/${bookingId}/status`,
       { status, reason }
     ),

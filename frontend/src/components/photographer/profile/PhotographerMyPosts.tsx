@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { feedService, type FeedPost } from "../../../services/feedService";
 import { getErrorMessage } from "../../../utils/errorUtils";
+import ConfirmationModal from "../../common/ConfirmationModal";
 
 export default function PhotographerMyPosts() {
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -24,6 +25,7 @@ export default function PhotographerMyPosts() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<FeedPost | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
   const fetchPosts = async () => {
     try {
@@ -43,17 +45,22 @@ export default function PhotographerMyPosts() {
     fetchPosts();
   }, []);
 
-  const handleDelete = async (postId: string) => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
+  const handleDeleteClick = (postId: string) => {
+    setPostToDelete(postId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!postToDelete) return;
 
     try {
-      setDeletingId(postId);
-      await feedService.deletePost(postId);
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
-      if (selectedPost?.id === postId) {
+      setDeletingId(postToDelete);
+      await feedService.deletePost(postToDelete);
+      setPosts((prev) => prev.filter((p) => p.id !== postToDelete));
+      if (selectedPost?.id === postToDelete) {
         setSelectedPost(null);
       }
       toast.success("Post removed successfully");
+      setPostToDelete(null);
     } catch (err: unknown) {
       const msg = getErrorMessage(err, "Failed to delete post");
       toast.error(msg);
@@ -227,7 +234,7 @@ export default function PhotographerMyPosts() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(post.id);
+                        handleDeleteClick(post.id);
                       }}
                       disabled={deletingId === post.id}
                       className="p-2 rounded-full bg-red-950/80 text-red-400 hover:bg-red-900 transition-colors cursor-pointer"
@@ -388,7 +395,7 @@ export default function PhotographerMyPosts() {
               <div className="pt-6 border-t border-border/20 flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={() => handleDelete(selectedPost.id)}
+                  onClick={() => handleDeleteClick(selectedPost.id)}
                   disabled={deletingId === selectedPost.id}
                   className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 font-semibold cursor-pointer disabled:opacity-50"
                 >
@@ -412,6 +419,18 @@ export default function PhotographerMyPosts() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={postToDelete !== null}
+        onClose={() => setPostToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Post"
+        description="Are you sure you want to delete this post from your feed? This action cannot be undone."
+        confirmText="Delete Post"
+        variant="danger"
+        loading={deletingId !== null}
+      />
     </div>
   );
 }

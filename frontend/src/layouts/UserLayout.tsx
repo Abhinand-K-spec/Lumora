@@ -11,6 +11,7 @@ const UserLayout = () => {
     { label: "Feed", path: "/" },
     { label: "Photographers", path: "/photographers" },
     { label: "My Events", path: "/my-events" },
+    { label: "My Bookings", path: "/bookings" },
     { label: "Saved", path: "/saved" },
     { label: "Messages", path: "/messages" },
   ];

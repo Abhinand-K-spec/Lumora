@@ -22,6 +22,7 @@ import PhotographerRecent from "../../components/photographer/profile/Photograph
 import PhotographerMyPosts from "../../components/photographer/profile/PhotographerMyPosts";
 import PhotographerEditModal from "../../components/photographer/profile/PhotographerEditModal";
 import PhotographerPackageModal from "../../components/photographer/profile/PhotographerPackageModal";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 import { getErrorMessage } from "../../utils/errorUtils";
 
 const PhotographerProfile = () => {
@@ -84,6 +85,22 @@ const PhotographerProfile = () => {
   const [isServiceAreaModalOpen, setIsServiceAreaModalOpen] = useState(false);
   const [editingServiceArea, setEditingServiceArea] =
     useState<IServiceArea | null>(null);
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    confirmText?: string;
+    onConfirm: () => void;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    confirmText: "Delete",
+    onConfirm: () => {},
+    loading: false,
+  });
 
   // Sync profile details if DB returns any
   useEffect(() => {
@@ -296,20 +313,31 @@ const PhotographerProfile = () => {
     }
   };
 
-  const handleDeletePackage = async (packageId: string) => {
-    if (!window.confirm("Are you sure you want to delete this package?"))
-      return;
-    try {
-      const res = await photographerService.deletePackage(packageId);
-      setProfile((prev) => ({
-        ...prev,
-        packages: res.data.photographer.packages || [],
-      }));
-      toast.success("Package deleted successfully!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete package.");
-    }
+  const handleDeletePackage = (packageId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Package",
+      description: "Are you sure you want to delete this package? Clients will no longer be able to select it.",
+      confirmText: "Delete Package",
+      loading: false,
+      onConfirm: async () => {
+        try {
+          setConfirmModal((prev) => ({ ...prev, loading: true }));
+          const res = await photographerService.deletePackage(packageId);
+          setProfile((prev) => ({
+            ...prev,
+            packages: res.data.photographer.packages || [],
+          }));
+          toast.success("Package deleted successfully!");
+          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to delete package.");
+        } finally {
+          setConfirmModal((prev) => ({ ...prev, loading: false }));
+        }
+      },
+    });
   };
 
   const handleAddServiceAreaClick = () => {
@@ -358,29 +386,37 @@ const PhotographerProfile = () => {
     }
   };
 
-  const handleDeleteServiceArea = async (areaToDelete: IServiceArea) => {
-    if (
-      !window.confirm(`Are you sure you want to remove "${areaToDelete.name}"?`)
-    ) {
-      return;
-    }
-    try {
-      const updatedAreas = (profile.serviceAreas || []).filter((area) =>
-        areaToDelete._id
-          ? area._id !== areaToDelete._id
-          : area.name !== areaToDelete.name,
-      );
-      const res = await photographerService.updateServiceAreas(updatedAreas);
-      if (res.data && res.data.photographer) {
-        setProfile((prev) => ({
-          ...prev,
-          serviceAreas: res.data.photographer.serviceAreas || [],
-        }));
-        toast.success("Service area removed successfully.");
-      }
-    } catch (err: unknown) {
-      toast.error(getErrorMessage(err, "Failed to delete service area."));
-    }
+  const handleDeleteServiceArea = (areaToDelete: IServiceArea) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Remove Service Area",
+      description: `Are you sure you want to remove "${areaToDelete.name}" from your coverage areas?`,
+      confirmText: "Remove Area",
+      loading: false,
+      onConfirm: async () => {
+        try {
+          setConfirmModal((prev) => ({ ...prev, loading: true }));
+          const updatedAreas = (profile.serviceAreas || []).filter((area) =>
+            areaToDelete._id
+              ? area._id !== areaToDelete._id
+              : area.name !== areaToDelete.name,
+          );
+          const res = await photographerService.updateServiceAreas(updatedAreas);
+          if (res.data && res.data.photographer) {
+            setProfile((prev) => ({
+              ...prev,
+              serviceAreas: res.data.photographer.serviceAreas || [],
+            }));
+            toast.success("Service area removed successfully.");
+          }
+          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        } catch (err: unknown) {
+          toast.error(getErrorMessage(err, "Failed to delete service area."));
+        } finally {
+          setConfirmModal((prev) => ({ ...prev, loading: false }));
+        }
+      },
+    });
   };
 
   return (
@@ -644,6 +680,18 @@ const PhotographerProfile = () => {
         onClose={() => setIsServiceAreaModalOpen(false)}
         areaData={editingServiceArea}
         onSave={handleSaveServiceArea}
+      />
+
+      {/* 10. Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        confirmText={confirmModal.confirmText}
+        variant="danger"
+        loading={confirmModal.loading}
       />
     </div>
   );
