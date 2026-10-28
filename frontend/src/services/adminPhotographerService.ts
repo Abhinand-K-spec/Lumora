@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import API_ENDPOINTS from "../constants/apiEndpoints";
 import type { ApiResponse } from "../types/api";
 
 export interface ApprovalRequestItem {
@@ -66,7 +67,7 @@ const adminPhotographerService = {
     limit?: number;
   }): Promise<ApiResponse<PaginatedRequestsResponse>> => {
     const response = await api.get<ApiResponse<PaginatedRequestsResponse>>(
-      "/admin/photographers/requests",
+      API_ENDPOINTS.ADMIN.PHOTOGRAPHERS.REQUESTS,
       { params },
     );
     return response.data;
@@ -74,7 +75,7 @@ const adminPhotographerService = {
 
   getMetrics: async (): Promise<ApiResponse<{ metrics: ApprovalMetrics }>> => {
     const response = await api.get<ApiResponse<{ metrics: ApprovalMetrics }>>(
-      "/admin/photographers/metrics",
+      API_ENDPOINTS.ADMIN.PHOTOGRAPHERS.METRICS,
     );
     return response.data;
   },
@@ -85,7 +86,7 @@ const adminPhotographerService = {
   ): Promise<ApiResponse<{ request: ApprovalRequestItem }>> => {
     const response = await api.patch<
       ApiResponse<{ request: ApprovalRequestItem }>
-    >(`/admin/photographers/requests/${requestId}/review`, decision);
+    >(API_ENDPOINTS.ADMIN.PHOTOGRAPHERS.REVIEW_REQUEST(requestId), decision);
     return response.data;
   },
 };

@@ -1,4 +1,5 @@
 import api from "../api/axios";
+import API_ENDPOINTS from "../constants/apiEndpoints";
 import type { ApiResponse } from "../types/api";
 import type { User, accountStatus } from "../types/user";
 
@@ -31,7 +32,7 @@ const adminUserService = {
     params?: GetUsersParams,
   ): Promise<ApiResponse<PaginatedUsersResponse>> => {
     const response = await api.get<ApiResponse<PaginatedUsersResponse>>(
-      "/admin/userManagement/users",
+      API_ENDPOINTS.ADMIN.USERS.BASE,
       { params },
     );
     return response.data;
@@ -39,7 +40,7 @@ const adminUserService = {
 
   getUserById: async (id: string): Promise<ApiResponse<User>> => {
     const response = await api.get<ApiResponse<User>>(
-      `/admin/userManagement/users/${id}`,
+      API_ENDPOINTS.ADMIN.USERS.BY_ID(id),
     );
     return response.data;
   },
@@ -49,7 +50,7 @@ const adminUserService = {
     status: accountStatus,
   ): Promise<ApiResponse<User>> => {
     const response = await api.patch<ApiResponse<User>>(
-      `/admin/userManagement/users/${id}/status`,
+      API_ENDPOINTS.ADMIN.USERS.STATUS(id),
       { status },
     );
     return response.data;
@@ -57,7 +58,7 @@ const adminUserService = {
 
   deleteUser: async (id: string): Promise<ApiResponse> => {
     const response = await api.delete<ApiResponse>(
-      `/admin/userManagement/users/${id}/delete`,
+      API_ENDPOINTS.ADMIN.USERS.DELETE(id),
     );
     return response.data;
   },

@@ -1,5 +1,6 @@
 
 import api from "../api/axios";
+import API_ENDPOINTS from "../constants/apiEndpoints";
 
 export interface BookingEventItem {
   eventType: string;
@@ -76,16 +77,16 @@ interface ApiResponse<T> {
 
 const bookingService = {
   createBooking: (payload: CreateBookingPayload) =>
-    api.post<ApiResponse<{ booking: BookingItem }>>("/bookings", payload),
+    api.post<ApiResponse<{ booking: BookingItem }>>(API_ENDPOINTS.BOOKINGS.BASE, payload),
 
   getUserBookings: (query?: BookingQuery) =>
-    api.get<ApiResponse<PaginatedBookings>>("/bookings/my-bookings", {
+    api.get<ApiResponse<PaginatedBookings>>(API_ENDPOINTS.BOOKINGS.MY_BOOKINGS, {
       params: query,
     }),
 
   getPhotographerBookings: (query?: BookingQuery) =>
     api.get<ApiResponse<PaginatedBookings>>(
-      "/bookings/photographer-requests",
+        API_ENDPOINTS.BOOKINGS.PHOTOGRAPHER_REQUESTS,
       { params: query }
     ),
 
@@ -95,7 +96,7 @@ const bookingService = {
     reason?: string
   ) =>
     api.patch<ApiResponse<{ updated: BookingItem }>>(
-      `/bookings/${bookingId}/status`,
+      API_ENDPOINTS.BOOKINGS.STATUS(bookingId),
       { status, reason }
     ),
 };

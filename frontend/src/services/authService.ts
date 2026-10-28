@@ -9,56 +9,57 @@ import type {
   ResetPasswordRequest,
   VerifyEmailRequest,
 } from "../types/auth";
+import API_ENDPOINTS from "../constants/apiEndpoints";
 
 const authService = {
   register: async (data: RegisterRequest): Promise<ApiResponse> => {
-    const response = await api.post<ApiResponse>("/auth/register", data);
+    const response = await api.post<ApiResponse>(API_ENDPOINTS.AUTH.REGISTER, data);
     return response.data;
   },
 
   login: async (data: LoginRequest): Promise<ApiResponse<{ user: User }>> => {
     const response = await api.post<ApiResponse<{ user: User }>>(
-      "/auth/login",
+      API_ENDPOINTS.AUTH.LOGIN,
       data,
     );
     return response.data;
   },
 
   logout: async (): Promise<ApiResponse> => {
-    const response = await api.post<ApiResponse>("/auth/logout");
+    const response = await api.post<ApiResponse>(API_ENDPOINTS.AUTH.LOGOUT);
     return response.data;
   },
 
   getCurrentUser: async (): Promise<ApiResponse<{ user: User }>> => {
-    const response = await api.get<ApiResponse<{ user: User }>>("/auth/me");
+    const response = await api.get<ApiResponse<{ user: User }>>(API_ENDPOINTS.AUTH.ME);
     return response.data;
   },
 
   verifyEmail: async (data: VerifyEmailRequest): Promise<ApiResponse> => {
-    const response = await api.post<ApiResponse>("/auth/verify-email", data);
+    const response = await api.post<ApiResponse>(API_ENDPOINTS.AUTH.VERIFY_EMAIL, data);
     return response.data;
   },
 
   resendOtp: async (data: ResendOtpRequest): Promise<ApiResponse> => {
-    const response = await api.post<ApiResponse>("/auth/resend-otp", data);
+    const response = await api.post<ApiResponse>(API_ENDPOINTS.AUTH.RESEND_OTP, data);
     return response.data;
   },
 
   verifyResetOtp: async (data: VerifyEmailRequest): Promise<ApiResponse> => {
     const response = await api.post<ApiResponse>(
-      "/auth/verify-reset-otp",
+      API_ENDPOINTS.AUTH.VERIFY_RESET_OTP,
       data,
     );
     return response.data;
   },
 
   forgotPassword: async (data: ForgotPasswordRequest): Promise<ApiResponse> => {
-    const response = await api.post<ApiResponse>("/auth/forgot-password", data);
+    const response = await api.post<ApiResponse>(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, data);
     return response.data;
   },
 
   resetPassword: async (data: ResetPasswordRequest): Promise<ApiResponse> => {
-    const response = await api.post<ApiResponse>("/auth/reset-password", data);
+    const response = await api.post<ApiResponse>(API_ENDPOINTS.AUTH.RESET_PASSWORD, data);
     return response.data;
   },
 
