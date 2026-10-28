@@ -4,7 +4,7 @@ import { HttpStatus } from "../../../shared/enums/HTTP.status.code";
 import { AppError } from "../../../shared/errors/AppError";
 import type { BookingStatus, IBooking } from "../../../shared/interfaces/IBooking";
 import type { CreateBookingDTO } from "../dto/CreateBookingDto";
-import type { IBookingRepository } from "../interfaces/IBookingRepository";
+import type { BookingQueryOptions, IBookingRepository, PaginatedBookings } from "../interfaces/IBookingRepository";
 import type { IBookingService } from "../interfaces/IBookingService";
 
 export class BookingService implements IBookingService {
@@ -57,11 +57,11 @@ export class BookingService implements IBookingService {
 
     return await this._bookingRepository.create(bookingPayload);
   }
-  async getUserBookings(userId: string): Promise<IBooking[]> {
-    return await this._bookingRepository.findByUserId(userId);
+  async getUserBookings(userId: string, options?: BookingQueryOptions): Promise<PaginatedBookings> {
+    return await this._bookingRepository.findByUserId(userId, options);
   }
-  async getPhotographerBookings(photographerId: string): Promise<IBooking[]> {
-    return await this._bookingRepository.findByPhotographerId(photographerId);
+  async getPhotographerBookings(photographerId: string, options?: BookingQueryOptions): Promise<PaginatedBookings> {
+    return await this._bookingRepository.findByPhotographerId(photographerId, options);
   }
   async updateBookingStatus(bookingId: string, status: BookingStatus, actorId: string, reason?: string): Promise<IBooking> {
       const booking = await this._bookingRepository.findById(bookingId);

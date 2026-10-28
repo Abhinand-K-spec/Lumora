@@ -17,7 +17,14 @@ export interface CreateBookingPayload {
 export interface BookingItem {
   _id: string;
 
-  photographerId: {
+  userId?: {
+    _id: string;
+    name: string;
+    email?: string;
+    phone?: string;
+  };
+
+  photographerId?: {
     _id: string;
     name: string;
     email?: string;
@@ -28,6 +35,7 @@ export interface BookingItem {
     _id: string;
     packageName: string;
     price: number;
+    description?: string;
   };
 
   events: BookingEventItem[];
@@ -40,7 +48,24 @@ export interface BookingItem {
     | "COMPLETED";
 
   notes?: string;
+  rejectionReason?: string;
   createdAt: string;
+}
+
+export type BookingStatus = BookingItem["status"];
+
+export interface PaginatedBookings {
+  bookings: BookingItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface BookingQuery {
+  page?: number;
+  limit?: number;
+  status?: BookingStatus;
 }
 
 interface ApiResponse<T> {
@@ -53,12 +78,15 @@ const bookingService = {
   createBooking: (payload: CreateBookingPayload) =>
     api.post<ApiResponse<{ booking: BookingItem }>>("/bookings", payload),
 
-  getUserBookings: () =>
-    api.get<ApiResponse<{ bookings: BookingItem[] }>>("/bookings/my-bookings"),
+  getUserBookings: (query?: BookingQuery) =>
+    api.get<ApiResponse<PaginatedBookings>>("/bookings/my-bookings", {
+      params: query,
+    }),
 
-  getPhotographerBookings: () =>
-    api.get<ApiResponse<{ bookings: BookingItem[] }>>(
-      "/bookings/photographer-requests"
+  getPhotographerBookings: (query?: BookingQuery) =>
+    api.get<ApiResponse<PaginatedBookings>>(
+      "/bookings/photographer-requests",
+      { params: query }
     ),
 
   updateBookingStatus: (

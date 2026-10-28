@@ -28,9 +28,17 @@ export class BookingController{
             throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
         };
 
-        const bookings = await this._bookingService.getUserBookings(userId);
+        const page = Math.max(1, parseInt(req.query.page as string) || 1);
+        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 8));
+        const status = req.query.status as import('../../../shared/interfaces/IBooking').BookingStatus | undefined;
 
-        sendSuccess(res,{bookings},BOOKING_MESSAGES.BOOKINGS_FETCHED);
+        const result = await this._bookingService.getUserBookings(userId, {
+            page,
+            limit,
+            ...(status ? { status } : {}),
+        });
+
+        sendSuccess(res, result, BOOKING_MESSAGES.BOOKINGS_FETCHED);
     }
 
     async getPhotographerBookings(req:Request,res:Response):Promise<void>{
@@ -39,9 +47,17 @@ export class BookingController{
             throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED)
         }
 
-        const bookings = await this._bookingService.getPhotographerBookings(photographerId);
+        const page = Math.max(1, parseInt(req.query.page as string) || 1);
+        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 8));
+        const status = req.query.status as import('../../../shared/interfaces/IBooking').BookingStatus | undefined;
 
-        sendSuccess(res,{bookings},BOOKING_MESSAGES.BOOKINGS_FETCHED);
+        const result = await this._bookingService.getPhotographerBookings(photographerId, {
+            page,
+            limit,
+            ...(status ? { status } : {}),
+        });
+
+        sendSuccess(res, result, BOOKING_MESSAGES.BOOKINGS_FETCHED);
     }
 
     async updateStatus(req:Request,res:Response):Promise<void>{

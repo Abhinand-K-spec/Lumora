@@ -26,6 +26,7 @@ import CreateFeedPost from "../components/feed/CreateFeedPost";
 import Feed from "../pages/user/Feed";
 import Saved from "../pages/user/Saved";
 import Bookings from "../pages/user/Bookings";
+import PhotographerBookings from "../pages/photographer/PhotographerBookings";
 
 const RoleBasedLayout = () => {
   const { user } = useAuth();
@@ -80,6 +81,7 @@ const AppRoutes = () => {
               element={<PhotographerDetails />}
             />
             <Route path="/feedPostUpload" element={<CreateFeedPost />} />
+            <Route path="/photographer/bookings" element={<PhotographerBookings />} />
           </Route>
         </Route>
 
