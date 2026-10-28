@@ -1,10 +1,10 @@
-import Route from 'express';
+import {Router} from 'express';
 import { NotificationRepository } from '../repositories/NotificationRepository';
 import { NotificationService } from '../services/NotificationService';
 import { NotificationController } from '../controllers/NotificationController';
 import { authenticate } from '../../../shared/middlewares/auth.middleware';
 
-const router = Route();
+const router = Router();
 
 
 
