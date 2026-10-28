@@ -141,6 +141,66 @@ export const BOOKING_MESSAGES ={
   BOOKING_STATUS_UPDATED:'Booking status updated successfully'
 }
 
+export const NOTIFICATION_MESSAGES = {
+  BOOKING: {
+    CREATED: "Your booking request has been sent successfully.",
+    RECEIVED: "You have received a new booking request.",
+    ACCEPTED: "Your booking request has been accepted.",
+    REJECTED: "Your booking request has been rejected.",
+    CANCELLED: "The booking has been cancelled.",
+    COMPLETED: "Your booking has been marked as completed.",
+    UPDATED: "Your booking details have been updated.",
+  },
+
+  QUOTATION: {
+    CREATED: "A new quotation has been created for your event.",
+    RECEIVED: "You have received a new quotation.",
+    ACCEPTED: "Your quotation has been accepted.",
+    REJECTED: "Your quotation has been rejected.",
+    UPDATED: "The quotation has been updated.",
+    CANCELLED: "The quotation has been cancelled.",
+  },
+
+  PAYMENT: {
+    SUCCESS: "Your payment has been completed successfully.",
+    FAILED: "Your payment could not be completed.",
+    REFUNDED: "Your payment has been refunded.",
+    RELEASED: "Your payment has been released to the photographer.",
+  },
+
+  FEED: {
+    NEW_POST: "A photographer you follow has shared a new post.",
+    NEW_LIKE: "Someone liked your post.",
+    NEW_COMMENT: "Someone commented on your post.",
+    NEW_FOLLOWER: "You have a new follower.",
+    POST_REMOVED: "Your post has been removed.",
+  },
+
+  PROFILE: {
+    APPROVAL_REQUESTED: "Your profile has been submitted for approval.",
+    APPROVED: "Your photographer profile has been approved.",
+    REJECTED: "Your photographer profile has been rejected.",
+    UPDATED: "Your photographer profile has been updated.",
+  },
+
+  EVENT: {
+    CREATED: "A new event has been created.",
+    UPDATED: "Your event details have been updated.",
+    CANCELLED: "Your event has been cancelled.",
+    REMINDER: "You have an upcoming event.",
+  },
+
+  GENERAL: {
+    WELCOME: "Welcome to Lumora! We're glad to have you here.",
+    ACCOUNT_UPDATED: "Your account details have been updated.",
+    NEW_NOTIFICATION: "You have a new notification.",
+    NOTIFICATIONS_FETCHED:'Notifications fetched successfully',
+    UNREAD_COUNT_FETCHED:'Unread count fetched successfully',
+    NOTIFICATION_READ:'Notification marked as read',
+    ALL_NOTIFICATION_READ:'Marked all notifications as read'
+  },
+} as const;
+
 export const MESSAGES = {
   COMMON: COMMON_MESSAGES,
   AUTH: AUTH_MESSAGES,

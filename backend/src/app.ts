@@ -10,6 +10,7 @@ import appRoutes from "./modules/user/routes/user.routes.js";
 import photographerRoutes from "./modules/photographer/routes/photographer.routes.js";
 import feedRoutes from "./modules/feed/routes/feed.routes.js";
 import bookingRoutes from './modules/booking/routes/booking.routes.js'
+import notificationRoutes from './modules/notification/routes/notification.routes.js';
 import dotenv from "dotenv";
 import { errorHandler } from "./shared/middlewares/error.handler.middleware.js";
 import { COMMON_MESSAGES } from "./shared/constants/message.constant.js";
@@ -44,7 +45,8 @@ app.use("/api/photographer", photographerRoutes);
 app.use("/api/admin/userManagement", userManagementRoutes);
 app.use("/api/admin/photographers", adminPhotographerRoutes);
 app.use("/api/feed", feedRoutes);
-app.use("/api/bookings", bookingRoutes)
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/notifications",notificationRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({
