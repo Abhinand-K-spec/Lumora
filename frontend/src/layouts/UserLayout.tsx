@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { Search } from "lucide-react";
 import useAuth from "../hooks/useAuth";
+import NotificationBell from "../components/common/NotificationBell";
 
 const UserLayout = () => {
   const { user } = useAuth();
@@ -48,22 +49,30 @@ const UserLayout = () => {
             ))}
           </nav>
 
-          {/* Actions: Search & Profile */}
-          <div className="flex items-center gap-6">
-            <button className="text-text-secondary hover:text-text cursor-pointer transition-colors duration-200">
-              <Search size={20} />
-            </button>
+        {/* Actions: Search, Notifications & Profile */}
+        <div className="flex items-center gap-5">
+          <button
+            type="button"
+            aria-label="Search"
+            className="text-text-secondary hover:text-text cursor-pointer transition-colors duration-200"
+          >
+            <Search size={20} />
+          </button>
 
-            {/* Profile Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <Link
-                to="/profile"
-                className="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold cursor-pointer hover:bg-primary/20 transition-all select-none focus:outline-none"
-              >
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </Link>
-            </div>
+          <NotificationBell />
+
+          {/* Profile */}
+          <div className="relative" ref={dropdownRef}>
+            <Link
+              to="/profile"
+              aria-label="Open profile"
+              className="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-bold cursor-pointer hover:bg-primary/20 transition-all select-none focus:outline-none"
+            >
+              {user?.name?.charAt(0).toUpperCase() || "U"}
+            </Link>
           </div>
+        </div>
+
         </div>
       </header>
 

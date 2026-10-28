@@ -14,6 +14,7 @@ import useAuth from "../hooks/useAuth";
 import photographerService, {
   type PhotographerProfile,
 } from "../services/photographerService";
+import NotificationBell from "../components/common/NotificationBell";
 
 const PhotographerLayout = () => {
   const { user, logout } = useAuth();
@@ -150,6 +151,12 @@ const PhotographerLayout = () => {
 
       {/* 2. MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-black">
+
+        {/* Photographer Top Header */}
+        <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end border-b border-border/20 bg-black/90 px-6 backdrop-blur-md">
+          <NotificationBell />
+        </header>
+
         {isProfileIncomplete && !isProfilePage && (
           <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-200 px-6 py-3 flex items-center justify-between text-xs select-none">
             <div className="flex items-center gap-2.5">

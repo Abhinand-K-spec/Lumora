@@ -5,11 +5,15 @@ import { BookingController } from '../controllers/BookingController';
 import { authenticate } from '../../../shared/middlewares/auth.middleware';
 import { createBookingSchema } from '../../../shared/validators/booking.validator';
 import { validate } from '../../../shared/middlewares/validation.middleware';
+import { NotificationService } from '../../notification/services/NotificationService';
+import { NotificationRepository } from '../../notification/repositories/NotificationRepository';
 const router =  Router();
 
 
 const bookingRepository = new BookingRepository();
-const bookingService = new BookingService(bookingRepository);
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
+const bookingService = new BookingService(bookingRepository,notificationService);
 const bookingController = new BookingController(bookingService);
 
 router.post(
