@@ -82,7 +82,10 @@ const PhotographerLayout = () => {
           <nav className="flex flex-col gap-1 px-4">
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+              const isActive =
+                item.path === "/photographer/bookings"
+                  ? location.pathname.startsWith(item.path)
+                  : location.pathname === item.path;
               return (
                 <NavLink
                   key={item.path}
@@ -151,7 +154,6 @@ const PhotographerLayout = () => {
 
       {/* 2. MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-black">
-
         {/* Photographer Top Header */}
         <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end border-b border-border/20 bg-black/90 px-6 backdrop-blur-md">
           <NotificationBell />

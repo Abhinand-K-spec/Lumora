@@ -35,6 +35,7 @@ const API_ENDPOINTS = {
       BASE: "/bookings",
       MY_BOOKINGS: "/bookings/my-bookings",
       PHOTOGRAPHER_REQUESTS: "/bookings/photographer-requests",
+      BY_ID:(bookingId:string) => `/bookings/${bookingId}`,
       STATUS: (bookingId: string) => `/bookings/${bookingId}/status`,
     },
   

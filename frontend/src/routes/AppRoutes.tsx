@@ -82,6 +82,7 @@ const AppRoutes = () => {
             />
             <Route path="/feedPostUpload" element={<CreateFeedPost />} />
             <Route path="/photographer/bookings" element={<PhotographerBookings />} />
+            <Route path="/photographer/bookings/:id" element={<PhotographerDetails/>} />
           </Route>
         </Route>
 

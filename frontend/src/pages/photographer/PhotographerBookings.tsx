@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Search,
@@ -18,6 +17,7 @@ import { Table, type Column } from "../../components/common/Table";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import useAuth from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/errorUtils";
+import { useNavigate } from "react-router-dom";
 
 const getInitials = (name?: string) => {
   if (!name) return "??";
@@ -130,6 +130,8 @@ const PhotographerBookings = () => {
   const [confirmState, setConfirmState] =
     useState<ActionState | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   /* ── Fetch bookings from the backend ── */
   const fetchBookings = useCallback(
@@ -413,10 +415,6 @@ const PhotographerBookings = () => {
         align: "right",
         width: "10%",
         render: (booking) => {
-          if (booking.status !== "PENDING") {
-            return <div className="w-8" />;
-          }
-
           const isOpen = openMenuId === booking._id;
 
           return (
@@ -430,31 +428,41 @@ const PhotographerBookings = () => {
               >
                 <MoreVertical size={16} />
               </button>
-
+          
               {isOpen && (
                 <div
-                  className="absolute right-0 top-full mt-1 w-36 bg-[#111214] border border-white/10 rounded-xl shadow-2xl z-30 overflow-hidden"
+                  className="absolute right-0 top-full mt-1 w-40 bg-[#111214] border border-white/10 rounded-xl shadow-2xl z-30 overflow-hidden"
                   onClick={(event) => event.stopPropagation()}
                 >
                   <button
-                    onClick={() =>
-                      triggerAction(booking._id, "ACCEPTED")
-                    }
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-emerald-400 hover:bg-emerald-500/8 transition cursor-pointer"
+                    onClick={() => {
+                      setOpenMenuId(null);
+                      navigate(`/photographer/booking/${booking._id}`);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-text-secondary hover:bg-white/5 hover:text-primary transition cursor-pointer"
                   >
-                    <Check size={13} />
-                    Accept
+                    View Details
                   </button>
-
-                  <button
-                    onClick={() =>
-                      triggerAction(booking._id, "REJECTED")
-                    }
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/8 transition cursor-pointer"
-                  >
-                    <X size={13} />
-                    Decline
-                  </button>
+          
+                  {booking.status === "PENDING" && (
+                    <>
+                      <button
+                        onClick={() => triggerAction(booking._id, "ACCEPTED")}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-emerald-400 hover:bg-emerald-500/8 transition cursor-pointer"
+                      >
+                        <Check size={13} />
+                        Accept
+                      </button>
+          
+                      <button
+                        onClick={() => triggerAction(booking._id, "REJECTED")}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/8 transition cursor-pointer"
+                      >
+                        <X size={13} />
+                        Decline
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

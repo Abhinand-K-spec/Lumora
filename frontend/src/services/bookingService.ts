@@ -1,4 +1,3 @@
-
 import api from "../api/axios";
 import API_ENDPOINTS from "../constants/apiEndpoints";
 
@@ -41,12 +40,7 @@ export interface BookingItem {
 
   events: BookingEventItem[];
 
-  status:
-    | "PENDING"
-    | "ACCEPTED"
-    | "REJECTED"
-    | "CANCELLED"
-    | "COMPLETED";
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED" | "COMPLETED";
 
   notes?: string;
   rejectionReason?: string;
@@ -77,16 +71,25 @@ interface ApiResponse<T> {
 
 const bookingService = {
   createBooking: (payload: CreateBookingPayload) =>
-    api.post<ApiResponse<{ booking: BookingItem }>>(API_ENDPOINTS.BOOKINGS.BASE, payload),
+    api.post<ApiResponse<{ booking: BookingItem }>>(
+      API_ENDPOINTS.BOOKINGS.BASE,
+      payload
+    ),
 
   getUserBookings: (query?: BookingQuery) =>
-    api.get<ApiResponse<PaginatedBookings>>(API_ENDPOINTS.BOOKINGS.MY_BOOKINGS, {
-      params: query,
-    }),
+    api.get<ApiResponse<PaginatedBookings>>(
+      API_ENDPOINTS.BOOKINGS.MY_BOOKINGS,
+      {
+        params: query,
+      }
+    ),
+
+  getBookingById: (bookingId: string) =>
+    api.get<ApiResponse<BookingItem>>(API_ENDPOINTS.BOOKINGS.BY_ID(bookingId)),
 
   getPhotographerBookings: (query?: BookingQuery) =>
     api.get<ApiResponse<PaginatedBookings>>(
-        API_ENDPOINTS.BOOKINGS.PHOTOGRAPHER_REQUESTS,
+      API_ENDPOINTS.BOOKINGS.PHOTOGRAPHER_REQUESTS,
       { params: query }
     ),
 
