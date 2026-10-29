@@ -2,9 +2,6 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Search,
   ChevronDown,
-  MoreVertical,
-  Check,
-  X,
   CalendarDays,
   Inbox,
 } from "lucide-react";
@@ -258,13 +255,13 @@ const PhotographerBookings = () => {
   };
 
   /* ── Booking actions ── */
-  const triggerAction = (
-    bookingId: string,
-    action: "ACCEPTED" | "REJECTED"
-  ) => {
-    setOpenMenuId(null);
-    setConfirmState({ bookingId, action });
-  };
+  // const triggerAction = (
+  //   bookingId: string,
+  //   action: "ACCEPTED" | "REJECTED"
+  // ) => {
+  //   setOpenMenuId(null);
+  //   setConfirmState({ bookingId, action });
+  // };
 
   const handleConfirm = async () => {
     if (!confirmState) return;
@@ -414,60 +411,14 @@ const PhotographerBookings = () => {
         header: "Actions",
         align: "right",
         width: "10%",
-        render: (booking) => {
-          const isOpen = openMenuId === booking._id;
-
-          return (
-            <div className="relative flex justify-end">
-              <button
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setOpenMenuId(isOpen ? null : booking._id);
-                }}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:text-white hover:bg-white/8 transition cursor-pointer"
-              >
-                <MoreVertical size={16} />
-              </button>
-          
-              {isOpen && (
-                <div
-                  className="absolute right-0 top-full mt-1 w-40 bg-[#111214] border border-white/10 rounded-xl shadow-2xl z-30 overflow-hidden"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <button
-                    onClick={() => {
-                      setOpenMenuId(null);
-                      navigate(`/photographer/booking/${booking._id}`);
-                    }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-text-secondary hover:bg-white/5 hover:text-primary transition cursor-pointer"
-                  >
-                    View Details
-                  </button>
-          
-                  {booking.status === "PENDING" && (
-                    <>
-                      <button
-                        onClick={() => triggerAction(booking._id, "ACCEPTED")}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-emerald-400 hover:bg-emerald-500/8 transition cursor-pointer"
-                      >
-                        <Check size={13} />
-                        Accept
-                      </button>
-          
-                      <button
-                        onClick={() => triggerAction(booking._id, "REJECTED")}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/8 transition cursor-pointer"
-                      >
-                        <X size={13} />
-                        Decline
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        },
+        render: (booking) => (
+          <button
+            onClick={() => navigate(`/photographer/booking/${booking._id}`)}
+            className="inline-flex items-center justify-center rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-text-secondary transition hover:border-primary/30 hover:bg-white/5 hover:text-primary"
+          >
+            View Details
+          </button>
+        ),
       },
     ],
     [openMenuId]
