@@ -27,6 +27,7 @@ import Feed from "../pages/user/Feed";
 import Saved from "../pages/user/Saved";
 import Bookings from "../pages/user/Bookings";
 import PhotographerBookings from "../pages/photographer/PhotographerBookings";
+import BookingDetails from "../pages/photographer/PhotographerBookingDetails";
 
 const RoleBasedLayout = () => {
   const { user } = useAuth();
@@ -82,7 +83,7 @@ const AppRoutes = () => {
             />
             <Route path="/feedPostUpload" element={<CreateFeedPost />} />
             <Route path="/photographer/bookings" element={<PhotographerBookings />} />
-            <Route path="/photographer/bookings/:id" element={<PhotographerDetails/>} />
+            <Route path="/photographer/booking/:bookingId" element={<BookingDetails/>} />
           </Route>
         </Route>
 

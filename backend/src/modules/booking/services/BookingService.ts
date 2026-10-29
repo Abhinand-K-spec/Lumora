@@ -104,6 +104,10 @@ export class BookingService implements IBookingService {
       options
     );
   }
+  async getPhotographerBookingDetails(photographerId:string,bookingId: string): Promise<IBooking | null> {
+    const booking =  await this._bookingRepository.findByBookingId(photographerId,bookingId);
+    return booking;
+  }
   async updateBookingStatus(
     bookingId: string,
     status: BookingStatus,

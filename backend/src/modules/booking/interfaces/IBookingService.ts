@@ -6,6 +6,7 @@ export interface IBookingService{
     createBooking(userId:string,data:CreateBookingDTO):Promise<IBooking>;
     getUserBookings(userId:string, options?: BookingQueryOptions):Promise<PaginatedBookings>;
     getPhotographerBookings(photographerId:string, options?: BookingQueryOptions):Promise<PaginatedBookings>;
+    getPhotographerBookingDetails(photographerId:string,ookingId:string):Promise<IBooking | null>;
     updateBookingStatus(
         bookingId: string,
         status: BookingStatus,

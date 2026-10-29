@@ -75,6 +75,15 @@ export class BookingRepository
     };
   }
 
+
+  async findByBookingId(photographerId: string, bookingId: string): Promise<IBooking | null> {
+    const booking = await this._model.findOne({photographerId,_id:bookingId})
+    .populate("userId", "name email phone")
+    .populate("packageId", "packageName price description")
+    .lean();;
+    return booking
+  }
+
   async findConflict(photographerId: string, eventDates: Date[]): Promise<IBooking | null> {
     return await this._model.findOne({
       photographerId,

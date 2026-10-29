@@ -34,6 +34,12 @@ router.post(
     authenticate,
     bookingController.getPhotographerBookings.bind(bookingController)
   );
+
+  router.get(
+    '/:id',
+    authenticate,
+    bookingController.getPhotographerBookingDetails.bind(bookingController)
+  );
   
   router.patch(
     "/:id/status",

@@ -60,6 +60,22 @@ export class BookingController{
         sendSuccess(res, result, BOOKING_MESSAGES.BOOKINGS_FETCHED);
     }
 
+    async getPhotographerBookingDetails(req:Request,res:Response):Promise<void>{
+        const photographerId = req.user?.id;
+        const bookingId = req.params?.id?.toString();
+
+        if(!photographerId){
+            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
+        };
+
+        if(!bookingId){
+            throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.FORBIDDEN);
+        };
+
+        const booking = await this._bookingService.getPhotographerBookingDetails(photographerId,bookingId)
+        sendSuccess(res,booking,BOOKING_MESSAGES.BOOKINGS_FETCHED);
+    }
+
     async updateStatus(req:Request,res:Response):Promise<void>{
         const actorId = req.user?.id;
         if(!actorId){
