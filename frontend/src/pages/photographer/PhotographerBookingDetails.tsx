@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -9,7 +8,6 @@ import {
   UserRound,
   Camera,
   CheckCircle2,
-  XCircle,
   FileText,
   Mail,
   Phone,
@@ -29,6 +27,7 @@ import bookingService, {
   type BookingStatus,
 } from "../../services/bookingService";
 import { getErrorMessage } from "../../utils/errorUtils";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 
 const STATUS_STYLES: Record<
   BookingStatus,
@@ -164,6 +163,11 @@ const BookingDetails = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [pageError, setPageError] = useState("");
 
+  const [isDeclineModalOpen, setIsDeclineModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+
+  const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
+
   const fetchBooking = useCallback(async () => {
     if (!bookingId) {
       setPageError("A booking ID was not provided.");
@@ -184,10 +188,7 @@ const BookingDetails = () => {
 
       setBooking(result);
     } catch (error) {
-      const message = getErrorMessage(
-        error,
-        "Unable to load booking details."
-      );
+      const message = getErrorMessage(error, "Unable to load booking details.");
 
       setPageError(message);
       toast.error(message);
@@ -201,32 +202,51 @@ const BookingDetails = () => {
   }, [fetchBooking]);
 
   const handleStatusUpdate = async (
-    status: Extract<BookingStatus, "ACCEPTED" | "REJECTED">
+    status: Extract<BookingStatus, "ACCEPTED" | "REJECTED">,
+    reason: string = ""
   ) => {
     if (!booking || !bookingId || actionLoading) return;
-
-    const actionLabel = status === "ACCEPTED" ? "accept" : "decline";
-
-    const confirmed = window.confirm(
-      `Are you sure you want to ${actionLabel} this booking?`
-    );
-
-    if (!confirmed) return;
-
+  
+    const normalizedReason = reason.trim();
+  
+    if (status === "REJECTED" && normalizedReason.length < 5) {
+      toast.error("Reason must contain at least 5 characters.");
+      return;
+    }
+  
     try {
       setActionLoading(true);
-
-      await bookingService.updateBookingStatus(bookingId, status);
-
-      setBooking((current) =>
-        current ? { ...current, status } : current
+  
+      await bookingService.updateBookingStatus(
+        bookingId,
+        status,
+        status === "REJECTED" ? normalizedReason : undefined
       );
-
+  
+      setBooking((current) =>
+        current
+          ? {
+              ...current,
+              status,
+              rejectionReason:
+                status === "REJECTED" ? normalizedReason : null,
+            }
+          : current
+      );
+  
       toast.success(
         status === "ACCEPTED"
           ? "Booking accepted successfully."
           : "Booking declined successfully."
       );
+  
+      // Close the appropriate modal only after success
+      if (status === "ACCEPTED") {
+        setIsAcceptModalOpen(false);
+      } else {
+        setIsDeclineModalOpen(false);
+        setRejectionReason("");
+      }
     } catch (error) {
       toast.error(
         getErrorMessage(error, "Failed to update booking status.")
@@ -234,6 +254,17 @@ const BookingDetails = () => {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleDeclineSubmit = async () => {
+    const reason = rejectionReason.trim();
+
+    if (reason.length < 5) {
+      toast.error("Reason must contain at least 5 characters.");
+      return;
+    }
+
+    await handleStatusUpdate("REJECTED", reason);
   };
 
   if (loading) {
@@ -282,9 +313,7 @@ const BookingDetails = () => {
   const status = STATUS_STYLES[booking.status];
   const client = booking.userId;
   const events = [...booking.events].sort(
-    (a, b) =>
-      new Date(a.eventDate).getTime() -
-      new Date(b.eventDate).getTime()
+    (a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()
   );
 
   const firstEvent = events[0];
@@ -296,7 +325,6 @@ const BookingDetails = () => {
   return (
     <div className="min-h-full bg-[#080808] text-white">
       <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
-
         {/* Breadcrumbs */}
         <nav className="mb-7 flex flex-wrap items-center gap-2 text-xs text-text-secondary">
           <button
@@ -329,12 +357,13 @@ const BookingDetails = () => {
             </div>
 
             <h1 className="break-words font-heading text-3xl font-medium tracking-tight text-white sm:text-4xl lg:text-5xl">
-              {client?.name || "Client Booking"}
+              {`${client?.name.charAt(0).toUpperCase()}${client?.name?.slice(1)}` ||
+                "Client Booking"}
             </h1>
 
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary">
-              Review the event brief, client requirements, and schedule for
-              this photography engagement.
+              Review the event brief, client requirements, and schedule for this
+              photography engagement.
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-text-secondary/70">
@@ -353,15 +382,76 @@ const BookingDetails = () => {
             <div className="flex flex-wrap gap-3 xl:shrink-0">
               <button
                 disabled={actionLoading}
-                onClick={() => void handleStatusUpdate("REJECTED")}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/25 bg-red-500/[0.05] px-5 py-3 text-sm font-medium text-red-300 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setIsDeclineModalOpen(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/30 px-5 py-3 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <XCircle size={16} />
-                Decline
+                Decline Booking
               </button>
+              {isDeclineModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+                  <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+                    {/* Header */}
+                    <div className="mb-5">
+                      <h2 className="font-heading text-xl font-semibold text-text">
+                        Decline Booking
+                      </h2>
+
+                      <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                        Please provide a reason for declining this booking. The
+                        customer will be able to see this reason.
+                      </p>
+                    </div>
+
+                    {/* Reason input */}
+                    <textarea
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      placeholder="Enter your reason..."
+                      rows={4}
+                      maxLength={500}
+                      className="w-full resize-none rounded-xl border border-border bg-neutral p-3 text-sm text-text placeholder:text-text-secondary/60 outline-none transition focus:border-primary focus:ring-1 focus:ring-primary/30"
+                    />
+
+                    {/* Character counter */}
+                    <div className="mt-2 flex justify-between text-xs">
+                      <span className="text-text-secondary">
+                        Minimum 5 characters
+                      </span>
+
+                      <span className="text-text-secondary">
+                        {rejectionReason.length}/500
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="mt-7 flex justify-end gap-3">
+                      <button
+                        onClick={() => {
+                          setIsDeclineModalOpen(false);
+                          setRejectionReason("");
+                        }}
+                        disabled={actionLoading}
+                        className="rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-medium text-text-secondary transition hover:border-primary/40 hover:text-text disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        onClick={() => void handleDeclineSubmit()}
+                        disabled={
+                          actionLoading || rejectionReason.trim().length < 5
+                        }
+                        className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-tertiary transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        {actionLoading ? "Declining..." : "Confirm Decline"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <button
                 disabled={actionLoading}
-                onClick={() => void handleStatusUpdate("ACCEPTED")}
+                onClick={() => setIsAcceptModalOpen(true)}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-black shadow-[0_0_24px_rgba(197,160,89,0.08)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {actionLoading ? (
@@ -377,10 +467,8 @@ const BookingDetails = () => {
 
         {/* Main two-column layout */}
         <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,1fr)_340px]">
-
           {/* Main column */}
           <div className="min-w-0 space-y-8">
-
             {/* Project overview */}
             <section className="rounded-2xl border border-white/[0.07] bg-[#101010] p-5 sm:p-7 lg:p-8">
               <SectionHeading
@@ -493,8 +581,8 @@ const BookingDetails = () => {
               {eventTypes.length > 0 && (
                 <p className="mt-4 text-xs text-text-secondary/60">
                   {events.length} scheduled event
-                  {events.length === 1 ? "" : "s"} across{" "}
-                  {eventTypes.length} event categor
+                  {events.length === 1 ? "" : "s"} across {eventTypes.length}{" "}
+                  event categor
                   {eventTypes.length === 1 ? "y" : "ies"}.
                 </p>
               )}
@@ -555,11 +643,21 @@ const BookingDetails = () => {
                 </p>
               )}
             </section>
+            <ConfirmationModal
+          isOpen={isAcceptModalOpen}
+          onClose={() => setIsAcceptModalOpen(false)}
+          onConfirm={() => void handleStatusUpdate("ACCEPTED")}
+          title="Accept Booking?"
+          description="Are you sure you want to accept this booking? Once accepted, you can proceed with preparing a quotation for the customer."
+          confirmText="Accept Booking"
+          cancelText="Cancel"
+          variant="primary"
+          loading={actionLoading}
+        />
           </div>
 
           {/* Right sidebar */}
           <aside className="min-w-0 space-y-5 xl:sticky xl:top-6">
-
             {/* Booking summary */}
             <section className="overflow-hidden rounded-2xl border border-primary/20 bg-[#10100e]">
               <div className="border-b border-primary/15 bg-gradient-to-br from-primary/[0.10] to-transparent p-6">
@@ -689,9 +787,7 @@ const BookingDetails = () => {
                   <Clock size={15} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-white">
-                    Next steps
-                  </h3>
+                  <h3 className="text-sm font-medium text-white">Next steps</h3>
                   <p className="mt-2 text-xs leading-6 text-text-secondary">
                     {booking.status === "PENDING"
                       ? "Review the event dates, locations, and client brief before accepting or declining the request."
