@@ -33,6 +33,21 @@ interface GalleryPhoto {
   caption?: string;
 }
 
+interface BookingFormData {
+  events: {
+    eventType: string;
+    eventDate: string;
+    location: string;
+  }[];
+  deliverables: {
+    name: string;
+    count: number;
+  }[];
+  notes: string;
+}
+
+
+
 const PhotographerDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -59,11 +74,16 @@ const PhotographerDetails = () => {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
 
   // Booking Form State
-  const [bookingForm, setBookingForm] = useState({
-    notes: "",
+  const [bookingForm, setBookingForm] = useState<BookingFormData>({
     events: [
-      { eventType: "Wedding", eventDate: "", location: "" },
+      {
+        eventType: "",
+        eventDate: "",
+        location: "",
+      },
     ],
+    deliverables: [],
+    notes: "",
   });
 
   // Quotation Form State
@@ -174,7 +194,7 @@ const PhotographerDetails = () => {
       ...prev,
       events: [
         ...prev.events,
-        { eventType: "Reception", eventDate: "", location: "" },
+        { eventType: "", eventDate: "", location: "" },
       ],
     }));
   };
@@ -202,6 +222,39 @@ const PhotographerDetails = () => {
     });
   };
 
+  const handleAddDeliverable = () => {
+    setBookingForm((prev) => ({
+      ...prev,
+      deliverables: [
+        ...prev.deliverables,
+        {
+          name: "",
+          count: 1,
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveDeliverable = (index: number) => {
+    setBookingForm((prev) => ({
+      ...prev,
+      deliverables: prev.deliverables.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleDeliverableChange = (
+    index: number,
+    field: "name" | "count",
+    value: string | number
+  ) => {
+    setBookingForm((prev) => ({
+      ...prev,
+      deliverables: prev.deliverables.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -209,6 +262,14 @@ const PhotographerDetails = () => {
 
     if (!bookingForm.events || bookingForm.events.length === 0) {
       toast.error("Please add at least one event.");
+      return;
+    }
+
+    const missingEventType = bookingForm.events.find(
+      (ev) => !ev.eventType.trim()
+    );
+    if (missingEventType) {
+      toast.error("Please enter an event type for every event.");
       return;
     }
 
@@ -228,6 +289,17 @@ const PhotographerDetails = () => {
       return;
     }
 
+    const invalidDeliverable = bookingForm.deliverables.find(
+      (item) =>
+        !item.name.trim() ||
+        !Number.isInteger(item.count) ||
+        item.count < 1
+    );
+    if (invalidDeliverable) {
+      toast.error("Enter a deliverable name and a valid quantity (at least 1).");
+      return;
+    }
+
     if (!id) {
       toast.error("Photographer not found.");
       return;
@@ -239,8 +311,16 @@ const PhotographerDetails = () => {
       await bookingService.createBooking({
         photographerId: id,
         packageId: selectedPackageId,
-        events: bookingForm.events,
-        notes: bookingForm.notes,
+        events: bookingForm.events.map((event) => ({
+          eventType: event.eventType.trim(),
+          eventDate: event.eventDate,
+          location: event.location.trim(),
+        })),
+        deliverables: bookingForm.deliverables.map((item) => ({
+          name: item.name.trim(),
+          count: item.count,
+        })),
+        notes: bookingForm.notes.trim(),
       });
 
       toast.success(
@@ -253,10 +333,12 @@ const PhotographerDetails = () => {
 
       setBookingForm({
         notes: "",
-        events: [{ eventType: "Wedding", eventDate: "", location: "" }],
+        events: [{ eventType: "", eventDate: "", location: "" }],
+        deliverables: [],
       });
 
       setSelectedPackageId(undefined);
+      setSelectedPlan("");
     } catch (err: unknown) {
       toast.error(getErrorMessage(err, "Failed to submit booking request."));
     } finally {
@@ -827,7 +909,7 @@ const PhotographerDetails = () => {
       {/* 5. Interactive Booking Modal */}
       {isBookingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-[#0f1012] border border-white/10 rounded-2xl p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-[#0f1012] border border-white/10 rounded-2xl p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200">
             <button
               onClick={() => setIsBookingModalOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
@@ -836,7 +918,7 @@ const PhotographerDetails = () => {
             </button>
             <div className="space-y-1.5">
               <h3 className="text-lg font-heading font-semibold text-white">
-                Book {profile.name}
+                Book {profile.name.charAt(0).toUpperCase()}{profile.name.slice(1)}
               </h3>
               {selectedPlan && (
                 <div className="text-[10px] text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded w-fit uppercase tracking-wider font-semibold">
@@ -892,22 +974,17 @@ const PhotographerDetails = () => {
                           <label className="text-[9px] text-gray-500 uppercase tracking-wider">
                             Type *
                           </label>
-                          <select
+                          <input
+                            type="text"
+                            list="lumora-event-types"
+                            required
                             value={ev.eventType}
                             onChange={(e) =>
                               handleEventChange(idx, "eventType", e.target.value)
                             }
-                            className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none cursor-pointer"
-                          >
-                            <option value="Wedding">Wedding</option>
-                            <option value="Reception">Reception</option>
-                            <option value="Pre-Wedding">Pre-Wedding</option>
-                            <option value="Engagement">Engagement</option>
-                            <option value="Haldi / Mehendi">Haldi / Mehendi</option>
-                            <option value="Sangeet">Sangeet</option>
-                            <option value="Post-Wedding">Post-Wedding</option>
-                            <option value="Other">Other</option>
-                          </select>
+                            placeholder="Type or choose an event"
+                            className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
+                          />
                         </div>
 
                         <div className="space-y-1">
@@ -945,6 +1022,120 @@ const PhotographerDetails = () => {
                     </div>
                   ))}
                 </div>
+
+                <datalist id="lumora-event-types">
+                  <option value="Wedding" />
+                  <option value="Reception" />
+                  <option value="Pre-Wedding" />
+                  <option value="Engagement" />
+                  <option value="Haldi / Mehendi" />
+                  <option value="Sangeet" />
+                  <option value="Post-Wedding" />
+                  <option value="Nikah" />
+                  <option value="Birthday" />
+                  <option value="Baby Shower" />
+                  <option value="Corporate Event" />
+                  <option value="Graduation" />
+                  <option value="Other" />
+                </datalist>
+              </div>
+
+              {/* ADDITIONAL DELIVERABLES */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                    Additional Deliverables
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={handleAddDeliverable}
+                    className="text-[10px] text-[#F2C94C] hover:text-[#F2C94C]/80 font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition"
+                  >
+                    <Plus size={11} />
+                    <span>Add Item</span>
+                  </button>
+                </div>
+
+                <p className="text-[10px] text-gray-500">
+                  Request albums, photoframes, prints or other physical products.
+                </p>
+
+                {bookingForm.deliverables.length === 0 && (
+                  <div className="border border-dashed border-white/10 rounded-xl p-4 text-center">
+                    <p className="text-xs text-gray-500">
+                      No additional deliverables requested. This section is optional.
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {bookingForm.deliverables.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-end gap-2 p-3 rounded-xl bg-[#070708] border border-white/10"
+                    >
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <label className="text-[9px] text-gray-500 uppercase tracking-wider">
+                          Item Name *
+                        </label>
+                        <input
+                          type="text"
+                          list="lumora-deliverable-options"
+                          required
+                          value={item.name}
+                          onChange={(e) =>
+                            handleDeliverableChange(idx, "name", e.target.value)
+                          }
+                          placeholder="e.g. Photo Album"
+                          className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white outline-none focus:border-[#F2C94C]"
+                        />
+                      </div>
+
+                      <div className="w-20 shrink-0 space-y-1">
+                        <label className="text-[9px] text-gray-500 uppercase tracking-wider">
+                          Count *
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          step={1}
+                          required
+                          value={item.count}
+                          onChange={(e) =>
+                            handleDeliverableChange(
+                              idx,
+                              "count",
+                              e.target.value === "" ? 0 : Number(e.target.value)
+                            )
+                          }
+                          className="w-full bg-[#121316] border border-white/15 rounded-lg px-2 py-2 text-xs text-white outline-none focus:border-[#F2C94C]"
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDeliverable(idx)}
+                        className="p-2 text-red-400 hover:text-red-300 transition cursor-pointer"
+                        title="Remove deliverable"
+                        aria-label={`Remove deliverable ${idx + 1}`}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <datalist id="lumora-deliverable-options">
+                  <option value="Photo Album" />
+                  <option value="Premium Wedding Album" />
+                  <option value="Photoframe" />
+                  <option value="Printed Photos" />
+                  <option value="Canvas Print" />
+                  <option value="Photo Calendar" />
+                  <option value="USB Drive" />
+                  <option value="Custom Photo Book" />
+                </datalist>
               </div>
 
               <div className="space-y-1">

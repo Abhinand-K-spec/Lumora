@@ -9,6 +9,10 @@ export interface IBookingSubEvent {
   eventDate: Date;
   location?: string | undefined;
 }
+export interface IDeliverables{
+  name:string;
+  count:number;
+}
 
 export interface IBooking {
   userId: Types.ObjectId;
@@ -18,6 +22,7 @@ export interface IBooking {
   notes?: string | undefined;
   status: BookingStatus;
   rejectionReason?: string;
+  deliverables:IDeliverables[];
   createdAt: Date;
   updatedAt: Date;
 }
