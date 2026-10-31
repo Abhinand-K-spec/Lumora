@@ -7,10 +7,16 @@ export interface BookingEventItem {
   location?: string;
 }
 
+interface IDeliverables{
+  name:string;
+  count:number;
+}
+
 export interface CreateBookingPayload {
   photographerId: string;
   packageId?: string;
   events: BookingEventItem[];
+  deliverables:IDeliverables[];
   notes?: string;
 }
 

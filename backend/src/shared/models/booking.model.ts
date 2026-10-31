@@ -20,6 +20,17 @@ const subEventSchema = new Schema(
   { _id: false }
 );
 
+const deliverabkesSchema = new Schema(
+ { name:{
+    type:String,
+    required:true,
+  },
+  count:{
+    type:Number,
+    required:true,
+  },}
+)
+
 const bookingSchema = new Schema<IBooking>(
   {
     userId: {
@@ -46,6 +57,9 @@ const bookingSchema = new Schema<IBooking>(
         (val: unknown[]) => val && val.length > 0,
         "At least one event is required",
       ],
+    },
+    deliverables:{
+      type:[deliverabkesSchema]
     },
     notes: {
       type: String,
