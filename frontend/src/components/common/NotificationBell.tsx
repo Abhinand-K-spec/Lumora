@@ -162,7 +162,9 @@ export default function NotificationBell() {
                 No notifications yet.
               </p>
             ) : (
-              notifications.map((notification) => (
+              notifications
+              .filter((notification) => !notification.isRead)
+              .map((notification) => (
                 <button
                   key={notification._id}
                   type="button"
