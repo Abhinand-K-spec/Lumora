@@ -70,7 +70,6 @@ const PhotographerDetails = () => {
 
   // Modals state
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
 
   // Booking Form State
@@ -86,16 +85,6 @@ const PhotographerDetails = () => {
     notes: "",
   });
 
-  // Quotation Form State
-  const [quoteForm, setQuoteForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    eventDate: "",
-    location: "",
-    expectedGuests: "100-300",
-    servicesRequired: [] as string[],
-  });
 
   // Saved photographer state
   const [isSaved, setIsSaved] = useState(false);
@@ -346,27 +335,6 @@ const PhotographerDetails = () => {
     }
   };
 
-  const handleQuoteSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quoteForm.name || !quoteForm.email || !quoteForm.phone) {
-      toast.error("Please fill in the required contact information.");
-      return;
-    }
-    const artistName = profile?.name || "The photographer";
-    toast.success(
-      `Quotation request submitted! ${artistName}'s team will send a detailed price breakdown to your email.`
-    );
-    setIsQuoteModalOpen(false);
-    setQuoteForm({
-      name: "",
-      email: "",
-      phone: "",
-      eventDate: "",
-      location: "",
-      expectedGuests: "100-300",
-      servicesRequired: [],
-    });
-  };
 
   const openBookingForPlan = (packageName: string, packageId?: string) => {
     setSelectedPlan(packageName);
@@ -527,12 +495,6 @@ const PhotographerDetails = () => {
                 className="px-6 py-2.5 bg-gradient-to-r from-[#F2C94C] to-[#dfb230] text-black font-semibold text-xs rounded-full hover:brightness-110 active:scale-98 transition shadow-lg shadow-[#F2C94C]/15 cursor-pointer uppercase tracking-wider text-center"
               >
                 Book Now
-              </button>
-              <button
-                onClick={() => setIsQuoteModalOpen(true)}
-                className="px-6 py-2.5 bg-transparent border border-white/20 text-white hover:text-black hover:bg-white font-semibold text-xs rounded-full active:scale-98 transition cursor-pointer uppercase tracking-wider text-center"
-              >
-                Request Quotation
               </button>
             </div>
           </div>
@@ -836,12 +798,6 @@ const PhotographerDetails = () => {
                   <span>
                     No fixed packages published yet by this photographer.
                   </span>
-                  <button
-                    onClick={() => setIsQuoteModalOpen(true)}
-                    className="px-5 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 text-xs font-semibold transition cursor-pointer"
-                  >
-                    Request Custom Quotation
-                  </button>
                 </div>
               )}
             </div>
@@ -1178,170 +1134,7 @@ const PhotographerDetails = () => {
         </div>
       )}
 
-      {/* 6. Request Quotation Modal */}
-      {isQuoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-[#0f1012] border border-white/10 rounded-2xl p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in duration-200">
-            <button
-              onClick={() => setIsQuoteModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
-            >
-              <X size={18} />
-            </button>
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-heading font-semibold text-white">
-                Request Quotation
-              </h3>
-              <p className="text-xs text-gray-400">
-                Request custom pricing from {profile.name} based on event
-                headcount and location details.
-              </p>
-            </div>
-
-            <form onSubmit={handleQuoteSubmit} className="space-y-3.5">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">
-                    Contact Name *
-                  </label>
-                  <input
-                    type="text"
-                     
-                    value={quoteForm.name}
-                    onChange={(e) =>
-                      setQuoteForm((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-[#070708] border border-white/15 rounded-lg px-3 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
-                    placeholder="Enter name"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="text"
-                     
-                    value={quoteForm.phone}
-                    onChange={(e) =>
-                      setQuoteForm((prev) => ({
-                        ...prev,
-                        phone: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-[#070708] border border-white/15 rounded-lg px-3 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
-                    placeholder="+91 XXXXX XXXXX"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                   
-                  value={quoteForm.email}
-                  onChange={(e) =>
-                    setQuoteForm((prev) => ({ ...prev, email: e.target.value }))
-                  }
-                  className="w-full bg-[#070708] border border-white/15 rounded-lg px-3 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
-                  placeholder="name@example.com"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">
-                    Shoot Location
-                  </label>
-                  <input
-                    type="text"
-                    value={quoteForm.location}
-                    onChange={(e) =>
-                      setQuoteForm((prev) => ({
-                        ...prev,
-                        location: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-[#070708] border border-white/15 rounded-lg px-3 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
-                    placeholder="e.g. Kochi"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">
-                    Event Scale (Guests)
-                  </label>
-                  <select
-                    value={quoteForm.expectedGuests}
-                    onChange={(e) =>
-                      setQuoteForm((prev) => ({
-                        ...prev,
-                        expectedGuests: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-[#070708] border border-white/15 rounded-lg px-3 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none cursor-pointer"
-                  >
-                    <option value="Under 100">Under 100</option>
-                    <option value="100-300">100-300</option>
-                    <option value="300-500">300-500</option>
-                    <option value="500+">500+</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">
-                  Services Needed
-                </label>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {[
-                    "Photography",
-                    "Videography",
-                    "Drone Aerials",
-                    "Album Printing",
-                  ].map((srv) => {
-                    const isChecked = quoteForm.servicesRequired.includes(srv);
-                    return (
-                      <button
-                        type="button"
-                        key={srv}
-                        onClick={() => {
-                          setQuoteForm((prev) => ({
-                            ...prev,
-                            servicesRequired: isChecked
-                              ? prev.servicesRequired.filter((x) => x !== srv)
-                              : [...prev.servicesRequired, srv],
-                          }));
-                        }}
-                        className={`py-1.5 px-3 rounded-lg text-left text-[10px] border transition flex items-center justify-between cursor-pointer ${
-                          isChecked
-                            ? "bg-[#F2C94C]/10 border-[#F2C94C] text-[#F2C94C]"
-                            : "bg-[#070708] border-white/5 text-gray-400"
-                        }`}
-                      >
-                        <span>{srv}</span>
-                        {isChecked && <Check size={10} />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full mt-2 py-2.5 bg-transparent border border-white/20 hover:bg-white hover:text-black text-white font-bold uppercase tracking-widest text-[10px] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
-              >
-                <span>Request Custom Pricing</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      
 
       {/* 7. Bottom Brand Footer */}
       <footer className="w-full border-t border-white/5 bg-[#050506] py-12 px-6 select-none mt-20">
