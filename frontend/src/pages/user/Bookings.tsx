@@ -34,32 +34,39 @@ const Bookings = () => {
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
-  const [selectedBookingToCancel, setSelectedBookingToCancel] = useState<string | null>(null);
+  const [selectedBookingToCancel, setSelectedBookingToCancel] = useState<
+    string | null
+  >(null);
 
   // Server-side pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<BookingStatus | "ALL">("ALL");
+  const [statusFilter, setStatusFilter] = useState<BookingStatus | "ALL">(
+    "ALL"
+  );
 
-  const fetchBookings = useCallback(async (pg: number, status: BookingStatus | "ALL") => {
-    try {
-      setLoading(true);
-      const res = await bookingService.getUserBookings({
-        page: pg,
-        limit: PAGE_LIMIT,
-        ...(status !== "ALL" ? { status } : {}),
-      });
-      const data = res.data.data;
-      setBookings(data.bookings ?? []);
-      setTotal(data.total ?? 0);
-      setTotalPages(data.totalPages ?? 1);
-    } catch (err: unknown) {
-      toast.error(getErrorMessage(err, "Failed to load bookings."));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchBookings = useCallback(
+    async (pg: number, status: BookingStatus | "ALL") => {
+      try {
+        setLoading(true);
+        const res = await bookingService.getUserBookings({
+          page: pg,
+          limit: PAGE_LIMIT,
+          ...(status !== "ALL" ? { status } : {}),
+        });
+        const data = res.data.data;
+        setBookings(data.bookings ?? []);
+        setTotal(data.total ?? 0);
+        setTotalPages(data.totalPages ?? 1);
+      } catch (err: unknown) {
+        toast.error(getErrorMessage(err, "Failed to load bookings."));
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     fetchBookings(page, statusFilter);
@@ -74,7 +81,10 @@ const Bookings = () => {
     if (!selectedBookingToCancel) return;
     try {
       setCancellingId(selectedBookingToCancel);
-      await bookingService.updateBookingStatus(selectedBookingToCancel, "CANCELLED");
+      await bookingService.updateBookingStatus(
+        selectedBookingToCancel,
+        "CANCELLED"
+      );
       toast.success("Booking cancelled successfully.");
       await fetchBookings(page, statusFilter);
       setSelectedBookingToCancel(null);
@@ -124,7 +134,9 @@ const Bookings = () => {
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-heading font-semibold text-white">My Bookings</h1>
+        <h1 className="text-2xl font-heading font-semibold text-white">
+          My Bookings
+        </h1>
         <p className="text-xs text-text-secondary mt-1">
           Track upcoming shoot dates and status of your photographer requests.
         </p>
@@ -161,10 +173,13 @@ const Bookings = () => {
         <div className="text-center py-20 border border-white/10 border-dashed rounded-2xl bg-[#070708] space-y-4">
           <Camera className="w-12 h-12 text-gray-600 mx-auto" />
           <h3 className="text-sm font-semibold text-white">
-            {statusFilter === "ALL" ? "No Bookings Placed Yet" : `No ${statusFilter.toLowerCase()} bookings`}
+            {statusFilter === "ALL"
+              ? "No Bookings Placed Yet"
+              : `No ${statusFilter.toLowerCase()} bookings`}
           </h3>
           <p className="text-xs text-gray-400 max-w-sm mx-auto">
-            Browse through verified photographers in Lumora and book dates for your special events.
+            Browse through verified photographers in Lumora and book dates for
+            your special events.
           </p>
           {statusFilter === "ALL" && (
             <Link
@@ -208,6 +223,16 @@ const Bookings = () => {
                       Cancel Request
                     </button>
                   )}
+                  {booking.status === "REJECTED" && booking.rejectionReason && (
+                    <div className="mt-4 rounded-xl border border-error/20 bg-error/5 p-4">
+                      <h3 className="text-sm font-semibold text-error">
+                        Reason for Declining
+                      </h3>
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
+                        {booking.rejectionReason}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -218,8 +243,13 @@ const Bookings = () => {
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {booking.events?.map((ev, idx) => (
-                    <div key={idx} className="bg-[#070708] border border-white/5 rounded-xl p-3 space-y-1">
-                      <div className="text-xs font-semibold text-white">{ev.eventType}</div>
+                    <div
+                      key={idx}
+                      className="bg-[#070708] border border-white/5 rounded-xl p-3 space-y-1"
+                    >
+                      <div className="text-xs font-semibold text-white">
+                        {ev.eventType}
+                      </div>
                       <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
                         <Calendar size={12} />
                         <span>
@@ -244,7 +274,9 @@ const Bookings = () => {
               {/* Notes */}
               {booking.notes && (
                 <div className="text-xs text-gray-400 bg-[#070708] p-3 rounded-lg border border-white/5">
-                  <span className="text-gray-500 font-semibold">Your Notes: </span>
+                  <span className="text-gray-500 font-semibold">
+                    Your Notes:{" "}
+                  </span>
                   {booking.notes}
                 </div>
               )}
@@ -256,8 +288,8 @@ const Bookings = () => {
             <div className="flex items-center justify-between pt-4 border-t border-white/5">
               <p className="text-xs text-text-secondary/50">
                 Page <span className="text-text-secondary">{page}</span> of{" "}
-                <span className="text-text-secondary">{totalPages}</span>{" "}
-                ({total} total)
+                <span className="text-text-secondary">{totalPages}</span> (
+                {total} total)
               </p>
               <div className="flex items-center gap-1.5">
                 <button
@@ -267,20 +299,22 @@ const Bookings = () => {
                 >
                   <ChevronLeft size={15} />
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setPage(n)}
-                    disabled={loading}
-                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition cursor-pointer border ${
-                      page === n
-                        ? "bg-primary text-black border-primary"
-                        : "border-white/10 text-text-secondary hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (n) => (
+                    <button
+                      key={n}
+                      onClick={() => setPage(n)}
+                      disabled={loading}
+                      className={`w-8 h-8 rounded-lg text-xs font-semibold transition cursor-pointer border ${
+                        page === n
+                          ? "bg-primary text-black border-primary"
+                          : "border-white/10 text-text-secondary hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  )
+                )}
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages || loading}
