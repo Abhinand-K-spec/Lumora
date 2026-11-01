@@ -18,7 +18,6 @@ import PhotographerNarrative from "../../components/photographer/profile/Photogr
 import PhotographerGear from "../../components/photographer/profile/PhotographerGear";
 import PhotographerServices from "../../components/photographer/profile/PhotographerServices";
 import PhotographerSubscription from "../../components/photographer/profile/PhotographerSubscription";
-import PhotographerRecent from "../../components/photographer/profile/PhotographerRecent";
 import PhotographerMyPosts from "../../components/photographer/profile/PhotographerMyPosts";
 import PhotographerEditModal from "../../components/photographer/profile/PhotographerEditModal";
 import PhotographerPackageModal from "../../components/photographer/profile/PhotographerPackageModal";
@@ -626,7 +625,6 @@ const PhotographerProfile = () => {
 
         {/* 5. Bottom visual narratives portfolio grid and My Uploaded Posts */}
         <div className="max-w-7xl mx-auto w-full px-8 mt-8 space-y-12">
-          <PhotographerRecent />
           <PhotographerMyPosts />
         </div>
       </div>
