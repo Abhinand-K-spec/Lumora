@@ -625,7 +625,7 @@ const PhotographerProfile = () => {
 
         {/* 5. Bottom visual narratives portfolio grid and My Uploaded Posts */}
         <div className="max-w-7xl mx-auto w-full px-8 mt-8 space-y-12">
-          <PhotographerMyPosts />
+          {profile.approvalStatus==="APPROVED"?  <PhotographerMyPosts />: <p className="text-primary">You can upload posts after profile approval</p>}
         </div>
       </div>
 
