@@ -16,7 +16,7 @@ const quotationService = new QuotationService(bookingRepository,quotationReposit
 const quotationController = new QuotationController(quotationService);
 
 
-router.post('/create',authenticate,validate(createQuotationSchema),quotationController.createDraft.bind(quotationController));
+router.post('/create/:bookingId',authenticate,validate(createQuotationSchema),quotationController.createDraft.bind(quotationController));
 
 
 export default router
