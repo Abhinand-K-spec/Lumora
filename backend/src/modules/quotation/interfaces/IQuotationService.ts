@@ -8,4 +8,9 @@ export interface IQuotationService {
     bookingId: string,
     data: CreateQuotationDTO,
   ): Promise<IQuotation>;
+  updateQuotation(
+    photographerId:string,
+    quotationId:string,
+    data:CreateQuotationDTO
+  ):Promise<IQuotation>;
 }

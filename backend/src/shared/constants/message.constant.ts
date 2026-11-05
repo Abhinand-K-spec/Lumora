@@ -148,7 +148,10 @@ export const QUOTATION_MESSAGES={
   NO_QUOTATION_ITEM:'Atleast one quotation item is required',
   INVALID_DATE:'Date is not valid',
   DISCOUNT_MUST_NOT_EXCEED:'Discount must be less than subtotal',
-  QUOTATION_DRAFTED:'Quotation draft created successfully'
+  ADVANCE_MUST_NOT_EXCEED:'Advance amount must be less than subtotal',
+  QUOTATION_DRAFTED:'Quotation draft created successfully',
+  NOT_DRAFTED_QUOTATION:'Quotation is not in draft status',
+  QUOTATION_STATUS_CHANGED:'Quotation status changed successfully'
 }
 
 export const NOTIFICATION_MESSAGES = {

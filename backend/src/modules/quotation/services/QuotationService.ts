@@ -80,6 +80,50 @@ export class QuotationService implements IQuotationService {
     return await this._quotationRepository.create(quotationPayload);
   }
 
+  async updateQuotation(photographerId: string, quotationId: string, data: CreateQuotationDTO): Promise<IQuotation> {
+    if(!photographerId){
+      throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
+    };
 
+    if(!quotationId){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    const quotation = await this._quotationRepository.findByIdAndPhotographer(quotationId,photographerId);
+
+    if(quotation?.status !== 'DRAFT'){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_DRAFTED_QUOTATION);
+    };
+
+    const validUntil = new Date(data.validUntil);
+
+    if(validUntil.getTime()< Date.now()){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.INVALID_DATE);
+    };
+
+    const calculated = calculateQuotation(data);
+
+    if(calculated.discount>calculated.subtotal){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.DISCOUNT_MUST_NOT_EXCEED);
+    };
+
+    if(calculated.advanceAmount>calculated.subtotal){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.ADVANCE_MUST_NOT_EXCEED)
+    };
+
+    const updated = await this._quotationRepository.update(quotationId,{
+      ...calculated,
+      validUntil,
+      ...(data.notes!==undefined && {
+        notes:data.notes
+      }),
+
+    })
+
+    if(!updated){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND)
+    }
+    return updated;
+  }
   
 }
