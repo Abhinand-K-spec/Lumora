@@ -141,6 +141,16 @@ export const BOOKING_MESSAGES ={
   BOOKING_STATUS_UPDATED:'Booking status updated successfully'
 }
 
+export const QUOTATION_MESSAGES={
+  NOT_FOUND: 'Booking not found',
+  INVALID_DISCOUNT:'Invalid discount amount',
+  BOOKING_NOT_ACCEPTED:'Quotation can only create for an accepted booking',
+  NO_QUOTATION_ITEM:'Atleast one quotation item is required',
+  INVALID_DATE:'Date is not valid',
+  DISCOUNT_MUST_NOT_EXCEED:'Discount must be less than subtotal',
+  QUOTATION_DRAFTED:'Quotation draft created successfully'
+}
+
 export const NOTIFICATION_MESSAGES = {
   BOOKING: {
     CREATED: "Your booking request has been sent successfully.",
