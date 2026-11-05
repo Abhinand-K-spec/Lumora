@@ -15,3 +15,6 @@ const quotationController = new QuotationController(quotationService);
 
 
 router.post('/create',authenticate,quotationController.createDraft.bind(quotationController));
+
+
+export default router
