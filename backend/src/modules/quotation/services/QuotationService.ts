@@ -125,5 +125,29 @@ export class QuotationService implements IQuotationService {
     }
     return updated;
   }
+
+  async sendQuotation(photographerId: string, quotationId: string): Promise<IQuotation> {
+    const quotation = await this._quotationRepository.findByIdAndPhotographer(quotationId,photographerId);
+
+    if(!quotation){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    if(quotation.status !== 'DRAFT'){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_DRAFTED_QUOTATION);
+    };
+
+    if(new Date(quotation.validUntil) <= new Date()){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.INVALID_DATE)
+    };
+
+    const updatedQuotation = await this._quotationRepository.update(quotationId,{status:'SENT',submittedAt:new Date()});
+
+    if(!updatedQuotation){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
+    }
+
+    return updatedQuotation;
+  }
   
 }

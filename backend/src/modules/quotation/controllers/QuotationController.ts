@@ -54,4 +54,23 @@ export class QuotationController{
 
         sendSuccess(res,updated,QUOTATION_MESSAGES.QUOTATION_STATUS_CHANGED);
     }
+
+    async sendQuotation(req:Request,res:Response):Promise<void>{
+        const photographerId = req.user?.id;
+        const quotationId = req.params?.quotationId?.toString()
+        if(!photographerId){
+            throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
+        };
+
+        if(!quotationId){
+            throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND)
+        }
+
+        const updated = await this._quotationService.sendQuotation(photographerId,quotationId)
+
+        sendSuccess(res,updated,QUOTATION_MESSAGES.QUOTATION_STATUS_CHANGED);
+    }
+
+
+    
 }

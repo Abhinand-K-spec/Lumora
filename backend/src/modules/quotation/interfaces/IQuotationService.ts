@@ -13,4 +13,8 @@ export interface IQuotationService {
     quotationId:string,
     data:CreateQuotationDTO
   ):Promise<IQuotation>;
+  sendQuotation(
+    photographerId:string,
+    quotationId:string
+  ):Promise<IQuotation>;
 }
