@@ -151,8 +151,11 @@ export const QUOTATION_MESSAGES={
   ADVANCE_MUST_NOT_EXCEED:'Advance amount must be less than subtotal',
   QUOTATION_DRAFTED:'Quotation draft created successfully',
   NOT_DRAFTED_QUOTATION:'Quotation is not in draft status',
+  NOT_SENT_QUOTATION:'Quotation is not sent',
   QUOTATION_STATUS_CHANGED:'Quotation status changed successfully',
   DATE_EXPIRED:'Date of the quotation is expired',
+  REJECTION_REASON_NEEDED:'Rejection reason is needed',
+  QUOTATION_FETCHED:'Quotation fetched successfully'
 }
 
 export const NOTIFICATION_MESSAGES = {

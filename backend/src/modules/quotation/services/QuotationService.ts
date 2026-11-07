@@ -19,7 +19,7 @@ export class QuotationService implements IQuotationService {
   constructor(
     private readonly _bookingRepository: IBookingRepository,
     private readonly _quotationRepository: IQuotationRepository
-  ) {}
+  ) { }
 
   async createDraft(
     photographerId: string,
@@ -55,7 +55,7 @@ export class QuotationService implements IQuotationService {
 
     const validUntil = new Date(data.validUntil);
 
-    if (Number.isNaN(validUntil.getTime) || validUntil.getTime() < Date.now()) {
+    if (Number.isNaN(validUntil.getTime()) || validUntil.getTime() < Date.now()) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
         QUOTATION_MESSAGES.INVALID_DATE
@@ -81,73 +81,190 @@ export class QuotationService implements IQuotationService {
   }
 
   async updateQuotation(photographerId: string, quotationId: string, data: CreateQuotationDTO): Promise<IQuotation> {
-    if(!photographerId){
-      throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
+    if (!photographerId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
     };
 
-    if(!quotationId){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
+    if (!quotationId) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
     };
 
-    const quotation = await this._quotationRepository.findByIdAndPhotographer(quotationId,photographerId);
+    const quotation = await this._quotationRepository.findByIdAndPhotographer(quotationId, photographerId);
 
-    if(quotation?.status !== 'DRAFT'){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_DRAFTED_QUOTATION);
+    if (quotation?.status !== 'DRAFT') {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_DRAFTED_QUOTATION);
     };
 
     const validUntil = new Date(data.validUntil);
 
-    if(validUntil.getTime()< Date.now()){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.INVALID_DATE);
+    if (validUntil.getTime() < Date.now()) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.INVALID_DATE);
     };
 
     const calculated = calculateQuotation(data);
 
-    if(calculated.discount>calculated.subtotal){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.DISCOUNT_MUST_NOT_EXCEED);
+    if (calculated.discount > calculated.subtotal) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.DISCOUNT_MUST_NOT_EXCEED);
     };
 
-    if(calculated.advanceAmount>calculated.subtotal){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.ADVANCE_MUST_NOT_EXCEED)
+    if (calculated.advanceAmount > calculated.subtotal) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.ADVANCE_MUST_NOT_EXCEED)
     };
 
-    const updated = await this._quotationRepository.update(quotationId,{
+    const updated = await this._quotationRepository.update(quotationId, {
       ...calculated,
       validUntil,
-      ...(data.notes!==undefined && {
-        notes:data.notes
+      ...(data.notes !== undefined && {
+        notes: data.notes
       }),
 
     })
 
-    if(!updated){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND)
+    if (!updated) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND)
     }
     return updated;
   }
 
   async sendQuotation(photographerId: string, quotationId: string): Promise<IQuotation> {
-    const quotation = await this._quotationRepository.findByIdAndPhotographer(quotationId,photographerId);
+    const quotation = await this._quotationRepository.findByIdAndPhotographer(quotationId, photographerId);
 
-    if(!quotation){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
+    if (!quotation) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
     };
 
-    if(quotation.status !== 'DRAFT'){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_DRAFTED_QUOTATION);
+    if (quotation.status !== 'DRAFT') {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_DRAFTED_QUOTATION);
     };
 
-    if(new Date(quotation.validUntil) <= new Date()){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.INVALID_DATE)
+    if (new Date(quotation.validUntil) <= new Date()) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.INVALID_DATE)
     };
 
-    const updatedQuotation = await this._quotationRepository.update(quotationId,{status:'SENT',submittedAt:new Date()});
+    const updatedQuotation = await this._quotationRepository.update(quotationId, { status: 'SENT', submittedAt: new Date() });
 
-    if(!updatedQuotation){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
+    if (!updatedQuotation) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
     }
 
     return updatedQuotation;
   }
-  
+
+  async acceptQuotation(quotationId: string, customerId: string): Promise<IQuotation> {
+    const quotation = await this._quotationRepository.findById(quotationId);
+
+    if (!quotation) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    if (quotation.userId.toString() !== customerId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    };
+
+    if (quotation.status !== 'SENT') {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_SENT_QUOTATION);
+    };
+
+    if (new Date(quotation.validUntil) <= new Date()) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.DATE_EXPIRED)
+    };
+
+    const updatedQuotation = await this._quotationRepository.update(quotationId, { status: 'ACCEPTED', respondedAt: new Date() });
+
+    if (!updatedQuotation) {
+      throw new AppError(HttpStatus.NOT_FOUND, QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    return updatedQuotation;
+  }
+
+
+  async rejectQuotation(quotationId: string, customerId: string, reason: string): Promise<IQuotation> {
+    const quotation = await this._quotationRepository.findById(quotationId);
+
+    if (!quotation) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    if (quotation.userId.toString() !== customerId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    };
+
+    if (new Date(quotation.validUntil) <= new Date()) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.DATE_EXPIRED);
+
+    }
+
+    if (!reason.trim()) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.REJECTION_REASON_NEEDED);
+    }
+
+    const updatedQuotation = await this._quotationRepository.update(quotationId, { status: 'REJECTED', respondedAt: new Date(), rejectionReason: reason })
+
+    if (!updatedQuotation) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    return updatedQuotation;
+  };
+
+  async getQuotationByBooking(requesterId: string, bookingId: string): Promise<IQuotation[]> {
+    const booking = await this._bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new AppError(HttpStatus.BAD_REQUEST, BOOKING_MESSAGES.BOOKING_NOT_FOUND);
+    };
+
+    const isUser = booking.userId.toString() === requesterId;
+    const isPhotographer = booking.photographerId.toString() === requesterId;
+
+    if (!isUser && !isPhotographer) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    };
+
+    const quotation = await this._quotationRepository.findByBookingId(bookingId);
+    if (!quotation) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
+    };
+    return quotation;
+  }
+
+  async getQuotationById(requesterId: string, quotationId: string): Promise<IQuotation> {
+
+    if (!quotationId) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    const quotation = await this._quotationRepository.findById(quotationId);
+    if (!quotation) {
+      throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    const isUser = quotation?.userId.toString() === requesterId;
+    const isPhotographer = quotation?.photographerId.toString() === requesterId;
+
+    if (!isPhotographer && !isUser) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    };
+
+    return quotation;
+  }
+
+
+  async getPhotographerQuotations(photographerId: string): Promise<IQuotation[]> {
+    const quotations = await this._quotationRepository.findByPhotographerId(photographerId);
+    if(!quotations){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    return quotations;
+  }
+  async getUserQuotations(userId: string): Promise<IQuotation[]> {
+    const quotations = await this._quotationRepository.findByUserId(userId);
+    if(!quotations){
+      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
+    };
+
+    return quotations;
+  }
+
 }

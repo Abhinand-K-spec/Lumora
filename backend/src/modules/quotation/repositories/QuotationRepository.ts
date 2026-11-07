@@ -17,4 +17,10 @@ export class QuotationRepository extends BaseRepository<IQuotation> implements I
     async findByIdAndUser(quotationId: string, userId: string): Promise<IQuotation | null> {
         return await this._model.findOne({_id:quotationId,userId}).exec();
     }
+    async findByPhotographerId(photographerId: string): Promise<IQuotation[] | null> {
+        return await this._model.find({photographerId}).sort({createdAt:-1}).exec();
+    }
+    async findByUserId(userId: string): Promise<IQuotation[] | null> {
+        return await this._model.find({userId}).sort({created:-1}).exec();
+    }
 }
