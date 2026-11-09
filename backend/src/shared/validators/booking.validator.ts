@@ -6,6 +6,7 @@ export const subEventSchema = z.object({
     message: "Valid event date is required",
   }),
   location: z.string().min(2, "Event location/venue is required"),
+  coordinates: z.tuple([z.number(), z.number()]).optional(),
 });
 
 export const createBookingSchema = z.object({

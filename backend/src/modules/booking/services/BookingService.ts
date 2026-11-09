@@ -49,6 +49,7 @@ export class BookingService implements IBookingService {
         eventType: ev.eventType,
         eventDate,
         location: ev.location,
+        ...(ev.coordinates ? { coordinates: ev.coordinates } : {}),
       };
     });
 

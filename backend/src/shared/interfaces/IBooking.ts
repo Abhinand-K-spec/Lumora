@@ -8,6 +8,7 @@ export interface IBookingSubEvent {
   eventType: string;
   eventDate: Date;
   location?: string | undefined;
+  coordinates?: [number, number] | undefined;
 }
 export interface IDeliverables{
   name:string;

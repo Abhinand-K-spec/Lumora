@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import LocationPickerModal from "../../components/common/LocationPickerModal";
 import {
   MapPin,
   Star,
@@ -38,6 +39,7 @@ interface BookingFormData {
     eventType: string;
     eventDate: string;
     location: string;
+    coordinates?:[number,number];
   }[];
   deliverables: {
     name: string;
@@ -45,8 +47,6 @@ interface BookingFormData {
   }[];
   notes: string;
 }
-
-
 
 const PhotographerDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,6 +72,11 @@ const PhotographerDetails = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
 
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [activeLocationEventIndex, setActiveLocationEventIndex] = useState<
+    number | null
+  >(null);
+
   // Booking Form State
   const [bookingForm, setBookingForm] = useState<BookingFormData>({
     events: [
@@ -84,7 +89,6 @@ const PhotographerDetails = () => {
     deliverables: [],
     notes: "",
   });
-
 
   // Saved photographer state
   const [isSaved, setIsSaved] = useState(false);
@@ -181,10 +185,7 @@ const PhotographerDetails = () => {
   const handleAddEvent = () => {
     setBookingForm((prev) => ({
       ...prev,
-      events: [
-        ...prev.events,
-        { eventType: "", eventDate: "", location: "" },
-      ],
+      events: [...prev.events, { eventType: "", eventDate: "", location: "" }],
     }));
   };
 
@@ -280,12 +281,12 @@ const PhotographerDetails = () => {
 
     const invalidDeliverable = bookingForm.deliverables.find(
       (item) =>
-        !item.name.trim() ||
-        !Number.isInteger(item.count) ||
-        item.count < 1
+        !item.name.trim() || !Number.isInteger(item.count) || item.count < 1
     );
     if (invalidDeliverable) {
-      toast.error("Enter a deliverable name and a valid quantity (at least 1).");
+      toast.error(
+        "Enter a deliverable name and a valid quantity (at least 1)."
+      );
       return;
     }
 
@@ -304,6 +305,7 @@ const PhotographerDetails = () => {
           eventType: event.eventType.trim(),
           eventDate: event.eventDate,
           location: event.location.trim(),
+          ...(event.coordinates ? { coordinates: event.coordinates } : {}),
         })),
         deliverables: bookingForm.deliverables.map((item) => ({
           name: item.name.trim(),
@@ -334,7 +336,6 @@ const PhotographerDetails = () => {
       setIsSubmittingBooking(false);
     }
   };
-
 
   const openBookingForPlan = (packageName: string, packageId?: string) => {
     setSelectedPlan(packageName);
@@ -783,7 +784,9 @@ const PhotographerDetails = () => {
                           </div>
 
                           <button
-                            onClick={() => openBookingForPlan(pkg.packageName, pkg._id)}
+                            onClick={() =>
+                              openBookingForPlan(pkg.packageName, pkg._id)
+                            }
                             className="w-full py-2.5 text-[10px] uppercase font-bold tracking-widest rounded-lg transition-all active:scale-98 cursor-pointer text-center bg-[#F2C94C] hover:bg-[#F2C94C]/90 text-neutral-950"
                           >
                             Book This Plan
@@ -874,7 +877,8 @@ const PhotographerDetails = () => {
             </button>
             <div className="space-y-1.5">
               <h3 className="text-lg font-heading font-semibold text-white">
-                Book {profile.name.charAt(0).toUpperCase()}{profile.name.slice(1)}
+                Book {profile.name.charAt(0).toUpperCase()}
+                {profile.name.slice(1)}
               </h3>
               {selectedPlan && (
                 <div className="text-[10px] text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded w-fit uppercase tracking-wider font-semibold">
@@ -936,7 +940,11 @@ const PhotographerDetails = () => {
                             required
                             value={ev.eventType}
                             onChange={(e) =>
-                              handleEventChange(idx, "eventType", e.target.value)
+                              handleEventChange(
+                                idx,
+                                "eventType",
+                                e.target.value
+                              )
                             }
                             placeholder="Type or choose an event"
                             className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
@@ -949,11 +957,15 @@ const PhotographerDetails = () => {
                           </label>
                           <input
                             type="date"
-                             
+
                             min={new Date().toISOString().split("T")[0]}
                             value={ev.eventDate}
                             onChange={(e) =>
-                              handleEventChange(idx, "eventDate", e.target.value)
+                              handleEventChange(
+                                idx,
+                                "eventDate",
+                                e.target.value
+                              )
                             }
                             className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
                           />
@@ -961,19 +973,46 @@ const PhotographerDetails = () => {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[9px] text-gray-500 uppercase tracking-wider">
-                          Shoot Location / Venue *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={ev.location || ""}
-                          onChange={(e) =>
-                            handleEventChange(idx, "location", e.target.value)
-                          }
-                          className="w-full bg-[#121316] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-[#F2C94C] outline-none"
-                          placeholder="e.g. Grand Hyatt, Kochi"
-                        />
+                        <div className="flex items-center justify-between">
+                          <label className="text-[9px] text-gray-500 uppercase tracking-wider">
+                            Shoot Location / Venue *
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveLocationEventIndex(idx);
+                              setIsLocationModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition cursor-pointer"
+                          >
+                            <MapPin size={11} />
+                            <span>Choose on Map</span>
+                          </button>
+                        </div>
+
+                        <div className="relative">
+                          <input
+                            type="text"
+                            required
+                            value={ev.location || ""}
+                            onChange={(e) =>
+                              handleEventChange(idx, "location", e.target.value)
+                            }
+                            className="w-full bg-[#121316] border border-white/15 rounded-lg pl-2.5 pr-8 py-1.5 text-xs text-white focus:border-primary outline-none"
+                            placeholder="e.g. Grand Hyatt, Kochi or select on map"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveLocationEventIndex(idx);
+                              setIsLocationModalOpen(true);
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition cursor-pointer"
+                            title="Pick on map"
+                          >
+                            <MapPin size={14} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1014,13 +1053,15 @@ const PhotographerDetails = () => {
                 </div>
 
                 <p className="text-[10px] text-gray-500">
-                  Request albums, photoframes, prints or other physical products.
+                  Request albums, photoframes, prints or other physical
+                  products.
                 </p>
 
                 {bookingForm.deliverables.length === 0 && (
                   <div className="border border-dashed border-white/10 rounded-xl p-4 text-center">
                     <p className="text-xs text-gray-500">
-                      No additional deliverables requested. This section is optional.
+                      No additional deliverables requested. This section is
+                      optional.
                     </p>
                   </div>
                 )}
@@ -1134,8 +1175,6 @@ const PhotographerDetails = () => {
         </div>
       )}
 
-      
-
       {/* 7. Bottom Brand Footer */}
       <footer className="w-full border-t border-white/5 bg-[#050506] py-12 px-6 select-none mt-20">
         <div className="max-w-7xl mx-auto flex flex-col items-center justify-between gap-6 text-center">
@@ -1165,6 +1204,41 @@ const PhotographerDetails = () => {
           </p>
         </div>
       </footer>
+      <LocationPickerModal
+        isOpen={isLocationModalOpen}
+        onClose={() => {
+          setIsLocationModalOpen(false);
+          setActiveLocationEventIndex(null);
+        }}
+        selectedLocation={
+          activeLocationEventIndex !== null &&
+          bookingForm.events[activeLocationEventIndex]?.coordinates
+            ? {
+                name: bookingForm.events[activeLocationEventIndex].location,
+                coordinates:
+                  bookingForm.events[activeLocationEventIndex].coordinates!,
+              }
+            : null
+        }
+        onSelect={(selected) => {
+          if (activeLocationEventIndex !== null) {
+            setBookingForm((prev) => {
+              const updated = [...prev.events];
+              const target = updated[activeLocationEventIndex];
+              if (target) {
+                updated[activeLocationEventIndex] = {
+                  ...target,
+                  location: selected.name,
+                  coordinates: selected.coordinates,
+                };
+              }
+              return { ...prev, events: updated };
+            });
+          }
+          setIsLocationModalOpen(false);
+          setActiveLocationEventIndex(null);
+        }}
+      />
     </div>
   );
 };

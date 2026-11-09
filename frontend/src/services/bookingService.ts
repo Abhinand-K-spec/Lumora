@@ -5,6 +5,7 @@ export interface BookingEventItem {
   eventType: string;
   eventDate: string;
   location?: string;
+  coordinates?: [number, number];
 }
 
 interface IDeliverables{

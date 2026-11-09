@@ -16,6 +16,10 @@ const subEventSchema = new Schema(
       type: String,
       trim: true,
     },
+    coordinates: {
+      type: [Number],
+      default: undefined,
+    },
   },
   { _id: false }
 );
