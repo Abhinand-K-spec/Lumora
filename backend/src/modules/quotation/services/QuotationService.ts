@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import {
   AUTH_MESSAGES,
   BOOKING_MESSAGES,
+  NOTIFICATION_MESSAGES,
   QUOTATION_MESSAGES,
 } from "../../../shared/constants/message.constant";
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code";
@@ -13,12 +14,14 @@ import type { IQuotationRepository } from "../interfaces/IQuotationRepository";
 import type { IQuotationService } from "../interfaces/IQuotationService";
 import type { IQuotation } from "../../../shared/interfaces/IQuotation";
 import type { CreateQuotationDTO } from "../dto/createQuotationDto";
+import type { INotificationService } from "../../notification/interfaces/INotificationService";
 import { calculateQuotation } from "../utils/QuotationFinanceCalculator";
 
 export class QuotationService implements IQuotationService {
   constructor(
     private readonly _bookingRepository: IBookingRepository,
-    private readonly _quotationRepository: IQuotationRepository
+    private readonly _quotationRepository: IQuotationRepository,
+    private readonly _notificationService: INotificationService,
   ) { }
 
   async createDraft(
@@ -161,6 +164,16 @@ export class QuotationService implements IQuotationService {
       throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
     }
 
+    await this._notificationService.createNotification({
+      recipientId: updatedQuotation.userId as Types.ObjectId,
+      actorId: new Types.ObjectId(photographerId),
+      type: 'QUOTATION_RECEIVED',
+      title: NOTIFICATION_MESSAGES.QUOTATION.RECEIVED,
+      message: 'You have received a new quotation. Review and respond.',
+      resourceType: 'QUOTATION',
+      resourceId: updatedQuotation.bookingId as Types.ObjectId,
+    });
+
     return updatedQuotation;
   }
 
@@ -188,6 +201,16 @@ export class QuotationService implements IQuotationService {
     if (!updatedQuotation) {
       throw new AppError(HttpStatus.NOT_FOUND, QUOTATION_MESSAGES.NOT_FOUND);
     };
+
+    await this._notificationService.createNotification({
+      recipientId: updatedQuotation.photographerId as Types.ObjectId,
+      actorId: updatedQuotation.userId as Types.ObjectId,
+      type: 'QUOTATION_ACCEPTED',
+      title: NOTIFICATION_MESSAGES.QUOTATION.ACCEPTED,
+      message: 'The client has accepted your quotation.',
+      resourceType: 'QUOTATION',
+      resourceId: updatedQuotation.bookingId as Types.ObjectId,
+    });
 
     return updatedQuotation;
   }
@@ -218,6 +241,16 @@ export class QuotationService implements IQuotationService {
     if (!updatedQuotation) {
       throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
     };
+
+    await this._notificationService.createNotification({
+      recipientId: updatedQuotation.photographerId as Types.ObjectId,
+      actorId: updatedQuotation.userId as Types.ObjectId,
+      type: 'QUOTATION_REJECTED',
+      title: NOTIFICATION_MESSAGES.QUOTATION.REJECTED,
+      message: `The client has declined your quotation. Reason: "${reason.trim()}"`,
+      resourceType: 'QUOTATION',
+      resourceId: updatedQuotation.bookingId as Types.ObjectId,
+    });
 
     return updatedQuotation;
   };

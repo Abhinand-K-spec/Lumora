@@ -36,6 +36,7 @@ import quotationService, {
 import { getErrorMessage } from "../../utils/errorUtils";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import CreateQuotationModal from "../../components/photographer/quotation/CreateQuotationModal";
+import BookingTimeline from "../../components/common/BookingTimeline";
 
 const STATUS_STYLES: Record<
   BookingStatus,
@@ -997,8 +998,15 @@ const BookingDetails = () => {
               </div>
             </section>
 
-            {/* Client information */}
-            <section className="rounded-2xl border border-white/[0.07] bg-[#101010] p-6">
+            {/* Booking progress timeline */}
+            <section className="rounded-2xl border border-white/[0.07] bg-[#101010] p-5">
+              <BookingTimeline
+                bookingStatus={booking.status}
+                quotationStatus={quotation?.status}
+              />
+            </section>
+
+            {/* Client information */}            <section className="rounded-2xl border border-white/[0.07] bg-[#101010] p-6">
               <div className="mb-5 flex items-center gap-2">
                 <UserRound size={16} className="text-primary" />
                 <h2 className="font-heading text-lg text-white">

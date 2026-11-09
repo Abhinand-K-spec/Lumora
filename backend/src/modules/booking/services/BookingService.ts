@@ -78,14 +78,26 @@ export class BookingService implements IBookingService {
     const booking = await this._bookingRepository.create(bookingPayload);
   
 
-    await this._notificationService.createNotification({
-      recipientId:new Types.ObjectId(photographerId),
-      actorId:new Types.ObjectId(userId),
-      type:'BOOKING_CREATED',
-      title:NOTIFICATION_MESSAGES.BOOKING.CREATED,
-      message:'You have recieved a new booking',
-      resourceType:'BOOKING'
-    })
+    if (booking._id) {
+      await this._notificationService.createNotification({
+        recipientId: new Types.ObjectId(photographerId),
+        actorId: new Types.ObjectId(userId),
+        type: 'BOOKING_CREATED',
+        title: NOTIFICATION_MESSAGES.BOOKING.RECEIVED,
+        message: 'You have received a new booking request.',
+        resourceType: 'BOOKING',
+        resourceId: booking._id,
+      });
+    } else {
+      await this._notificationService.createNotification({
+        recipientId: new Types.ObjectId(photographerId),
+        actorId: new Types.ObjectId(userId),
+        type: 'BOOKING_CREATED',
+        title: NOTIFICATION_MESSAGES.BOOKING.RECEIVED,
+        message: 'You have received a new booking request.',
+        resourceType: 'BOOKING',
+      });
+    }
 
     return booking
   }
@@ -146,7 +158,7 @@ export class BookingService implements IBookingService {
     if (status === "ACCEPTED" || status === "REJECTED") {
       await this._notificationService.createNotification({
         recipientId: booking.userId,
-        actorId: new Types.ObjectId(booking.packageId),
+        actorId: booking.photographerId,
         type:
           status === "ACCEPTED"
             ? "BOOKING_ACCEPTED"
@@ -160,6 +172,7 @@ export class BookingService implements IBookingService {
             ? "Your booking request has been accepted."
             : "Your booking request has been rejected.",
         resourceType: "BOOKING",
+        resourceId: new Types.ObjectId(bookingId),
       });
     }
     if (status === "CANCELLED") {
@@ -170,6 +183,7 @@ export class BookingService implements IBookingService {
         title: NOTIFICATION_MESSAGES.BOOKING.CANCELLED,
         message: "A booking has been cancelled by the user.",
         resourceType: "BOOKING",
+        resourceId: new Types.ObjectId(bookingId),
       });
     }
     

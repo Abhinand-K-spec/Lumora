@@ -24,6 +24,7 @@ import quotationService, {
 import { getErrorMessage } from "../../utils/errorUtils";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import UserQuotationModal from "../../components/user/quotation/UserQuotationModal";
+import BookingTimeline from "../../components/common/BookingTimeline";
 
 const PAGE_LIMIT = 6;
 
@@ -316,6 +317,18 @@ const Bookings = () => {
                   {booking.notes}
                 </div>
               )}
+
+              {/* Booking Progress Timeline */}
+              {(() => {
+                const bIdStr = String(booking._id);
+                const q = quotationsMap[bIdStr] ?? quotationsMap[booking._id];
+                return (
+                  <BookingTimeline
+                    bookingStatus={booking.status}
+                    quotationStatus={q?.status}
+                  />
+                );
+              })()}
 
               {/* Quotation Status Strip */}
               {(() => {

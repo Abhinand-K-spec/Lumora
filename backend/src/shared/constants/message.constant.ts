@@ -142,7 +142,7 @@ export const BOOKING_MESSAGES ={
 }
 
 export const QUOTATION_MESSAGES={
-  NOT_FOUND: 'Booking not found',
+  NOT_FOUND: 'Quotation not found',
   INVALID_DISCOUNT:'Invalid discount amount',
   BOOKING_NOT_ACCEPTED:'Quotation can only create for an accepted booking',
   NO_QUOTATION_ITEM:'Atleast one quotation item is required',

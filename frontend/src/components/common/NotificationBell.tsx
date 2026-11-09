@@ -7,9 +7,11 @@ import { toast } from "sonner";
 import notificationService, {
   type NotificationItem,
 } from "../../services/notificationService";
+import useAuth from "../../hooks/useAuth";
 
 export default function NotificationBell() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [notifications, setNotifications] =
     useState<NotificationItem[]>([]);
@@ -90,18 +92,31 @@ export default function NotificationBell() {
     try {
       await handleMarkAsRead(notification);
 
-      if (notification.resourceType === "BOOKING" && notification.resourceId) {
-        navigate(`/bookings/${notification.resourceId}`);
+      if (notification.resourceType === "BOOKING") {
+        if (user?.role === "PHOTOGRAPHER") {
+          if (notification.resourceId) {
+            navigate(`/photographer/booking/${notification.resourceId}`);
+          } else {
+            navigate("/photographer/bookings");
+          }
+        } else {
+          navigate("/bookings");
+        }
+      } else if (notification.resourceType === "QUOTATION") {
+        if (user?.role === "PHOTOGRAPHER") {
+          if (notification.resourceId) {
+            navigate(`/photographer/booking/${notification.resourceId}`);
+          } else {
+            navigate("/photographer/bookings");
+          }
+        } else {
+          navigate("/bookings");
+        }
       } else if (
         notification.resourceType === "POST" &&
         notification.resourceId
       ) {
         navigate(`/posts/${notification.resourceId}`);
-      } else if (
-        notification.resourceType === "QUOTATION" &&
-        notification.resourceId
-      ) {
-        navigate(`/quotations/${notification.resourceId}`);
       }
 
       setIsOpen(false);
@@ -162,9 +177,7 @@ export default function NotificationBell() {
                 No notifications yet.
               </p>
             ) : (
-              notifications
-              .filter((notification) => !notification.isRead)
-              .map((notification) => (
+              notifications.map((notification) => (
                 <button
                   key={notification._id}
                   type="button"

@@ -5,7 +5,7 @@ import type { INotificationRepository } from "../interfaces/INotificationReposit
 import type { ICreateNotificationInput } from "../interfaces/ICreateNotificationInput";
 import { AppError } from "../../../shared/errors/AppError";
 import { HttpStatus } from "../../../shared/enums/HTTP.status.code";
-import { AUTH_MESSAGES } from "../../../shared/constants/message.constant";
+import { AUTH_MESSAGES, COMMON_MESSAGES } from "../../../shared/constants/message.constant";
 
 
 
@@ -19,7 +19,7 @@ async createNotification(
     if (!Types.ObjectId.isValid(input.recipientId)) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
-        AUTH_MESSAGES.INVALID_CREDENTIALS,
+        COMMON_MESSAGES.BAD_REQUEST,
       );
     }
   
@@ -50,10 +50,10 @@ async createNotification(
 
   async getNotifications(recipientId: Types.ObjectId, page: number, limit: number): Promise<{notifications:INotification[],total:number,unreadCount:number}> {
       if(!Number.isInteger(page) || page<1){
-        throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.INVALID_CREDENTIALS);
+        throw new AppError(HttpStatus.BAD_REQUEST,COMMON_MESSAGES.BAD_REQUEST);
       }
       if(!Number.isInteger(limit) || limit > 100){
-        throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.INVALID_CREDENTIALS);
+        throw new AppError(HttpStatus.BAD_REQUEST,COMMON_MESSAGES.BAD_REQUEST);
       }
 
       const [result, unreadCount] = await Promise.all([this._notificationRepository.findByRecipientId(recipientId,page,limit),this._notificationRepository.countUnread(recipientId)]);
@@ -71,7 +71,7 @@ async createNotification(
 
   async markAsRead(notificationId: string, recipientId: Types.ObjectId): Promise<INotification> {
       if(!notificationId){
-        throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.INVALID_CREDENTIALS)
+        throw new AppError(HttpStatus.BAD_REQUEST,COMMON_MESSAGES.BAD_REQUEST)
       }
 
       if(!recipientId){
@@ -80,7 +80,7 @@ async createNotification(
 
       const notification = await this._notificationRepository.markAsRead(notificationId,recipientId);
       if(!notification){
-        throw new AppError(HttpStatus.BAD_REQUEST,AUTH_MESSAGES.FORBIDDEN);
+        throw new AppError(HttpStatus.NOT_FOUND,COMMON_MESSAGES.NOT_FOUND);
       }
       return notification;
   }

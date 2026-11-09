@@ -15,6 +15,7 @@ export interface IDeliverables{
 }
 
 export interface IBooking {
+  _id?: Types.ObjectId;
   userId: Types.ObjectId;
   photographerId: Types.ObjectId;
   packageId?: Types.ObjectId | undefined;
