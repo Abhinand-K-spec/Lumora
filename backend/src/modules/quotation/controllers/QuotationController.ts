@@ -11,7 +11,7 @@ export class QuotationController {
 
     async createDraft(req: Request, res: Response): Promise<void> {
         const photographerId = req.user?.id;
-        const bookingId = req.params.id?.toString();
+        const bookingId = (req.params.bookingId ?? req.params.id)?.toString();
 
         if (!photographerId) {
             throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
@@ -73,7 +73,7 @@ export class QuotationController {
         };
 
         if (!quotationId) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+            throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
         }
 
         const updated = await this._quotationService.acceptQuotation(quotationId, customerId);
@@ -95,14 +95,14 @@ export class QuotationController {
         };
 
         if (!quotationId) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+            throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
         };
 
 
         const updated = await this._quotationService.rejectQuotation(quotationId, customerId, reason);
 
         if (!updated) {
-            throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+            throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.NOT_FOUND);
         };
 
         sendSuccess(res, updated, QUOTATION_MESSAGES.QUOTATION_STATUS_CHANGED);
@@ -111,7 +111,7 @@ export class QuotationController {
 
     async getquotationByBooking(req: Request, res: Response): Promise<void> {
         const userId = req.user?.id;
-        const bookingId = req.params?.id?.toString();
+        const bookingId = (req.params.bookingId ?? req.params.id)?.toString();
 
         if (!userId) {
             throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);

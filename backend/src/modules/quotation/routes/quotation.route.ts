@@ -21,9 +21,9 @@ router.patch('/:id',authenticate,validate(createQuotationSchema),quotationContro
 router.patch('/:id/send',authenticate,quotationController.sendQuotation.bind(quotationController));
 router.patch('/:id/accept',authenticate,quotationController.acceptQuotation.bind(quotationController));
 router.patch('/:id/reject',authenticate,quotationController.rejectQuotation.bind(quotationController));
-router.get('/:id',authenticate,quotationController.getQuoatationById.bind(quotationController));
+router.get('/user',authenticate,quotationController.getUserQuotations.bind(quotationController));
+router.get('/photographer',authenticate,quotationController.getPhotographerQuotations.bind(quotationController));
 router.get('/bookings/:id/quotation',authenticate,quotationController.getquotationByBooking.bind(quotationController));
-router.get('/user/quotation',authenticate,quotationController.getUserQuotations.bind(quotationController))
-router.get('/photographer/quotation',authenticate,quotationController.getPhotographerQuotations.bind(quotationController))
+router.get('/:id',authenticate,quotationController.getQuoatationById.bind(quotationController));
 
 export default router

@@ -40,12 +40,12 @@ const quotationSchema = new Schema<IQuotation>(
     },
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Users",
       required: true,
     },
     photographerId: {
       type: Schema.Types.ObjectId,
-      ref: "Photographer",
+      ref: "Users",
       required: true,
     },
     quotationNumber: {

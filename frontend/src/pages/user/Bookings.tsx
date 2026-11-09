@@ -11,14 +11,19 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  Receipt,
 } from "lucide-react";
 import { toast } from "sonner";
 import bookingService, {
   type BookingItem,
   type BookingStatus,
 } from "../../services/bookingService";
+import quotationService, {
+  type QuotationItem,
+} from "../../services/quotationService";
 import { getErrorMessage } from "../../utils/errorUtils";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
+import UserQuotationModal from "../../components/user/quotation/UserQuotationModal";
 
 const PAGE_LIMIT = 6;
 
@@ -38,6 +43,11 @@ const Bookings = () => {
     string | null
   >(null);
 
+  // Quotation state
+  const [quotationsMap, setQuotationsMap] = useState<Record<string, QuotationItem>>({});
+  const [selectedQuotation, setSelectedQuotation] = useState<QuotationItem | null>(null);
+  const [selectedPhotographerName, setSelectedPhotographerName] = useState<string>("");
+
   // Server-side pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -45,6 +55,31 @@ const Bookings = () => {
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "ALL">(
     "ALL"
   );
+
+  const fetchQuotations = useCallback(async () => {
+    try {
+      const res = await quotationService.getUserQuotations();
+      const list = res.data;
+      if (Array.isArray(list)) {
+        const map: Record<string, QuotationItem> = {};
+        list.forEach((q) => {
+          const rawId =
+            typeof q.bookingId === "string"
+              ? q.bookingId
+              : (q.bookingId as { _id?: string })?._id ?? q.bookingId;
+          const bId = rawId ? String(rawId) : null;
+          if (bId) {
+            if (!map[bId] || new Date(q.createdAt).getTime() > new Date(map[bId].createdAt).getTime()) {
+              map[bId] = q;
+            }
+          }
+        });
+        setQuotationsMap(map);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user quotations:", err);
+    }
+  }, []);
 
   const fetchBookings = useCallback(
     async (pg: number, status: BookingStatus | "ALL") => {
@@ -59,13 +94,14 @@ const Bookings = () => {
         setBookings(data.bookings ?? []);
         setTotal(data.total ?? 0);
         setTotalPages(data.totalPages ?? 1);
+        void fetchQuotations();
       } catch (err: unknown) {
         toast.error(getErrorMessage(err, "Failed to load bookings."));
       } finally {
         setLoading(false);
       }
     },
-    []
+    [fetchQuotations]
   );
 
   useEffect(() => {
@@ -280,6 +316,116 @@ const Bookings = () => {
                   {booking.notes}
                 </div>
               )}
+
+              {/* Quotation Status Strip */}
+              {(() => {
+                const bIdStr = String(booking._id);
+                const quotation = quotationsMap[bIdStr] ?? quotationsMap[booking._id];
+                if (!quotation) {
+                  if (booking.status === "ACCEPTED") {
+                    return (
+                      <div className="rounded-xl border border-white/[0.06] bg-[#070708] p-3 flex items-center gap-2.5 text-xs text-text-secondary">
+                        <Clock size={14} className="text-primary/70 shrink-0" />
+                        <span>Photographer accepted your request. Awaiting formal quotation.</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                }
+
+                if (quotation.status === "SENT") {
+                  return (
+                    <div className="rounded-xl border border-primary/30 bg-primary/[0.05] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary shrink-0">
+                          <Receipt size={17} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-semibold text-white">
+                              Formal Quotation Received
+                            </p>
+                            <span className="rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                              Action Required
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-text-secondary mt-0.5">
+                            Total: ₹{quotation.total.toLocaleString("en-IN")} • Advance payable: ₹{quotation.advanceAmount.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedQuotation(quotation);
+                          setSelectedPhotographerName(booking.photographerId?.name || "Photographer");
+                        }}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-black text-xs font-bold hover:bg-primary/90 transition shadow-lg shadow-primary/15 self-start sm:self-auto cursor-pointer"
+                      >
+                        <span>Review & Accept</span>
+                        <ArrowRight size={13} />
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (quotation.status === "ACCEPTED") {
+                  return (
+                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] p-3.5 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                        <div>
+                          <p className="text-xs font-semibold text-white">
+                            Quotation Accepted
+                          </p>
+                          <p className="text-[11px] text-text-secondary">
+                            Total: ₹{quotation.total.toLocaleString("en-IN")} • Advance required: ₹{quotation.advanceAmount.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedQuotation(quotation);
+                          setSelectedPhotographerName(booking.photographerId?.name || "Photographer");
+                        }}
+                        className="text-xs text-text-secondary hover:text-white underline transition cursor-pointer"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (quotation.status === "REJECTED") {
+                  return (
+                    <div className="rounded-xl border border-red-500/20 bg-red-500/[0.05] p-3.5 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <XCircle size={16} className="text-red-400 shrink-0" />
+                        <div>
+                          <p className="text-xs font-semibold text-white">
+                            Quotation Declined
+                          </p>
+                          {quotation.rejectionReason && (
+                            <p className="text-[11px] text-text-secondary line-clamp-1">
+                              &ldquo;{quotation.rejectionReason}&rdquo;
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedQuotation(quotation);
+                          setSelectedPhotographerName(booking.photographerId?.name || "Photographer");
+                        }}
+                        className="text-xs text-text-secondary hover:text-white underline transition cursor-pointer"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  );
+                }
+
+                return null;
+              })()}
             </div>
           ))}
 
@@ -338,6 +484,23 @@ const Bookings = () => {
         cancelText="Keep Booking"
         variant="danger"
         loading={cancellingId !== null}
+      />
+
+      <UserQuotationModal
+        isOpen={selectedQuotation !== null}
+        quotation={selectedQuotation}
+        photographerName={selectedPhotographerName}
+        onClose={() => setSelectedQuotation(null)}
+        onStatusChange={(updated) => {
+          setSelectedQuotation(updated);
+          const bId =
+            typeof updated.bookingId === "string"
+              ? updated.bookingId
+              : (updated.bookingId as { _id?: string })?._id;
+          if (bId) {
+            setQuotationsMap((prev) => ({ ...prev, [bId]: updated }));
+          }
+        }}
       />
     </div>
   );

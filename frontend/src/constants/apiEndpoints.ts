@@ -38,6 +38,18 @@ const API_ENDPOINTS = {
       BY_ID:(bookingId:string) => `/bookings/${bookingId}`,
       STATUS: (bookingId: string) => `/bookings/${bookingId}/status`,
     },
+    
+    QUOTATION: {
+      CREATE: (bookingId: string) => `/quotation/create/${bookingId}`,
+      BY_ID: (quotationId: string) => `/quotation/${quotationId}`,
+      UPDATE: (quotationId: string) => `/quotation/${quotationId}`,
+      SEND: (quotationId: string) => `/quotation/${quotationId}/send`,
+      ACCEPT: (quotationId: string) => `/quotation/${quotationId}/accept`,
+      REJECT: (quotationId: string) => `/quotation/${quotationId}/reject`,
+      BY_BOOKING: (bookingId: string) => `/quotation/bookings/${bookingId}/quotation`,
+      USER_QUOTATIONS: "/quotation/user",
+      PHOTOGRAPHER_QUOTATIONS: "/quotation/photographer",
+    },
   
     FEED: {
       BASE: "/feed",

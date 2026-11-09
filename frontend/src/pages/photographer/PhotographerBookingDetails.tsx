@@ -8,6 +8,7 @@ import {
   UserRound,
   Camera,
   CheckCircle2,
+  XCircle,
   FileText,
   Mail,
   Phone,
@@ -19,6 +20,9 @@ import {
   ChevronRight,
   Sparkles,
   ShieldCheck,
+  Receipt,
+  Plus,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,8 +30,12 @@ import bookingService, {
   type BookingItem,
   type BookingStatus,
 } from "../../services/bookingService";
+import quotationService, {
+  type QuotationItem,
+} from "../../services/quotationService";
 import { getErrorMessage } from "../../utils/errorUtils";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
+import CreateQuotationModal from "../../components/photographer/quotation/CreateQuotationModal";
 
 const STATUS_STYLES: Record<
   BookingStatus,
@@ -167,6 +175,28 @@ const BookingDetails = () => {
   const [rejectionReason, setRejectionReason] = useState("");
 
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
+  const [isQuotationModalOpen, setIsQuotationModalOpen] = useState(false);
+  const [quotation, setQuotation] = useState<QuotationItem | null>(null);
+  const [quotationLoading, setQuotationLoading] = useState(false);
+  const [isSendingQuotation, setIsSendingQuotation] = useState(false);
+
+  const fetchQuotation = useCallback(async () => {
+    if (!bookingId) return;
+    try {
+      setQuotationLoading(true);
+      const res = await quotationService.getByBookingId(bookingId);
+      const list = res.data;
+      if (Array.isArray(list) && list.length > 0) {
+        setQuotation(list[0]);
+      } else {
+        setQuotation(null);
+      }
+    } catch {
+      setQuotation(null);
+    } finally {
+      setQuotationLoading(false);
+    }
+  }, [bookingId]);
 
   const fetchBooking = useCallback(async () => {
     if (!bookingId) {
@@ -187,6 +217,9 @@ const BookingDetails = () => {
       }
 
       setBooking(result);
+      if (result.status === "ACCEPTED") {
+        void fetchQuotation();
+      }
     } catch (error) {
       const message = getErrorMessage(error, "Unable to load booking details.");
 
@@ -229,7 +262,7 @@ const BookingDetails = () => {
               ...current,
               status,
               rejectionReason:
-                status === "REJECTED" ? normalizedReason : null,
+                status === "REJECTED" ? normalizedReason : undefined,
             }
           : current
       );
@@ -243,6 +276,7 @@ const BookingDetails = () => {
       // Close the appropriate modal only after success
       if (status === "ACCEPTED") {
         setIsAcceptModalOpen(false);
+        setIsQuotationModalOpen(true);
       } else {
         setIsDeclineModalOpen(false);
         setRejectionReason("");
@@ -265,6 +299,20 @@ const BookingDetails = () => {
     }
 
     await handleStatusUpdate("REJECTED", reason);
+  };
+
+  const handleSendDraftQuotation = async () => {
+    if (!quotation) return;
+    try {
+      setIsSendingQuotation(true);
+      const res = await quotationService.send(quotation._id);
+      setQuotation(res.data ?? { ...quotation, status: "SENT" });
+      toast.success("Quotation sent to client successfully.");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to send quotation."));
+    } finally {
+      setIsSendingQuotation(false);
+    }
   };
 
   if (loading) {
@@ -643,6 +691,238 @@ const BookingDetails = () => {
                 </p>
               )}
             </section>
+
+            {/* Quotation Section */}
+            {booking.status === "ACCEPTED" && (
+              <section className="rounded-2xl border border-white/[0.07] bg-[#101010] p-6 sm:p-7 space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                        Commercial Terms
+                      </span>
+                    </div>
+                    <h2 className="font-heading text-xl text-white mt-1">
+                      Client Quotation
+                    </h2>
+                    <p className="text-xs text-text-secondary mt-1">
+                      Itemized breakdown, services, rates, and required advance deposit.
+                    </p>
+                  </div>
+
+                  {!quotation && !quotationLoading && (
+                    <button
+                      onClick={() => setIsQuotationModalOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-black hover:bg-primary/90 transition shadow-lg shadow-primary/15 self-start sm:self-auto cursor-pointer"
+                    >
+                      <Plus size={15} />
+                      Create Quotation
+                    </button>
+                  )}
+                </div>
+
+                {quotationLoading ? (
+                  <div className="flex items-center justify-center py-10">
+                    <LoaderCircle className="animate-spin text-primary" size={24} />
+                  </div>
+                ) : !quotation ? (
+                  <div className="rounded-xl border border-dashed border-white/10 bg-[#070708] p-8 text-center space-y-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary mx-auto">
+                      <Receipt size={22} />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">
+                      No Quotation Prepared Yet
+                    </h3>
+                    <p className="text-xs text-text-secondary max-w-md mx-auto leading-relaxed">
+                      Now that this booking is accepted, prepare an itemized quotation with your rates, deliverables, and required advance payment.
+                    </p>
+                    <button
+                      onClick={() => setIsQuotationModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-black hover:bg-primary/90 transition shadow-md shadow-primary/15 cursor-pointer"
+                    >
+                      <Plus size={14} />
+                      Prepare Quotation
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Quotation Header & Status */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-[#070708] p-4 text-xs">
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-text-secondary/60 block">
+                          Quotation Number
+                        </span>
+                        <span className="font-mono font-semibold text-white">
+                          #{quotation.quotationNumber}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-text-secondary/60 block">
+                          Valid Until
+                        </span>
+                        <span className="text-white font-medium">
+                          {new Date(quotation.validUntil).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-text-secondary/60 block mb-1">
+                          Status
+                        </span>
+                        {quotation.status === "ACCEPTED" ? (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
+                            <CheckCircle2 size={12} /> Accepted by Client
+                          </span>
+                        ) : quotation.status === "REJECTED" ? (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-red-500/25 bg-red-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-red-400">
+                            <XCircle size={12} /> Declined by Client
+                          </span>
+                        ) : quotation.status === "SENT" ? (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-[#F2C94C]/25 bg-[#F2C94C]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#F2C94C]">
+                            <Clock size={12} /> Sent (Awaiting Response)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] font-semibold text-gray-400">
+                            Draft (Not Sent)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Rejection Alert if declined */}
+                    {quotation.status === "REJECTED" && quotation.rejectionReason && (
+                      <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold text-red-400">
+                            Client Declined Quotation
+                          </p>
+                          <p className="text-xs text-text-secondary mt-0.5">
+                            Reason: &ldquo;{quotation.rejectionReason}&rdquo;
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setIsQuotationModalOpen(true)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/20 transition self-start sm:self-auto cursor-pointer"
+                        >
+                          <Plus size={13} />
+                          Create Revised Quotation
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Table of items */}
+                    <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#070708]">
+                      <table className="w-full text-left text-xs">
+                        <thead className="border-b border-white/[0.06] bg-white/[0.02] text-text-secondary">
+                          <tr>
+                            <th className="px-4 py-3 font-semibold">Item & Description</th>
+                            <th className="px-3 py-3 font-semibold text-center w-16">Qty</th>
+                            <th className="px-4 py-3 font-semibold text-right">Unit Rate</th>
+                            <th className="px-4 py-3 font-semibold text-right">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/[0.04]">
+                          {quotation.items.map((item, idx) => (
+                            <tr key={idx} className="hover:bg-white/[0.015]">
+                              <td className="px-4 py-3">
+                                <p className="font-semibold text-white">{item.name}</p>
+                                {item.description && (
+                                  <p className="text-[11px] text-text-secondary mt-0.5">
+                                    {item.description}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-3 py-3 text-center text-text-secondary font-mono">
+                                {item.quantity}
+                              </td>
+                              <td className="px-4 py-3 text-right text-text-secondary font-mono">
+                                ₹{item.unitPrice.toLocaleString("en-IN")}
+                              </td>
+                              <td className="px-4 py-3 text-right font-semibold text-white font-mono">
+                                ₹{item.total.toLocaleString("en-IN")}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Financial summary breakdown */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {quotation.notes && (
+                        <div className="rounded-xl border border-white/[0.06] bg-[#070708] p-4 text-xs">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary mb-1">
+                            Notes & Terms
+                          </p>
+                          <p className="text-white whitespace-pre-wrap leading-relaxed">
+                            {quotation.notes}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className={`rounded-xl border border-white/[0.06] bg-[#070708] p-4 space-y-2 text-xs ${!quotation.notes ? "sm:col-span-2" : ""}`}>
+                        <div className="flex justify-between text-text-secondary">
+                          <span>Subtotal</span>
+                          <span className="font-medium text-white">
+                            ₹{quotation.subtotal.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                        {quotation.discount > 0 && (
+                          <div className="flex justify-between text-emerald-400">
+                            <span>Discount</span>
+                            <span>- ₹{quotation.discount.toLocaleString("en-IN")}</span>
+                          </div>
+                        )}
+                        {quotation.tax > 0 && (
+                          <div className="flex justify-between text-text-secondary">
+                            <span>Tax</span>
+                            <span className="font-medium text-white">
+                              + ₹{quotation.tax.toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                        )}
+                        <div className="border-t border-white/[0.08] pt-2 flex justify-between items-center text-white">
+                          <span className="font-semibold">Grand Total</span>
+                          <span className="font-bold font-mono text-sm text-primary">
+                            ₹{quotation.total.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+
+                        <div className="rounded-lg border border-primary/20 bg-primary/[0.05] p-2.5 flex justify-between items-center text-xs mt-2">
+                          <span className="text-text-secondary">Advance Required:</span>
+                          <span className="font-bold text-primary font-mono">
+                            ₹{quotation.advanceAmount.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions for Draft Quotation */}
+                    {quotation.status === "DRAFT" && (
+                      <div className="flex items-center justify-end gap-3 pt-2">
+                        <button
+                          onClick={handleSendDraftQuotation}
+                          disabled={isSendingQuotation}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-black hover:bg-primary/90 transition shadow-lg shadow-primary/15 cursor-pointer disabled:opacity-50"
+                        >
+                          {isSendingQuotation ? (
+                            <LoaderCircle size={14} className="animate-spin" />
+                          ) : (
+                            <Send size={14} />
+                          )}
+                          Send Draft to Client
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
             <ConfirmationModal
           isOpen={isAcceptModalOpen}
           onClose={() => setIsAcceptModalOpen(false)}
@@ -811,6 +1091,12 @@ const BookingDetails = () => {
             </button>
           </aside>
         </div>
+        <CreateQuotationModal
+          isOpen={isQuotationModalOpen}
+          booking={booking}
+          onClose={() => setIsQuotationModalOpen(false)}
+          onSuccess={(newQuo) => setQuotation(newQuo)}
+        />
 
         {/* Footer */}
         <footer className="mt-12 flex flex-col gap-3 border-t border-white/[0.06] pt-6 text-[10px] text-text-secondary/40 sm:flex-row sm:items-center sm:justify-between">

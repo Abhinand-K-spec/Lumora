@@ -48,7 +48,7 @@ export class QuotationService implements IQuotationService {
 
     if (data.items.length < 1) {
       throw new AppError(
-        HttpStatus.UNAUTHORIZED,
+        HttpStatus.BAD_REQUEST,
         QUOTATION_MESSAGES.NO_QUOTATION_ITEM
       );
     }
@@ -63,6 +63,20 @@ export class QuotationService implements IQuotationService {
     }
 
     const calculated = calculateQuotation(data);
+
+    if (calculated.discount > calculated.subtotal) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        QUOTATION_MESSAGES.DISCOUNT_MUST_NOT_EXCEED
+      );
+    }
+
+    if (calculated.advanceAmount > calculated.total) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        QUOTATION_MESSAGES.ADVANCE_MUST_NOT_EXCEED
+      );
+    }
 
     const quotationPayload: Partial<IQuotation> = {
       bookingId: new Types.ObjectId(bookingId),
@@ -107,7 +121,7 @@ export class QuotationService implements IQuotationService {
       throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.DISCOUNT_MUST_NOT_EXCEED);
     };
 
-    if (calculated.advanceAmount > calculated.subtotal) {
+    if (calculated.advanceAmount > calculated.total) {
       throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.ADVANCE_MUST_NOT_EXCEED)
     };
 
@@ -195,7 +209,7 @@ export class QuotationService implements IQuotationService {
 
     }
 
-    if (!reason.trim()) {
+    if (!reason || !reason.trim()) {
       throw new AppError(HttpStatus.BAD_REQUEST, QUOTATION_MESSAGES.REJECTION_REASON_NEEDED);
     }
 
@@ -252,19 +266,11 @@ export class QuotationService implements IQuotationService {
 
   async getPhotographerQuotations(photographerId: string): Promise<IQuotation[]> {
     const quotations = await this._quotationRepository.findByPhotographerId(photographerId);
-    if(!quotations){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
-    };
-
-    return quotations;
+    return quotations ?? [];
   }
   async getUserQuotations(userId: string): Promise<IQuotation[]> {
     const quotations = await this._quotationRepository.findByUserId(userId);
-    if(!quotations){
-      throw new AppError(HttpStatus.BAD_REQUEST,QUOTATION_MESSAGES.NOT_FOUND);
-    };
-
-    return quotations;
+    return quotations ?? [];
   }
 
 }
