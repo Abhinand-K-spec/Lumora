@@ -177,7 +177,7 @@ export default function NotificationBell() {
                 No notifications yet.
               </p>
             ) : (
-              notifications.map((notification) => (
+              notifications.filter((notification)=> !notification.isRead).map((notification) => (
                 <button
                   key={notification._id}
                   type="button"
@@ -201,9 +201,9 @@ export default function NotificationBell() {
                       {notification.title}
                     </span>
   
-                    <span className="mt-1 block text-sm text-text-secondary">
+                    {/* <span className="mt-1 block text-sm text-text-secondary">
                       {notification.message}
-                    </span>
+                    </span> */}
   
                     <span className="mt-2 block text-xs text-text-secondary/70">
                       {new Date(notification.createdAt).toLocaleString()}
