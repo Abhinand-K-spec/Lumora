@@ -158,6 +158,20 @@ export const QUOTATION_MESSAGES={
   QUOTATION_FETCHED:'Quotation fetched successfully'
 }
 
+export const PAYMENT_MESSAGES = {
+  NOT_ACCEPTED_QUOTATION : 'You should accept the quotation before making the payment',
+  INVALID_ADVANCE_AMNT:'Invalid advance amount',
+  NOT_FOUND:'Payment not found',
+  PAYMENT_ALREADY_COMPLETED:'This payment has already completed',
+  CANNOT_VERIFY: `Can't verify this payment`,
+  INVALID_SIGNATURE:'Invalid payment signature',
+  NOT_CAPTURED:'Payment has not captured yet',
+  AMOUNT_MISMATCH:'Payment amount not matching',
+  UNABLE_TO_UPDATE:'Unable to update payment',
+  PAYMENT_ORDER_CREATED:'Payment order created successfully',
+  PAYMENT_VERIFIED:'Payment verified successfully',
+}
+
 export const AVAILABILITY_MESSAGES = {
   INVALID_MONTH: "Month should be between 1 and 12",
   INVALID_YEAR: "Year is not valid",

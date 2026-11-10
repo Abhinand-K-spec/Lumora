@@ -11,6 +11,7 @@ export type PaymentStatus =
 export type PaymentGateway = "RAZORPAY";
 
 export interface IPayment {
+  _id:Types.ObjectId;
   bookingId: Types.ObjectId;
   quotationId: Types.ObjectId;
   userId: Types.ObjectId;

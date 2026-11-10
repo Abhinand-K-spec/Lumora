@@ -79,6 +79,17 @@ const bookingSchema = new Schema<IBooking>(
       type: String,
       default: null,
     },
+    paymentStatus: {
+      type: String,
+      enum: ["PENDING", "PARTIALLY_PAID", "PAID"],
+      default: "PENDING",
+    },
+
+    advancePaid: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,

@@ -14,6 +14,10 @@ export interface IDeliverables{
   name:string;
   count:number;
 }
+export type BookingPaymentStatus =
+  | "PENDING"
+  | "PARTIALLY_PAID"
+  | "PAID";
 
 export interface IBooking {
   _id?: Types.ObjectId;
@@ -27,4 +31,7 @@ export interface IBooking {
   deliverables:IDeliverables[];
   createdAt: Date;
   updatedAt: Date;
+  paymentStatus: BookingPaymentStatus;
+  advancePaid: number;
+  remainingAmount: number;
 }
