@@ -1,7 +1,7 @@
 import Router from "express";
 import { authenticate } from "../../../shared/middlewares/auth.middleware.js";
 import { validate } from "../../../shared/middlewares/validation.middleware.js";
-import { blockAvailabilitySchema, getCalendarSchema } from "../../../shared/validators/availability.validator.js";
+import { blockAvailabilitySchema } from "../../../shared/validators/availability.validator.js";
 import { AvailabilityController } from "../controllers/AvailabilityController.js";
 import { AvailabilityService } from "../services/AvailabilityService.js";
 import { AvailabilityRepository } from "../repositories/AvailabilityRepository.js";
