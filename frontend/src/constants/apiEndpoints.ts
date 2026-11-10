@@ -90,6 +90,16 @@ const API_ENDPOINTS = {
       READ: (id: string) => `/notifications/${id}/read`,
       READ_ALL: "/notifications/read-all",
     },
+
+    AVAILABILITY: {
+      BASE: "/availability",
+      MY_CALENDAR: "/availability/my-calendar",
+      PHOTOGRAPHER_CALENDAR: (photographerId: string) =>
+        `/availability/calendar/${photographerId}`,
+      BLOCK: "/availability/block",
+      UNBLOCK: (availabilityId: string) =>
+        `/availability/unblock/${availabilityId}`,
+    },
   } as const;
   
   export default API_ENDPOINTS;

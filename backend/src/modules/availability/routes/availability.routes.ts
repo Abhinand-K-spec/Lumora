@@ -20,7 +20,6 @@ const availabilityController = new AvailabilityController(availabilityService);
 router.get(
   "/my-calendar",
   authenticate,
-  validate(getCalendarSchema),
   availabilityController.getMyCalendar.bind(availabilityController)
 );
 

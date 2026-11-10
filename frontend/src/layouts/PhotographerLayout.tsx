@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Calendar,
+  CalendarDays,
   Camera,
   MessageSquare,
   BarChart3,
@@ -15,10 +16,12 @@ import photographerService, {
   type PhotographerProfile,
 } from "../services/photographerService";
 import NotificationBell from "../components/common/NotificationBell";
+import CalendarModal from "../components/photographer/calendar/CalendarModal";
 
 const PhotographerLayout = () => {
   const { user, logout } = useAuth();
   const [profile, setProfile] = useState<PhotographerProfile | null>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const location = useLocation();
 
   // Fetch photographer profile details (including photo) on mount and path changes
@@ -155,7 +158,16 @@ const PhotographerLayout = () => {
       {/* 2. MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-black">
         {/* Photographer Top Header */}
-        <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end border-b border-border/20 bg-black/90 px-6 backdrop-blur-md">
+        <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end gap-2 border-b border-border/20 bg-black/90 px-6 backdrop-blur-md">
+          <button
+            type="button"
+            onClick={() => setIsCalendarOpen(true)}
+            aria-label="Availability Calendar"
+            className="relative rounded-full p-2 text-text-secondary hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            title="Availability Calendar"
+          >
+            <CalendarDays size={20} />
+          </button>
           <NotificationBell />
         </header>
 
@@ -184,6 +196,11 @@ const PhotographerLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      <CalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+      />
     </div>
   );
 };
