@@ -19,15 +19,8 @@ export class AvailabilityController {
       throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
     }
 
-    const parseResult = getCalendarSchema.safeParse(req.query);
-    if (!parseResult.success) {
-      const errorMsg = parseResult.error.issues
-        .map((i) => i.message)
-        .join(", ");
-      throw new AppError(HttpStatus.BAD_REQUEST, errorMsg);
-    }
 
-    const { month, year } = parseResult.data;
+    const { month, year } = req.body;
     const calendar = await this._availabilityService.getMonthlyCalendar(
       new Types.ObjectId(photographerId),
       month,
