@@ -12,13 +12,17 @@ import quotationService, {
   type QuotationItem,
 } from "../../../services/quotationService";
 import ConfirmationModal from "../../common/ConfirmationModal";
+import AdvancePaymentButton from "../../payment/AdvancePaymentButton";
 
 interface UserQuotationModalProps {
   isOpen: boolean;
   quotation: QuotationItem | null;
   photographerName?: string;
+  paymentStatus?: "PENDING" | "PARTIALLY_PAID" | "PAID";
+  advancePaid?: number;
   onClose: () => void;
   onStatusChange?: (updated: QuotationItem) => void;
+  onPaymentSuccess?: () => void;
 }
 
 const formatCurrency = (amount: number): string => {
@@ -41,8 +45,11 @@ const UserQuotationModal = ({
   isOpen,
   quotation,
   photographerName = "Photographer",
+  paymentStatus = "PENDING",
+  advancePaid = 0,
   onClose,
   onStatusChange,
+  onPaymentSuccess,
 }: UserQuotationModalProps) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
@@ -63,7 +70,6 @@ const UserQuotationModal = ({
       toast.success("Quotation accepted successfully.");
       onStatusChange?.(updated);
       setIsAcceptModalOpen(false);
-      onClose();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to accept quotation.";
@@ -164,7 +170,10 @@ const UserQuotationModal = ({
                   {getStatusBadge()}
                 </div>
                 <p className="text-xs text-text-secondary mt-0.5">
-                  Prepared by <span className="text-white font-medium">{photographerName}</span>
+                  Prepared by{" "}
+                  <span className="text-white font-medium">
+                    {photographerName}
+                  </span>
                 </p>
               </div>
             </div>
@@ -208,14 +217,52 @@ const UserQuotationModal = ({
 
             {/* Accepted notice */}
             {quotation.status === "ACCEPTED" && (
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 flex items-center justify-between gap-3">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 space-y-3">
                 <div className="flex items-center gap-2.5 text-xs text-emerald-400 font-medium">
                   <CheckCircle2 size={16} />
-                  <span>Quotation accepted. Advance payment required to confirm date.</span>
+                  <span>Quotation accepted successfully.</span>
                 </div>
-                <span className="text-xs font-bold text-white">
-                  Advance: {formatCurrency(quotation.advanceAmount)}
-                </span>
+
+                <div className="flex justify-between text-xs">
+                  <span className="text-text-secondary">Advance required</span>
+                  <span className="font-semibold text-white">
+                    {formatCurrency(quotation.advanceAmount)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-xs">
+                  <span className="text-text-secondary">Advance paid</span>
+                  <span className="font-semibold text-white">
+                    {formatCurrency(advancePaid)}
+                  </span>
+                </div>
+
+                {paymentStatus === "PENDING" && (
+                  <AdvancePaymentButton
+                    quotationId={quotation._id}
+                    advanceAmount={quotation.advanceAmount}
+                    onPaymentSuccess={() => onPaymentSuccess?.()}
+                  />
+                )}
+
+                {paymentStatus === "PARTIALLY_PAID" && (
+                  <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
+                    <p className="text-xs font-semibold text-emerald-400">
+                      Advance payment received
+                    </p>
+                    <p className="text-[11px] text-text-secondary mt-1">
+                      Your advance payment has been successfully recorded.
+                    </p>
+                  </div>
+                )}
+
+                {paymentStatus === "PAID" && (
+                  <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
+                    <p className="text-xs font-semibold text-emerald-400">
+                      Fully paid
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -229,16 +276,24 @@ const UserQuotationModal = ({
                   <thead className="border-b border-white/[0.06] bg-white/[0.02] text-text-secondary">
                     <tr>
                       <th className="px-4 py-3 font-semibold">Service</th>
-                      <th className="px-3 py-3 font-semibold text-center w-16">Qty</th>
-                      <th className="px-4 py-3 font-semibold text-right">Rate</th>
-                      <th className="px-4 py-3 font-semibold text-right">Total</th>
+                      <th className="px-3 py-3 font-semibold text-center w-16">
+                        Qty
+                      </th>
+                      <th className="px-4 py-3 font-semibold text-right">
+                        Rate
+                      </th>
+                      <th className="px-4 py-3 font-semibold text-right">
+                        Total
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.04]">
                     {quotation.items.map((item, idx) => (
                       <tr key={idx} className="hover:bg-white/[0.015]">
                         <td className="px-4 py-3">
-                          <p className="font-semibold text-white">{item.name}</p>
+                          <p className="font-semibold text-white">
+                            {item.name}
+                          </p>
                           {item.description && (
                             <p className="text-[11px] text-text-secondary mt-0.5">
                               {item.description}
@@ -292,7 +347,9 @@ const UserQuotationModal = ({
                 )}
 
                 <div className="border-t border-white/[0.08] pt-2.5 flex justify-between items-center">
-                  <span className="text-xs font-semibold text-white">Grand Total</span>
+                  <span className="text-xs font-semibold text-white">
+                    Grand Total
+                  </span>
                   <span className="text-base font-bold text-white font-mono">
                     {formatCurrency(quotation.total)}
                   </span>
@@ -305,7 +362,9 @@ const UserQuotationModal = ({
                       Advance Required to Book
                     </span>
                     <span className="text-[11px] text-text-secondary">
-                      Remaining balance of {formatCurrency(quotation.remainingAmount)} upon completion.
+                      Remaining balance of{" "}
+                      {formatCurrency(quotation.remainingAmount)} upon
+                      completion.
                     </span>
                   </div>
                   <span className="text-lg font-bold text-primary font-mono shrink-0">
@@ -400,7 +459,8 @@ const UserQuotationModal = ({
             </div>
 
             <p className="text-xs text-text-secondary leading-relaxed">
-              Please share the reason for declining so the photographer can adjust terms or provide an alternative quote.
+              Please share the reason for declining so the photographer can
+              adjust terms or provide an alternative quote.
             </p>
 
             <textarea

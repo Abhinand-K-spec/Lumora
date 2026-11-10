@@ -499,22 +499,39 @@ const Bookings = () => {
         loading={cancellingId !== null}
       />
 
-      <UserQuotationModal
-        isOpen={selectedQuotation !== null}
-        quotation={selectedQuotation}
-        photographerName={selectedPhotographerName}
-        onClose={() => setSelectedQuotation(null)}
-        onStatusChange={(updated) => {
-          setSelectedQuotation(updated);
+      {(() => {
+        const matchingBooking = bookings.find((b) => {
           const bId =
-            typeof updated.bookingId === "string"
-              ? updated.bookingId
-              : (updated.bookingId as { _id?: string })?._id;
-          if (bId) {
-            setQuotationsMap((prev) => ({ ...prev, [bId]: updated }));
-          }
-        }}
-      />
+            typeof selectedQuotation?.bookingId === "string"
+              ? selectedQuotation.bookingId
+              : (selectedQuotation?.bookingId as unknown as { _id?: string })?._id;
+          return b._id === bId;
+        });
+
+        return (
+          <UserQuotationModal
+            isOpen={selectedQuotation !== null}
+            quotation={selectedQuotation}
+            photographerName={selectedPhotographerName}
+            paymentStatus={matchingBooking?.paymentStatus || "PENDING"}
+            advancePaid={matchingBooking?.advancePaid || 0}
+            onPaymentSuccess={() => {
+              void fetchBookings(page, statusFilter);
+            }}
+            onClose={() => setSelectedQuotation(null)}
+            onStatusChange={(updated) => {
+              setSelectedQuotation(updated);
+              const bId =
+                typeof updated.bookingId === "string"
+                  ? updated.bookingId
+                  : (updated.bookingId as unknown as { _id?: string })?._id;
+              if (bId) {
+                setQuotationsMap((prev) => ({ ...prev, [bId]: updated }));
+              }
+            }}
+          />
+        );
+      })()}
     </div>
   );
 };

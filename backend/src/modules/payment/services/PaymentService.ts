@@ -181,7 +181,7 @@ export class PaymentService implements IPaymentService{
         );
       
         if (
-          !/^[a-fA-F0-9]{128}$/.test(razorpay_signature) ||
+          !/^[a-fA-F0-9]{64}$/.test(razorpay_signature) ||
           receivedBuffer.length !== expectedBuffer.length ||
           !crypto.timingSafeEqual(receivedBuffer, expectedBuffer)
         ) {

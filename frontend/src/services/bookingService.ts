@@ -49,6 +49,9 @@ export interface BookingItem {
 
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED" | "COMPLETED";
 
+  paymentStatus: "PENDING" | "PARTIALLY_PAID" | "PAID";
+  advancePaid: number;
+
   notes?: string;
   rejectionReason?: string;
   createdAt: string;

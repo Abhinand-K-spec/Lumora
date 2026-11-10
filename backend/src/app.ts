@@ -49,10 +49,10 @@ app.use("/api/admin/userManagement", userManagementRoutes);
 app.use("/api/admin/photographers", adminPhotographerRoutes);
 app.use("/api/feed", feedRoutes);
 app.use("/api/bookings", bookingRoutes);
-app.use("/api/notifications",notificationRoutes);
-app.use('/api/quotation',quotationRouter);
+app.use("/api/notifications", notificationRoutes);
+app.use('/api/quotation', quotationRouter);
 app.use('/api/availability', availabilityRoutes);
-app.use('/payments',paymentRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({
