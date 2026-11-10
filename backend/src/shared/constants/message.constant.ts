@@ -158,6 +158,21 @@ export const QUOTATION_MESSAGES={
   QUOTATION_FETCHED:'Quotation fetched successfully'
 }
 
+export const AVAILABILITY_MESSAGES = {
+  INVALID_MONTH: "Month should be between 1 and 12",
+  INVALID_YEAR: "Year is not valid",
+  INVALID_DATE: "Invalid date format",
+  DATE_RANGE_INVALID: "End date must be on or after start date",
+  OVERLAPPING_BLOCK: "Selected dates overlap an existing blocked range",
+  CONFLICT_WITH_BOOKING: "Cannot block dates that already have confirmed bookings",
+  NOT_FOUND: "Availability record not found",
+  UNAUTHORIZED: "You are not authorized to manage this availability record",
+  DATES_BLOCKED: "Dates blocked successfully",
+  DATES_UNBLOCKED: "Dates unblocked successfully",
+  CALENDAR_FETCHED: "Calendar fetched successfully",
+  PHOTOGRAPHER_ID_REQUIRED: "Photographer ID is required",
+} as const;
+
 export const NOTIFICATION_MESSAGES = {
   BOOKING: {
     CREATED: "Your booking request has been sent successfully.",

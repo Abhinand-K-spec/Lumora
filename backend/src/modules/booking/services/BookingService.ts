@@ -18,6 +18,7 @@ import type {
 } from "../interfaces/IBookingRepository";
 import type { IBookingService } from "../interfaces/IBookingService";
 import type { INotificationService } from "../../notification/interfaces/INotificationService";
+import { AvailabilityModel } from "../../../shared/models/availability.model";
 
 export class BookingService implements IBookingService {
   constructor(
@@ -62,6 +63,20 @@ export class BookingService implements IBookingService {
       throw new AppError(
         HttpStatus.CONFLICT,
         "Photographer already has a booking or pending request on one of the selected dates"
+      );
+    }
+
+    const blockedConflict = await AvailabilityModel.findOne({
+      photographerId: new Types.ObjectId(photographerId),
+      $or: eventDates.map((date) => ({
+        startDate: { $lte: date },
+        endDate: { $gte: date },
+      })),
+    });
+    if (blockedConflict) {
+      throw new AppError(
+        HttpStatus.CONFLICT,
+        "Photographer has marked one or more selected dates as unavailable"
       );
     }
 

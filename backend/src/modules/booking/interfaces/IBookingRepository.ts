@@ -22,4 +22,5 @@ export interface IBookingRepository extends IBaseRepository<IBooking>{
     findConflict(photographerId: string, eventDates: Date[]): Promise<IBooking | null>;
     updateStatus(id:string,status:BookingStatus,reason?:string):Promise<IBooking|null>;
     findByBookingId(photographerId:string,bookingId:string):Promise<IBooking | null>;
+    findCalendarBookings(photographerId: string,startDate: Date,endDate: Date): Promise<IBooking[]>;
 }

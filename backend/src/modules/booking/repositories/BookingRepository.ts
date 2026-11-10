@@ -103,5 +103,25 @@ export class BookingRepository
       { new: true }
     );
   }
+  async findCalendarBookings(
+    photographerId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<IBooking[]> {
+    return await this._model.find({
+      photographerId,
+      status: {
+        $in: ["PENDING", "ACCEPTED", "COMPLETED"],
+      },
+      events: {
+        $elemMatch: {
+          eventDate: {
+            $gte: startDate,
+            $lt: endDate,
+          },
+        },
+      },
+    }).exec();
+  }
 }
 
