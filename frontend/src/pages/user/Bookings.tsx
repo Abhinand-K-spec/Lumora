@@ -326,6 +326,7 @@ const Bookings = () => {
                   <BookingTimeline
                     bookingStatus={booking.status}
                     quotationStatus={q?.status}
+                    paymentStatus={booking.paymentStatus}
                   />
                 );
               })()}
@@ -382,6 +383,20 @@ const Bookings = () => {
                 }
 
                 if (quotation.status === "ACCEPTED") {
+                  const ps = booking.paymentStatus;
+                  const paymentLabel =
+                    ps === "PAID"
+                      ? "Fully Paid"
+                      : ps === "PARTIALLY_PAID"
+                        ? "Advance Paid"
+                        : "Advance Pending";
+                  const paymentColor =
+                    ps === "PAID"
+                      ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                      : ps === "PARTIALLY_PAID"
+                        ? "text-primary bg-primary/10 border-primary/20"
+                        : "text-yellow-400 bg-yellow-500/10 border-yellow-500/20";
+
                   return (
                     <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] p-3.5 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5">
@@ -395,15 +410,20 @@ const Bookings = () => {
                           </p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSelectedQuotation(quotation);
-                          setSelectedPhotographerName(booking.photographerId?.name || "Photographer");
-                        }}
-                        className="text-xs text-text-secondary hover:text-white underline transition cursor-pointer"
-                      >
-                        View Details
-                      </button>
+                      <div className="flex items-center gap-2.5">
+                        <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${paymentColor}`}>
+                          {paymentLabel}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedQuotation(quotation);
+                            setSelectedPhotographerName(booking.photographerId?.name || "Photographer");
+                          }}
+                          className="text-xs text-text-secondary hover:text-white underline transition cursor-pointer"
+                        >
+                          {ps === "PENDING" ? "Pay Now" : "View Details"}
+                        </button>
+                      </div>
                     </div>
                   );
                 }

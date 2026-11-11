@@ -5,6 +5,7 @@ import type { QuotationStatus } from "../../services/quotationService";
 interface BookingTimelineProps {
   bookingStatus: BookingItem["status"];
   quotationStatus?: QuotationStatus;
+  paymentStatus?: BookingItem["paymentStatus"];
 }
 
 type StepState = "done" | "active" | "pending" | "failed";
@@ -17,6 +18,7 @@ interface Step {
 const BookingTimeline = ({
   bookingStatus,
   quotationStatus,
+  paymentStatus,
 }: BookingTimelineProps) => {
   const bookingAcceptedState = (): StepState => {
     if (bookingStatus === "ACCEPTED" || bookingStatus === "COMPLETED") return "done";
@@ -43,11 +45,27 @@ const BookingTimeline = ({
     return "pending";
   };
 
+  const advancePaymentState = (): StepState => {
+    if (bookingStatus === "CANCELLED" || bookingStatus === "REJECTED") return "pending";
+    if (quotationStatus !== "ACCEPTED") return "pending";
+    if (paymentStatus === "PARTIALLY_PAID" || paymentStatus === "PAID") return "done";
+    return "active";
+  };
+
+  const fullPaymentState = (): StepState => {
+    if (bookingStatus === "CANCELLED" || bookingStatus === "REJECTED") return "pending";
+    if (paymentStatus === "PAID" || bookingStatus === "COMPLETED") return "done";
+    if (paymentStatus === "PARTIALLY_PAID") return "active";
+    return "pending";
+  };
+
   const steps: Step[] = [
     { label: "Booking Sent", state: "done" },
     { label: "Booking Accepted", state: bookingAcceptedState() },
     { label: "Quotation Sent", state: quotationSentState() },
     { label: "Quotation Accepted", state: quotationAcceptedState() },
+    { label: "Advance Payment", state: advancePaymentState() },
+    { label: "Full Payment", state: fullPaymentState() },
   ];
 
   const dotClass = (state: StepState) => {
