@@ -2,9 +2,9 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  Heart,
-  Share2,
-  Bookmark,
+  // Heart,
+  // Share2,
+  // Bookmark,
   Camera,
   MapPin,
   ChevronLeft,
@@ -27,10 +27,10 @@ interface FeedPostCardProps {
 
 const FeedPostCard = ({
   post,
-  isLiked,
-  isSaved,
-  onToggleLike,
-  onToggleSave,
+  // isLiked,
+  // isSaved,
+  // onToggleLike,
+  // onToggleSave,
 }: FeedPostCardProps) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
@@ -48,29 +48,29 @@ const FeedPostCard = ({
     setActiveImageIndex((prev) => (prev - 1 + mediaCount) % mediaCount);
   };
 
-  const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/feed`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `Photography by ${post.author.name}`,
-          text: post.caption || "Check out this photo on Lumora",
-          url: shareUrl,
-        });
-      } catch (err: unknown) {
-        if (err instanceof Error && err.name !== "AbortError") {
-          toast.error("Failed to share post");
-        }
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success("Link copied to clipboard");
-      } catch {
-        toast.error("Could not copy link");
-      }
-    }
-  };
+  // const handleShare = async () => {
+  //   const shareUrl = `${window.location.origin}/feed`;
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share({
+  //         title: `Photography by ${post.author.name}`,
+  //         text: post.caption || "Check out this photo on Lumora",
+  //         url: shareUrl,
+  //       });
+  //     } catch (err: unknown) {
+  //       if (err instanceof Error && err.name !== "AbortError") {
+  //         toast.error("Failed to share post");
+  //       }
+  //     }
+  //   } else {
+  //     try {
+  //       await navigator.clipboard.writeText(shareUrl);
+  //       toast.success("Link copied to clipboard");
+  //     } catch {
+  //       toast.error("Could not copy link");
+  //     }
+  //   }
+  // };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -199,9 +199,8 @@ const FeedPostCard = ({
       </div>
 
       {/* Post Actions */}
-      <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+      {/* <div className="px-5 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-5">
-          {/* Like */}
           <button
             type="button"
             onClick={() => onToggleLike(post.id)}
@@ -217,7 +216,6 @@ const FeedPostCard = ({
             />
           </button>
 
-          {/* Share */}
           <button
             type="button"
             onClick={handleShare}
@@ -231,7 +229,6 @@ const FeedPostCard = ({
           </button>
         </div>
 
-        {/* Bookmark / Save */}
         <button
           type="button"
           onClick={() => onToggleSave(post.id)}
@@ -246,7 +243,7 @@ const FeedPostCard = ({
             className="transition-transform group-hover:scale-110"
           />
         </button>
-      </div>
+      </div> */}
 
       {/* Caption Section */}
       {post.caption && (
