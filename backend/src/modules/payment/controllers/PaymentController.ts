@@ -52,4 +52,24 @@ export class PaymentController {
 
       sendSuccess(res,result,PAYMENT_MESSAGES.PAYMENT_VERIFIED);
   }
+
+  async getUserPayments(req:Request,res:Response):Promise<void>{
+    const userId = req.user?.id;
+    if(!userId){
+      throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
+    };
+
+    const result = await this._paymentService.getUserPayments(userId);
+    sendSuccess(res,result,PAYMENT_MESSAGES.PAYMENTS_FETCHED);
+  }
+
+  async getPhotographerPayments(req:Request,res:Response):Promise<void>{
+    const photographerId = req.user?.id;
+    if(!photographerId){
+      throw new AppError(HttpStatus.UNAUTHORIZED,AUTH_MESSAGES.UNAUTHORIZED);
+    };
+
+    const result = await this._paymentService.getPhotographerPayments(photographerId);
+    sendSuccess(res,result,PAYMENT_MESSAGES.PAYMENTS_FETCHED);
+  }
 }

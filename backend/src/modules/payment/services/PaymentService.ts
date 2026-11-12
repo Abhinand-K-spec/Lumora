@@ -251,4 +251,15 @@ export class PaymentService implements IPaymentService{
           
           return updatedPayment;
       }
+
+
+      async getUserPayments(userId: string): Promise<IPayment[]> {
+        const result = await this._paymentRepository.getByUserId(userId);
+        return result;
+      }
+      
+      async getPhotographerPayments(userId: string): Promise<IPayment[]> {
+        const result = await this._paymentRepository.getByUserId(userId);
+        return result;
+      }
 }

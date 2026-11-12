@@ -8,13 +8,21 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
     constructor(){super(PaymentModel)}
     async findByGatewayOrderId(orderId: string): Promise<IPayment | null> {
         return await this._model.findOne({gatewayOrderId:orderId});
-    }
+    };
 
     async findByBookingId(bookingId: string): Promise<IPayment[]> {
         return await this._model.find({bookingId}).sort({createdAt:-1});
-    }
+    };
 
     async findByGatewayPaymentId(paymentId: string): Promise<IPayment | null> {
         return await this._model.findOne({gatewayPaymentId:paymentId});
-    }
+    };
+
+    async getByUserId(userId: string): Promise<IPayment[]> {
+        return await this._model.find({userId});
+    };
+
+    async getByPhotographerId(photographerId: string): Promise<IPayment[]> {
+        return await this._model.find({photographerId});
+    };
 }

@@ -19,4 +19,12 @@ export interface IPaymentService {
     userId: string,
     data: VerifyAdvancePaymentDTO
   ): Promise<IPayment>;
+
+  getUserPayments(
+    userId:string
+  ):Promise<IPayment[]>;
+
+  getPhotographerPayments(
+    photographerId:string
+  ):Promise<IPayment[]>;
 }

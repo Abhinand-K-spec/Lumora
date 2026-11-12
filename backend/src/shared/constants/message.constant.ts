@@ -170,6 +170,7 @@ export const PAYMENT_MESSAGES = {
   UNABLE_TO_UPDATE:'Unable to update payment',
   PAYMENT_ORDER_CREATED:'Payment order created successfully',
   PAYMENT_VERIFIED:'Payment verified successfully',
+  PAYMENTS_FETCHED:'Payments fetched successfully'
 }
 
 export const AVAILABILITY_MESSAGES = {
