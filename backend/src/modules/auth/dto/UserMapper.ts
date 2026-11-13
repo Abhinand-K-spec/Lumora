@@ -1,4 +1,5 @@
 import type { IUsers } from "../../../shared/interfaces/IUsers.js";
+import type { ReceiptUserDTO } from "../../payment/dtos/recieptUserDto.js";
 import type { LoginUserResponseDto } from "./LoginUserResponseDto.js";
 
 export class UserMapper {
@@ -9,6 +10,13 @@ export class UserMapper {
       name: u.name,
       email: u.email,
       role: u.role,
+    };
+  }
+  static toReceiptUserDTO(user: IUsers): ReceiptUserDTO {
+    return {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
     };
   }
 }
