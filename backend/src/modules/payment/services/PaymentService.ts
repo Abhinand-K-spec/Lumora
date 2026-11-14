@@ -10,12 +10,14 @@ import type { VerifyAdvancePaymentDTO } from "../dtos/verifyAdvancePaymentDto";
 import type { IPaymentRepository } from "../interfaces/IPaymentRepository";
 import type { CreateAdvanceOrderResponse } from "../interfaces/IPaymentService";
 import type { IPaymentService } from "../interfaces/IPaymentService";
+import type { IReceiptService } from '../interfaces/IRecieptService';
 
 export class PaymentService implements IPaymentService{
     constructor(
         private readonly _paymentRepository : IPaymentRepository,
         private readonly _bookingRepository : IBookingRepository,
-        private readonly _quotationRepository : IQuotationRepository
+        private readonly _quotationRepository : IQuotationRepository,
+        private readonly _recieptService : IReceiptService
     ){}
 
     async createAdvanceOrder(userId:string,quotationId:string):Promise<CreateAdvanceOrderResponse>{
@@ -233,6 +235,8 @@ export class PaymentService implements IPaymentService{
               PAYMENT_MESSAGES.UNABLE_TO_UPDATE
             );
           }
+
+          await this._recieptService.sendPaymentReceipt(updatedPayment);
           
           const updatedBooking = await this._bookingRepository.update(
             payment.bookingId.toString(),

@@ -334,7 +334,7 @@ export class AuthService implements IAuthService {
     const googleId = googleUser.googleId;
 
     let user = await this._userRepository.findByEmail(email);
-    let role = user ? user.role : requestedRole;
+    const role = user ? user.role : requestedRole;
 
     if (!user) {
       user = await this._userRepository.create({

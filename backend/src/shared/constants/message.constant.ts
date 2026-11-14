@@ -173,6 +173,12 @@ export const PAYMENT_MESSAGES = {
   PAYMENTS_FETCHED:'Payments fetched successfully'
 }
 
+export const RECIEPT_MESSAGES = {
+  ONLY_IF_SENT:'Reciept only can be send for a successfull payment',
+  RECORDS_NOT_FOUND:"Unable to generate receipt. Required details not found.",
+  
+}
+
 export const AVAILABILITY_MESSAGES = {
   INVALID_MONTH: "Month should be between 1 and 12",
   INVALID_YEAR: "Year is not valid",

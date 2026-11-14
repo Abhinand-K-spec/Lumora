@@ -5,16 +5,23 @@ import { QuotationRepository } from "../../quotation/repositories/QuotationRepos
 import { BookingRepository } from "../../booking/repositories/BookingRepository";
 import { authenticate } from "../../../shared/middlewares/auth.middleware";
 import { PaymentController } from "../controllers/PaymentController";
+import { ReceiptService } from "../services/RecieptService";
+import { UserRepository } from "../../auth/repositories/UserRepository";
+import { EmailService } from "../../../shared/services/EmailService";
 
 const router = Router();
 
 const paymentRepository = new PaymentRepository();
 const quotationRepository = new QuotationRepository();
 const bookingRepository = new BookingRepository();
+const userRepository = new UserRepository();
+const emailService = new EmailService()
+const recieptService = new ReceiptService(bookingRepository,quotationRepository,userRepository,emailService);
 const paymentService = new PaymentService(
   paymentRepository,
   bookingRepository,
-  quotationRepository
+  quotationRepository,
+  recieptService
 );
 const paymentController = new PaymentController(paymentService);
 
