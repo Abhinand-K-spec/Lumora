@@ -186,6 +186,21 @@ export const CONVERSATION_MESSAGES = {
   LONG_MESSAGE : "Message is too long"
 }
 
+export const EVENT_MESSAGES = {
+  NOT_ACCEPTED : "Event can only be created from an accepted booking.",
+  EVENT_EXISTING : "An event has already been created for this booking.",
+  ADVANCE_PAYMENT_NOT_SUCCESS : "Advance payment must be completed before creating an event.",
+  NO_NAME : "Event name is required.",
+  NOT_FOUND : "Event not found.",
+  NOT_AVAILABLE : "This event is no longer available.",
+  UNABLE_TO_UPDATE : "Unable to update event.",
+  EVENT_CREATED : "Event created successfully.",
+  EVENTS_FETCHED :  "Events fetched successfully.",
+  ID_REQUIRED : "Event ID is required.",
+  PUBLIC_EVENT_FETCHED : "Public event fetched successfully.",
+  EVENT_UPDATED : "Event updated successfully."
+}
+
 export const AVAILABILITY_MESSAGES = {
   INVALID_MONTH: "Month should be between 1 and 12",
   INVALID_YEAR: "Year is not valid",
