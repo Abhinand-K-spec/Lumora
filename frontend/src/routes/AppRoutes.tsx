@@ -26,14 +26,18 @@ import CreateFeedPost from "../components/feed/CreateFeedPost";
 import Feed from "../pages/user/Feed";
 import Saved from "../pages/user/Saved";
 import Bookings from "../pages/user/Bookings";
+import UserPayments from "../pages/user/UserPayments";
 import PhotographerBookings from "../pages/photographer/PhotographerBookings";
 import BookingDetails from "../pages/photographer/PhotographerBookingDetails";
+import PhotographerFinancials from "../pages/photographer/PhotographerFinancials";
 
 const RoleBasedLayout = () => {
   const { user } = useAuth();
+
   if (user?.role === "PHOTOGRAPHER") {
     return <PhotographerLayout />;
   }
+
   return <UserLayout />;
 };
 
@@ -75,6 +79,7 @@ const AppRoutes = () => {
             <Route path="/feed" element={<Feed />} />
             <Route path="/saved" element={<Saved />} />
             <Route path="/bookings" element={<Bookings />} />
+            <Route path="/payments" element={<UserPayments />} />
             <Route path="/profile" element={<ProfileRouteSelector />} />
             <Route path="/photographers" element={<PhotographersList />} />
             <Route
@@ -84,6 +89,7 @@ const AppRoutes = () => {
             <Route path="/feedPostUpload" element={<CreateFeedPost />} />
             <Route path="/photographer/bookings" element={<PhotographerBookings />} />
             <Route path="/photographer/booking/:bookingId" element={<BookingDetails/>} />
+            <Route path="/photographer/financials" element={<PhotographerFinancials />} />
           </Route>
         </Route>
 

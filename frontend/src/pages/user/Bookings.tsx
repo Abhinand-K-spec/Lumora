@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Receipt,
+  CreditCard,
 } from "lucide-react";
 import { toast } from "sonner";
 import bookingService, {
@@ -170,13 +171,23 @@ const Bookings = () => {
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-heading font-semibold text-white">
-          My Bookings
-        </h1>
-        <p className="text-xs text-text-secondary mt-1">
-          Track upcoming shoot dates and status of your photographer requests.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-heading font-semibold text-white">
+            My Bookings
+          </h1>
+          <p className="text-xs text-text-secondary mt-1">
+            Track upcoming shoot dates and status of your photographer requests.
+          </p>
+        </div>
+
+        <Link
+          to="/payments"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-white/10 bg-white/[0.03] text-xs font-semibold text-text-secondary hover:text-white hover:border-white/20 transition cursor-pointer self-start sm:self-auto"
+        >
+          <CreditCard size={14} className="text-primary" />
+          <span>Payment History</span>
+        </Link>
       </div>
 
       {/* Status Filter Tabs */}

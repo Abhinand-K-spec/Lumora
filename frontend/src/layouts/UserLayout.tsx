@@ -11,8 +11,8 @@ const UserLayout = () => {
   const navItems = [
     { label: "Feed", path: "/" },
     { label: "Photographers", path: "/photographers" },
-    { label: "My Events", path: "/my-events" },
     { label: "My Bookings", path: "/bookings" },
+    { label: "Payments", path: "/payments" },
     { label: "Saved", path: "/saved" },
     { label: "Messages", path: "/messages" },
   ];

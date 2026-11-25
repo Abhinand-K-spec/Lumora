@@ -262,8 +262,8 @@ export class PaymentService implements IPaymentService{
         return result;
       }
       
-      async getPhotographerPayments(userId: string): Promise<IPayment[]> {
-        const result = await this._paymentRepository.getByUserId(userId);
+      async getPhotographerPayments(photographerId: string): Promise<IPayment[]> {
+        const result = await this._paymentRepository.getByPhotographerId(photographerId);
         return result;
       }
 }

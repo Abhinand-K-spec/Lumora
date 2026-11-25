@@ -179,6 +179,13 @@ export const RECIEPT_MESSAGES = {
   
 }
 
+export const CONVERSATION_MESSAGES = {
+  NOT_FOUND : 'Cannot find the conversation',
+  INVALID_ID : "Invalid conversation Id",
+  EMPTY_MESSAGE : "Message cannot be empty",
+  LONG_MESSAGE : "Message is too long"
+}
+
 export const AVAILABILITY_MESSAGES = {
   INVALID_MONTH: "Month should be between 1 and 12",
   INVALID_YEAR: "Year is not valid",
