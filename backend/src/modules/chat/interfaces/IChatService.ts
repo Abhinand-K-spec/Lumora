@@ -1,27 +1,30 @@
-
-import type { IConversation } from "../../../shared/interfaces/IConversation";
-import type { IMessage, MessageType } from "../../../shared/interfaces/IMessage";
+import type { IMessage, MessageType } from "../../../shared/interfaces/IMessage.js";
+import type { ConversationResponseDto } from "../dtos/chat.dto.js";
 
 export interface IChatService {
   getOrCreateConversation(
-    customerId: string,
-    photographerId: string
-  ): Promise<IConversation>;
+    initiatorId: string,
+    targetUserId: string
+  ): Promise<ConversationResponseDto>;
 
   getUserConversations(
     userId: string
-  ): Promise<IConversation[]>;
+  ): Promise<ConversationResponseDto[]>;
 
   getPhotographerConversations(
     photographerId: string
-  ): Promise<IConversation[]>;
+  ): Promise<ConversationResponseDto[]>;
+
+  getAllConversationsForUser(
+    userId: string
+  ): Promise<ConversationResponseDto[]>;
 
   getMessages(
     conversationId: string,
     userId: string,
     limit: number,
     cursor?: string
-  ): Promise<IMessage[]>;
+  ): Promise<{ messages: IMessage[]; nextCursor: string | null; hasMore: boolean }>;
 
   sendMessage(
     conversationId: string,

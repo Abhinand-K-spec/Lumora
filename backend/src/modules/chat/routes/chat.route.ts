@@ -1,11 +1,14 @@
 import Router from "express";
-
-import { authenticate } from "../../../shared/middlewares/auth.middleware";
-
-import { ChatService } from "../services/ChatService";
-import { ChatController } from "../controllers/conversationController";
-import MessageRepository from "../repositories/MessageRepository";
-import ConversationRepository from "../repositories/ConversationRepository";
+import { authenticate } from "../../../shared/middlewares/auth.middleware.js";
+import { validate } from "../../../shared/middlewares/validation.middleware.js";
+import {
+  createConversationSchema,
+  sendMessageSchema,
+} from "../../../shared/validators/chat.validator.js";
+import { ChatService } from "../services/ChatService.js";
+import { ChatController } from "../controllers/conversationController.js";
+import MessageRepository from "../repositories/MessageRepository.js";
+import ConversationRepository from "../repositories/ConversationRepository.js";
 
 const router = Router();
 
@@ -25,17 +28,25 @@ const chatController = new ChatController(chatService);
 router.post(
   "/conversations",
   authenticate,
+  validate(createConversationSchema),
   chatController.createConversation.bind(chatController)
 );
 
-// Get customer conversations
+// Get conversations for the authenticated user (unified)
+router.get(
+  "/conversations",
+  authenticate,
+  chatController.getConversations.bind(chatController)
+);
+
+// Get customer conversations (backwards compatible)
 router.get(
   "/conversations/user",
   authenticate,
   chatController.getUserConversations.bind(chatController)
 );
 
-// Get photographer conversations
+// Get photographer conversations (backwards compatible)
 router.get(
   "/conversations/photographer",
   authenticate,
@@ -53,6 +64,7 @@ router.get(
 router.post(
   "/conversations/:conversationId/messages",
   authenticate,
+  validate(sendMessageSchema),
   chatController.sendMessage.bind(chatController)
 );
 

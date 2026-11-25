@@ -18,6 +18,7 @@ import {
   Bookmark,
   Plus,
   Trash2,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import photographerService, {
@@ -27,6 +28,7 @@ import { feedService } from "../../services/feedService";
 import userService from "../../services/userService";
 import { getErrorMessage } from "../../utils/errorUtils";
 import bookingService from "../../services/bookingService";
+import useAuth from "../../hooks/useAuth";
 
 interface GalleryPhoto {
   id: string;
@@ -51,6 +53,7 @@ interface BookingFormData {
 const PhotographerDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmittingBooking, setIsSubmittingBooking] =
@@ -349,6 +352,27 @@ const PhotographerDetails = () => {
     setIsBookingModalOpen(true);
   };
 
+  const handleStartChat = () => {
+    if (!user) {
+      toast.info("Please login to message this photographer");
+      navigate("/login");
+      return;
+    }
+
+    const targetUserId = profile?.id || id;
+    if (!targetUserId) return;
+
+    const currentUserId = user?._id || user?.id;
+    if (currentUserId === targetUserId) {
+      toast.info("You cannot chat with yourself");
+      return;
+    }
+
+    const chatPath =
+      user.role === "PHOTOGRAPHER" ? "/photographer/chat" : "/messages";
+    navigate(`${chatPath}?userId=${targetUserId}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#070708] flex items-center justify-center text-text-secondary text-sm">
@@ -486,6 +510,16 @@ const PhotographerDetails = () => {
                 />
                 <span>{isSaved ? "Saved" : "Save"}</span>
               </button>
+
+              <button
+                onClick={handleStartChat}
+                className="px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer border bg-[#0f1012] border-white/20 text-gray-300 hover:text-white hover:border-[#F2C94C]/60 hover:bg-[#F2C94C]/5"
+                title="Chat with photographer"
+              >
+                <MessageSquare size={14} className="text-[#F2C94C]" />
+                <span>Chat</span>
+              </button>
+
               <button
                 onClick={() =>
                   openBookingForPlan(

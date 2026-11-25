@@ -30,6 +30,7 @@ import UserPayments from "../pages/user/UserPayments";
 import PhotographerBookings from "../pages/photographer/PhotographerBookings";
 import BookingDetails from "../pages/photographer/PhotographerBookingDetails";
 import PhotographerFinancials from "../pages/photographer/PhotographerFinancials";
+import ChatPage from "../pages/chat/ChatPage";
 
 const RoleBasedLayout = () => {
   const { user } = useAuth();
@@ -80,6 +81,7 @@ const AppRoutes = () => {
             <Route path="/saved" element={<Saved />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/payments" element={<UserPayments />} />
+            <Route path="/messages" element={<ChatPage />} />
             <Route path="/profile" element={<ProfileRouteSelector />} />
             <Route path="/photographers" element={<PhotographersList />} />
             <Route
@@ -90,6 +92,7 @@ const AppRoutes = () => {
             <Route path="/photographer/bookings" element={<PhotographerBookings />} />
             <Route path="/photographer/booking/:bookingId" element={<BookingDetails/>} />
             <Route path="/photographer/financials" element={<PhotographerFinancials />} />
+            <Route path="/photographer/chat" element={<ChatPage />} />
           </Route>
         </Route>
 

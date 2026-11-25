@@ -1,17 +1,20 @@
-
 import { z } from "zod";
 
-// MongoDB ObjectId validation
 const objectIdSchema = z
   .string()
   .regex(/^[0-9a-fA-F]{24}$/, "Invalid ID format");
 
-// Create conversation
-export const createConversationSchema = z.object({
-  photographerUserId: objectIdSchema,
-});
+export const createConversationSchema = z
+  .object({
+    photographerUserId: objectIdSchema.optional(),
+    targetUserId: objectIdSchema.optional(),
+    participantId: objectIdSchema.optional(),
+  })
+  .refine(
+    (data) => Boolean(data.photographerUserId || data.targetUserId || data.participantId),
+    { message: "A valid participant user ID is required" }
+  );
 
-// Send message
 export const sendMessageSchema = z.object({
   content: z
     .string()
@@ -22,12 +25,10 @@ export const sendMessageSchema = z.object({
   type: z.enum(["TEXT", "IMAGE", "FILE"]).default("TEXT"),
 });
 
-// Conversation route parameters
 export const conversationParamsSchema = z.object({
   conversationId: objectIdSchema,
 });
 
-// Message pagination query
 export const messageQuerySchema = z.object({
   limit: z.coerce
     .number()

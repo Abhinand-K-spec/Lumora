@@ -20,7 +20,12 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     data: LoginFormData,
   ): Promise<ApiResponse<{ user: User }>> => {
     const response = await authService.login(data);
-    const user = response.data.user;
+    const rawUser = response.data.user;
+    const user: User = {
+      ...rawUser,
+      id: rawUser.id || rawUser._id || "",
+      _id: rawUser._id || rawUser.id || "",
+    };
 
     if (user.role !== "ADMIN") {
       setIsAuthenticated(true);
@@ -38,7 +43,12 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const getCurrentUser = async (): Promise<void> => {
     try {
       const response = await authService.getCurrentUser();
-      const user = response.data.user;
+      const rawUser = response.data.user;
+      const user: User = {
+        ...rawUser,
+        id: rawUser.id || rawUser._id || "",
+        _id: rawUser._id || rawUser.id || "",
+      };
 
       if (user.role !== "ADMIN") {
         setUser(user);

@@ -1,6 +1,6 @@
 import type { Types } from "mongoose";
-import type { IConversation } from "../../../shared/interfaces/IConversation";
-import type { IBaseRepository } from "../../../shared/repository/IBaseRepository";
+import type { IConversation } from "../../../shared/interfaces/IConversation.js";
+import type { IBaseRepository } from "../../../shared/repository/IBaseRepository.js";
 
 export interface IConversationRepository extends IBaseRepository<IConversation> {
   findByParticipants(
@@ -11,7 +11,9 @@ export interface IConversationRepository extends IBaseRepository<IConversation> 
   findByPhotographerId(
     photographerId: Types.ObjectId
   ): Promise<IConversation[]>;
-
+  findByAnyParticipant(
+    userId: Types.ObjectId
+  ): Promise<IConversation[]>;
   updateLastMessage(
     conversationId: string,
     lastMessage: string,

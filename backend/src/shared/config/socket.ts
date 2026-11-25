@@ -1,4 +1,3 @@
-
 import { Server } from "socket.io";
 import type { Server as HttpServer } from "node:http";
 import * as cookie from "cookie";
@@ -63,12 +62,47 @@ export const initializeSocket = (httpServer: HttpServer): Server => {
   io.on("connection", (socket) => {
     const userId = socket.data.user.id;
 
-    console.log(`Socket connected: ${socket.id}`);
+    console.log(`Socket connected: ${socket.id} (user: ${userId})`);
 
-    // Join the authenticated user's personal room
+    // Join the authenticated user's personal room for direct notifications
     socket.join(`user:${userId}`);
 
-    console.log(`User ${userId} joined their personal room`);
+    // Chat conversation room handling
+    socket.on("conversation:join", (conversationId: string) => {
+      if (conversationId) {
+        socket.join(`conversation:${conversationId}`);
+      }
+    });
+
+    socket.on("conversation:leave", (conversationId: string) => {
+      if (conversationId) {
+        socket.leave(`conversation:${conversationId}`);
+      }
+    });
+
+    socket.on(
+      "typing:start",
+      ({ conversationId }: { conversationId: string }) => {
+        if (conversationId) {
+          socket.to(`conversation:${conversationId}`).emit("typing:start", {
+            conversationId,
+            userId,
+          });
+        }
+      }
+    );
+
+    socket.on(
+      "typing:stop",
+      ({ conversationId }: { conversationId: string }) => {
+        if (conversationId) {
+          socket.to(`conversation:${conversationId}`).emit("typing:stop", {
+            conversationId,
+            userId,
+          });
+        }
+      }
+    );
 
     socket.on("disconnect", (reason) => {
       console.log(`Socket disconnected: ${socket.id}`, reason);

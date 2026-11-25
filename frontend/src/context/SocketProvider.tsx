@@ -14,7 +14,7 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
   const { user } = useAuth();
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
 
-  const userId = user?._id;
+  const userId = user?._id || user?.id;
 
   useEffect(() => {
     if (!userId) {

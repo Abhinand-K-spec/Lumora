@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
-import type { IConversation } from "../../../shared/interfaces/IConversation";
-import { BaseRepository } from "../../../shared/repository/BaseRepository";
-import type { IConversationRepository } from "../interfaces/IConversationRepository";
-import Conversation from "../../../shared/models/conversation.model";
+import type { IConversation } from "../../../shared/interfaces/IConversation.js";
+import { BaseRepository } from "../../../shared/repository/BaseRepository.js";
+import type { IConversationRepository } from "../interfaces/IConversationRepository.js";
+import Conversation from "../../../shared/models/conversation.model.js";
 
 class ConversationRepository
   extends BaseRepository<IConversation>
@@ -17,23 +17,42 @@ class ConversationRepository
     photographerId: Types.ObjectId
   ): Promise<IConversation | null> {
     return await Conversation.findOne({
-      userId,
-      photographerId,
-    });
+      $or: [
+        { userId, photographerId },
+        { userId: photographerId, photographerId: userId },
+      ],
+    })
+      .populate("userId", "name email role phone")
+      .populate("photographerId", "name email role phone");
   }
 
   async findByUserId(
     userId: Types.ObjectId
   ): Promise<IConversation[]> {
     return await Conversation.find({ userId })
-      .sort({ lastMessageAt: -1, _id: -1 });
+      .populate("userId", "name email role phone")
+      .populate("photographerId", "name email role phone")
+      .sort({ lastMessageAt: -1, updatedAt: -1, _id: -1 });
   }
 
   async findByPhotographerId(
     photographerId: Types.ObjectId
   ): Promise<IConversation[]> {
     return await Conversation.find({ photographerId })
-      .sort({ lastMessageAt: -1, _id: -1 });
+      .populate("userId", "name email role phone")
+      .populate("photographerId", "name email role phone")
+      .sort({ lastMessageAt: -1, updatedAt: -1, _id: -1 });
+  }
+
+  async findByAnyParticipant(
+    userId: Types.ObjectId
+  ): Promise<IConversation[]> {
+    return await Conversation.find({
+      $or: [{ userId }, { photographerId: userId }],
+    })
+      .populate("userId", "name email role phone")
+      .populate("photographerId", "name email role phone")
+      .sort({ lastMessageAt: -1, updatedAt: -1, _id: -1 });
   }
 
   async updateLastMessage(
@@ -54,7 +73,9 @@ class ConversationRepository
         },
       },
       { new: true }
-    );
+    )
+      .populate("userId", "name email role phone")
+      .populate("photographerId", "name email role phone");
   }
 }
 
