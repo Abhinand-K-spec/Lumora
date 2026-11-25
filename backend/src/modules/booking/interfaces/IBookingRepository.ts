@@ -14,6 +14,8 @@ export interface BookingQueryOptions {
   status?: BookingStatus;
   page?: number;
   limit?: number;
+  startDate?: string | Date;
+  endDate?: string | Date;
 }
 
 export interface IBookingRepository extends IBaseRepository<IBooking>{

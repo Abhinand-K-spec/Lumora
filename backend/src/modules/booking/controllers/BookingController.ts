@@ -50,11 +50,15 @@ export class BookingController{
         const page = Math.max(1, parseInt(req.query.page as string) || 1);
         const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 8));
         const status = req.query.status as BookingStatus | undefined;
+        const startDate = req.query.startDate as string | undefined;
+        const endDate = req.query.endDate as string | undefined;
 
         const result = await this._bookingService.getPhotographerBookings(photographerId, {
             page,
             limit,
             ...(status ? { status } : {}),
+            ...(startDate ? { startDate } : {}),
+            ...(endDate ? { endDate } : {}),
         });
 
         sendSuccess(res, result, BOOKING_MESSAGES.BOOKINGS_FETCHED);

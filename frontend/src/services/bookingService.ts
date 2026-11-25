@@ -71,6 +71,8 @@ export interface BookingQuery {
   page?: number;
   limit?: number;
   status?: BookingStatus;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface ApiResponse<T> {

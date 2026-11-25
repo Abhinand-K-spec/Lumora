@@ -49,11 +49,28 @@ export class BookingRepository
     photographerId: string,
     options: BookingQueryOptions = {}
   ): Promise<PaginatedBookings> {
-    const { status, page = 1, limit = 8 } = options;
+    const { status, page = 1, limit = 8, startDate, endDate } = options;
     const skip = (page - 1) * limit;
 
     const filter: Record<string, unknown> = { photographerId };
     if (status) filter.status = status;
+
+    if (startDate || endDate) {
+      const dateFilter: Record<string, unknown> = {};
+      if (startDate) {
+        dateFilter.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        dateFilter.$lte = end;
+      }
+      filter.events = {
+        $elemMatch: {
+          eventDate: dateFilter,
+        },
+      };
+    }
 
     const [bookings, total] = await Promise.all([
       this._model

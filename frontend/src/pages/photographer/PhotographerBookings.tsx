@@ -3,7 +3,9 @@ import {
   Search,
   ChevronDown,
   CalendarDays,
+  Calendar,
   Inbox,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import bookingService, {
@@ -94,6 +96,78 @@ type StatusFilter =
   | "CANCELLED"
   | "COMPLETED";
 
+export type DatePreset =
+  | "ALL"
+  | "UPCOMING"
+  | "TODAY"
+  | "THIS_WEEK"
+  | "THIS_MONTH"
+  | "PAST"
+  | "CUSTOM";
+
+const DATE_PRESET_LABELS: Record<DatePreset, string> = {
+  ALL: "All Dates",
+  UPCOMING: "Upcoming",
+  TODAY: "Today",
+  THIS_WEEK: "This Week",
+  THIS_MONTH: "This Month",
+  PAST: "Past Events",
+  CUSTOM: "Custom Range",
+};
+
+const getDateRangeFromPreset = (
+  preset: DatePreset,
+  customStart: string,
+  customEnd: string
+): { startDate?: string; endDate?: string } => {
+  const now = new Date();
+
+  switch (preset) {
+    case "TODAY": {
+      const todayStr = now.toISOString().split("T")[0];
+      return { startDate: todayStr, endDate: todayStr };
+    }
+    case "THIS_WEEK": {
+      const day = now.getDay();
+      const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(now.setDate(diffToMonday));
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      return {
+        startDate: monday.toISOString().split("T")[0],
+        endDate: sunday.toISOString().split("T")[0],
+      };
+    }
+    case "THIS_MONTH": {
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      return {
+        startDate: firstDay.toISOString().split("T")[0],
+        endDate: lastDay.toISOString().split("T")[0],
+      };
+    }
+    case "UPCOMING": {
+      const todayStr = now.toISOString().split("T")[0];
+      return { startDate: todayStr };
+    }
+    case "PAST": {
+      const todayStr = now.toISOString().split("T")[0];
+      return { endDate: todayStr };
+    }
+    case "CUSTOM": {
+      return {
+        startDate: customStart || undefined,
+        endDate: customEnd || undefined,
+      };
+    }
+    case "ALL":
+    default:
+      return {};
+  }
+};
+
 interface ActionState {
   bookingId: string;
   action: "ACCEPTED" | "REJECTED";
@@ -111,12 +185,14 @@ const PhotographerBookings = () => {
   const [statusFilter, setStatusFilter] =
     useState<StatusFilter>("ALL");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [datePreset, setDatePreset] = useState<DatePreset>("ALL");
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
   const [search, setSearch] = useState("");
+
   const [statusOpen, setStatusOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
-
-  // Action menus
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [dateOpen, setDateOpen] = useState(false);
 
   // Server-side pagination
   const [page, setPage] = useState(1);
@@ -132,9 +208,17 @@ const PhotographerBookings = () => {
 
   /* ── Fetch bookings from the backend ── */
   const fetchBookings = useCallback(
-    async (pg: number, status: StatusFilter) => {
+    async (
+      pg: number,
+      status: StatusFilter,
+      preset: DatePreset,
+      cStart: string,
+      cEnd: string
+    ) => {
       try {
         setLoading(true);
+
+        const dateRange = getDateRangeFromPreset(preset, cStart, cEnd);
 
         const res = await bookingService.getPhotographerBookings({
           page: pg,
@@ -142,6 +226,8 @@ const PhotographerBookings = () => {
           ...(status !== "ALL"
             ? { status: status as BookingStatus }
             : {}),
+          ...(dateRange.startDate ? { startDate: dateRange.startDate } : {}),
+          ...(dateRange.endDate ? { endDate: dateRange.endDate } : {}),
         });
 
         const data = res.data.data;
@@ -161,15 +247,28 @@ const PhotographerBookings = () => {
   );
 
   useEffect(() => {
-    fetchBookings(page, statusFilter);
-  }, [page, statusFilter, fetchBookings]);
+    fetchBookings(
+      page,
+      statusFilter,
+      datePreset,
+      customStartDate,
+      customEndDate
+    );
+  }, [
+    page,
+    statusFilter,
+    datePreset,
+    customStartDate,
+    customEndDate,
+    fetchBookings,
+  ]);
 
   /* ── Close dropdowns on outside click ── */
   useEffect(() => {
     const handler = () => {
       setStatusOpen(false);
       setCategoryOpen(false);
-      setOpenMenuId(null);
+      setDateOpen(false);
     };
 
     document.addEventListener("click", handler);
@@ -303,7 +402,7 @@ const PhotographerBookings = () => {
       {
         key: "client",
         header: "Client Identity",
-        width: "22%",
+        width: "20%",
         render: (booking) => {
           const name = booking.userId?.name;
           const initials = getInitials(name);
@@ -333,7 +432,7 @@ const PhotographerBookings = () => {
       {
         key: "narrative",
         header: "Event Narrative",
-        width: "24%",
+        width: "18%",
         render: (booking) => {
           const narrative = getNarrative(booking);
           const category = booking.events[0]?.eventType ?? "—";
@@ -352,9 +451,36 @@ const PhotographerBookings = () => {
         },
       },
       {
+        key: "sessionDate",
+        header: "Session Date",
+        width: "15%",
+        render: (booking) => {
+          const firstEvent = booking.events[0];
+          if (!firstEvent?.eventDate) {
+            return <span className="text-xs text-text-secondary/50">—</span>;
+          }
+          return (
+            <div>
+              <div className="flex items-center gap-1.5 text-xs text-white">
+                <Calendar
+                  size={12}
+                  className="flex-shrink-0 text-primary"
+                />
+                <span className="font-medium">{formatDate(firstEvent.eventDate)}</span>
+              </div>
+              {booking.events.length > 1 && (
+                <span className="text-[10px] text-text-secondary/60 block mt-0.5">
+                  +{booking.events.length - 1} more date{booking.events.length > 2 ? "s" : ""}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
         key: "submission",
         header: "Submission",
-        width: "13%",
+        width: "11%",
         render: (booking) => (
           <div className="flex items-center gap-1.5 text-xs text-text-secondary">
             <CalendarDays
@@ -368,7 +494,7 @@ const PhotographerBookings = () => {
       {
         key: "investment",
         header: "Investment",
-        width: "15%",
+        width: "13%",
         render: (booking) => {
           const investment = getInvestment(booking);
 
@@ -388,7 +514,7 @@ const PhotographerBookings = () => {
       {
         key: "status",
         header: "Status",
-        width: "14%",
+        width: "13%",
         render: (booking) => {
           const config =
             STATUS_CONFIG[booking.status] ??
@@ -414,14 +540,14 @@ const PhotographerBookings = () => {
         render: (booking) => (
           <button
             onClick={() => navigate(`/photographer/booking/${booking._id}`)}
-            className="inline-flex items-center justify-center rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-text-secondary transition hover:border-primary/30 hover:bg-white/5 hover:text-primary"
+            className="inline-flex items-center justify-center rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-text-secondary transition hover:border-primary/30 hover:bg-white/5 hover:text-primary cursor-pointer"
           >
             View Details
           </button>
         ),
       },
     ],
-    [openMenuId]
+    [navigate]
   );
 
   /* ── Render ── */
@@ -595,6 +721,142 @@ const PhotographerBookings = () => {
               </div>
             )}
           </div>
+
+          {/* Date filter */}
+          <div className="relative">
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                setDateOpen((value) => !value);
+                setStatusOpen(false);
+                setCategoryOpen(false);
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#111214] border border-white/8 text-sm hover:border-primary/30 transition cursor-pointer select-none"
+            >
+              <Calendar
+                size={13}
+                className="text-primary"
+              />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-text-secondary/50">
+                Date:
+              </span>
+
+              <span className="text-primary font-medium">
+                {DATE_PRESET_LABELS[datePreset]}
+              </span>
+
+              <ChevronDown
+                size={13}
+                className={`text-text-secondary transition-transform ${dateOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {dateOpen && (
+              <div
+                className="absolute top-full left-0 mt-1.5 w-60 bg-[#111214] border border-white/10 rounded-xl shadow-2xl z-20 overflow-hidden p-1.5"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {(
+                  [
+                    "ALL",
+                    "UPCOMING",
+                    "TODAY",
+                    "THIS_WEEK",
+                    "THIS_MONTH",
+                    "PAST",
+                    "CUSTOM",
+                  ] as DatePreset[]
+                ).map((preset) => (
+                  <button
+                    key={preset}
+                    onClick={() => {
+                      setDatePreset(preset);
+                      if (preset !== "CUSTOM") {
+                        setDateOpen(false);
+                      }
+                      setPage(1);
+                    }}
+                    className={`w-full text-left px-3.5 py-2 rounded-lg text-xs transition cursor-pointer flex items-center justify-between ${
+                      datePreset === preset
+                        ? "text-primary bg-primary/10 font-medium"
+                        : "text-text-secondary hover:text-text hover:bg-white/5"
+                    }`}
+                  >
+                    <span>{DATE_PRESET_LABELS[preset]}</span>
+                    {datePreset === preset && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    )}
+                  </button>
+                ))}
+
+                {/* Custom Date Inputs when CUSTOM is selected */}
+                {datePreset === "CUSTOM" && (
+                  <div className="mt-2 pt-2 border-t border-white/10 px-2 pb-1 space-y-2">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1">
+                        From
+                      </label>
+                      <input
+                        type="date"
+                        value={customStartDate}
+                        onChange={(e) => {
+                          setCustomStartDate(e.target.value);
+                          setPage(1);
+                        }}
+                        className="w-full bg-black/60 border border-white/10 rounded-md px-2.5 py-1 text-xs text-text focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1">
+                        To
+                      </label>
+                      <input
+                        type="date"
+                        value={customEndDate}
+                        onChange={(e) => {
+                          setCustomEndDate(e.target.value);
+                          setPage(1);
+                        }}
+                        className="w-full bg-black/60 border border-white/10 rounded-md px-2.5 py-1 text-xs text-text focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDateOpen(false)}
+                      className="w-full mt-1 py-1.5 bg-primary text-black font-semibold text-xs rounded hover:opacity-90 transition cursor-pointer"
+                    >
+                      Apply Range
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Active Date Badge if filtered */}
+          {datePreset !== "ALL" && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-xs text-primary">
+              <Calendar size={12} />
+              <span>
+                {datePreset === "CUSTOM"
+                  ? `${customStartDate || "Start"} - ${customEndDate || "End"}`
+                  : DATE_PRESET_LABELS[datePreset]}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setDatePreset("ALL");
+                  setCustomStartDate("");
+                  setCustomEndDate("");
+                  setPage(1);
+                }}
+                className="hover:opacity-70 p-0.5 cursor-pointer"
+                title="Remove date filter"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Bookings table */}
@@ -617,11 +879,15 @@ const PhotographerBookings = () => {
 
               {(statusFilter !== "ALL" ||
                 categoryFilter !== "ALL" ||
+                datePreset !== "ALL" ||
                 search.trim() !== "") && (
                 <button
                   onClick={() => {
                     setStatusFilter("ALL");
                     setCategoryFilter("ALL");
+                    setDatePreset("ALL");
+                    setCustomStartDate("");
+                    setCustomEndDate("");
                     setSearch("");
                     setPage(1);
                   }}
