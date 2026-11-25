@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import QRCode from "qrcode";
 import {
   AUTH_MESSAGES,
   BOOKING_MESSAGES,
@@ -176,5 +177,34 @@ export class EventService implements IEventService {
     }
 
     return updatedEvent;
+  }
+
+  async generateQRCode(eventId: string, photographerId:string): Promise<Buffer> {
+    if (!eventId) {
+      throw new AppError(HttpStatus.NOT_FOUND, EVENT_MESSAGES.NOT_FOUND);
+    }
+
+    const event = await this._eventRepository.findById(eventId);
+
+    if (!event) {
+      throw new AppError(HttpStatus.NOT_FOUND, EVENT_MESSAGES.NOT_FOUND);
+    }
+
+    if (event.photographerId.toString() !== photographerId) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+    }
+
+    const frontendUrl = process.env.CLIENT_URL;
+
+    const eventUrl = `${frontendUrl}/events/${event.publicId}`;
+
+    const qrCode = await QRCode.toBuffer(eventUrl, {
+      type: "png",
+      width: 500,
+      margin: 2,
+      errorCorrectionLevel: "H",
+    });
+
+    return qrCode;
   }
 }

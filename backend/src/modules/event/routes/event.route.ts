@@ -68,4 +68,9 @@ router.patch(
   eventController.updateEvent.bind(eventController)
 );
 
+router.get(
+    '/:eventId/qr',
+    authenticate,
+    eventController.generateEventQRCode.bind(eventController)
+)
 export default router;

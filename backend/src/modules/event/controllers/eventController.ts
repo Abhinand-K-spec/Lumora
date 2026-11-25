@@ -149,4 +149,38 @@ export class EventController {
       EVENT_MESSAGES.EVENT_UPDATED
     );
   }
+
+  async generateEventQRCode(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    const photographerId = req.user?.id;
+    const eventId = req.params.eventId?.toString();
+  
+    if (!photographerId) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        AUTH_MESSAGES.UNAUTHORIZED
+      );
+    }
+  
+    if (!eventId) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        EVENT_MESSAGES.ID_REQUIRED
+      );
+    }
+  
+    const qrCode = await this._eventService.generateQRCode(
+      eventId,
+      photographerId
+    );
+  
+    res.set({
+      "Content-Type": "image/png",
+      "Content-Disposition": 'inline; filename="event-qr.png"',
+    });
+  
+    res.send(qrCode);
+  }
 }

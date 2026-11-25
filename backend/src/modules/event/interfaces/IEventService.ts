@@ -31,4 +31,9 @@ export interface IEventService {
     photographerId: string,
     data: UpdateEventDTO
   ): Promise<IEvent>;
+
+  generateQRCode(
+    eventId:string,
+    photographerId:string,
+    ): Promise<Buffer>;
 }
