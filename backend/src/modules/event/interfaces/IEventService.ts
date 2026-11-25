@@ -17,6 +17,11 @@ export interface IEventService {
     photographerId: string
   ): Promise<IEvent>;
 
+  getEventByBookingId(
+    bookingId: string,
+    photographerId: string
+  ): Promise<IEvent | null>;
+
   getPublicEvent(
     publicId: string
   ): Promise<IEvent>;

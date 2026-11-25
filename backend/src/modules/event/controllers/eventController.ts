@@ -52,7 +52,7 @@ export class EventController {
 
   async getEventById(req: Request, res: Response): Promise<void> {
     const photographerId = req.user?.id;
-    const eventId = req.params.id?.toString();
+    const eventId = req.params.eventId?.toString();
 
     if (!photographerId) {
       throw new AppError(
@@ -76,6 +76,32 @@ export class EventController {
     sendSuccess(res, { event }, EVENT_MESSAGES.EVENTS_FETCHED);
   }
 
+  async getEventByBookingId(req: Request, res: Response): Promise<void> {
+    const photographerId = req.user?.id;
+    const bookingId = req.params.bookingId?.toString();
+
+    if (!photographerId) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        AUTH_MESSAGES.UNAUTHORIZED
+      );
+    }
+
+    if (!bookingId) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        EVENT_MESSAGES.ID_REQUIRED
+      );
+    }
+
+    const event = await this._eventService.getEventByBookingId(
+      bookingId,
+      photographerId
+    );
+
+    sendSuccess(res, { event }, EVENT_MESSAGES.EVENTS_FETCHED);
+  }
+
   async getPublicEvent(req: Request, res: Response): Promise<void> {
     const publicId = req.params.publicId?.toString();
 
@@ -93,7 +119,7 @@ export class EventController {
 
   async updateEvent(req: Request, res: Response): Promise<void> {
     const photographerId = req.user?.id;
-    const eventId = req.params.id?.toString();
+    const eventId = req.params.eventId?.toString();
 
     if (!photographerId) {
       throw new AppError(

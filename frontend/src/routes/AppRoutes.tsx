@@ -29,6 +29,8 @@ import Bookings from "../pages/user/Bookings";
 import UserPayments from "../pages/user/UserPayments";
 import PhotographerBookings from "../pages/photographer/PhotographerBookings";
 import BookingDetails from "../pages/photographer/PhotographerBookingDetails";
+import PhotographerEvents from "../pages/photographer/PhotographerEvents";
+import PhotographerEventDetails from "../pages/photographer/PhotographerEventDetails";
 import PhotographerFinancials from "../pages/photographer/PhotographerFinancials";
 import ChatPage from "../pages/chat/ChatPage";
 
@@ -91,6 +93,8 @@ const AppRoutes = () => {
             <Route path="/feedPostUpload" element={<CreateFeedPost />} />
             <Route path="/photographer/bookings" element={<PhotographerBookings />} />
             <Route path="/photographer/booking/:bookingId" element={<BookingDetails/>} />
+            <Route path="/photographer/events" element={<PhotographerEvents />} />
+            <Route path="/photographer/events/:eventId" element={<PhotographerEventDetails />} />
             <Route path="/photographer/financials" element={<PhotographerFinancials />} />
             <Route path="/photographer/chat" element={<ChatPage />} />
           </Route>

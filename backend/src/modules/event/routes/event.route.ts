@@ -3,6 +3,11 @@ import { Router } from "express";
 
 
 import { authenticate } from "../../../shared/middlewares/auth.middleware.js";
+import { validate } from "../../../shared/middlewares/validation.middleware.js";
+import {
+  createEventSchema,
+  updateEventSchema,
+} from "../../../shared/validators/event.validator.js";
 import { EventRepository } from "../repositories/EventRepository.js";
 import { BookingRepository } from "../../booking/repositories/BookingRepository.js";
 import { PaymentRepository } from "../../payment/repositories/PaymentRepository.js";
@@ -34,6 +39,7 @@ router.get(
 router.post(
   "/",
   authenticate,
+  validate(createEventSchema),
   eventController.createEvent.bind(eventController)
 );
 
@@ -41,6 +47,12 @@ router.get(
   "/photographer",
   authenticate,
   eventController.getPhotographerEvents.bind(eventController)
+);
+
+router.get(
+  "/booking/:bookingId",
+  authenticate,
+  eventController.getEventByBookingId.bind(eventController)
 );
 
 router.get(
@@ -52,6 +64,7 @@ router.get(
 router.patch(
   "/:eventId",
   authenticate,
+  validate(updateEventSchema),
   eventController.updateEvent.bind(eventController)
 );
 

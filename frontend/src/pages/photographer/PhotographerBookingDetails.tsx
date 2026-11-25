@@ -33,6 +33,8 @@ import bookingService, {
 import quotationService, {
   type QuotationItem,
 } from "../../services/quotationService";
+import eventService from "../../services/eventService";
+import type { EventItem } from "../../types/event.types";
 import { getErrorMessage } from "../../utils/errorUtils";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 import CreateQuotationModal from "../../components/photographer/quotation/CreateQuotationModal";
@@ -181,6 +183,26 @@ const BookingDetails = () => {
   const [quotationLoading, setQuotationLoading] = useState(false);
   const [isSendingQuotation, setIsSendingQuotation] = useState(false);
 
+  const [bookingEvent, setBookingEvent] = useState<EventItem | null>(null);
+  const [eventLoading, setEventLoading] = useState(false);
+  const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+  const [eventName, setEventName] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [creatingEvent, setCreatingEvent] = useState(false);
+
+  const fetchBookingEvent = useCallback(async () => {
+    if (!bookingId) return;
+    try {
+      setEventLoading(true);
+      const res = await eventService.getEventByBookingId(bookingId);
+      setBookingEvent(res.data.data.event ?? null);
+    } catch {
+      setBookingEvent(null);
+    } finally {
+      setEventLoading(false);
+    }
+  }, [bookingId]);
+
   const fetchQuotation = useCallback(async () => {
     if (!bookingId) return;
     try {
@@ -220,6 +242,7 @@ const BookingDetails = () => {
       setBooking(result);
       if (result.status === "ACCEPTED") {
         void fetchQuotation();
+        void fetchBookingEvent();
       }
     } catch (error) {
       const message = getErrorMessage(error, "Unable to load booking details.");
@@ -229,7 +252,37 @@ const BookingDetails = () => {
     } finally {
       setLoading(false);
     }
-  }, [bookingId]);
+  }, [bookingId, fetchBookingEvent]);
+
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bookingId || creatingEvent) return;
+
+    const trimmedName = eventName.trim();
+    if (!trimmedName) {
+      toast.error("Please enter an event name.");
+      return;
+    }
+
+    try {
+      setCreatingEvent(true);
+      const res = await eventService.createEvent({
+        bookingId,
+        name: trimmedName,
+        ...(eventDescription.trim() ? { description: eventDescription.trim() } : {}),
+      });
+      const created = res.data.data.event;
+      setBookingEvent(created);
+      setIsCreateEventModalOpen(false);
+      setEventName("");
+      setEventDescription("");
+      toast.success("Event created successfully.");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to create event."));
+    } finally {
+      setCreatingEvent(false);
+    }
+  };
 
   useEffect(() => {
     void fetchBooking();
@@ -1068,6 +1121,68 @@ const BookingDetails = () => {
               </div>
             </section>
 
+            {/* Event Management */}
+            {booking.status === "ACCEPTED" && (
+              <section className="rounded-2xl border border-white/[0.07] bg-[#101010] p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Camera size={16} className="text-primary" />
+                  <h2 className="font-heading text-lg text-white">
+                    Event Management
+                  </h2>
+                </div>
+
+                {eventLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <LoaderCircle className="animate-spin text-primary" size={18} />
+                  </div>
+                ) : bookingEvent ? (
+                  <div className="space-y-3">
+                    <div className="rounded-xl border border-white/[0.06] bg-[#070708] p-3.5 space-y-1">
+                      <p className="text-sm font-medium text-white truncate">
+                        {bookingEvent.name}
+                      </p>
+                      <p className="text-[11px] uppercase tracking-wider text-primary">
+                        {bookingEvent.status}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/photographer/events/${bookingEvent._id}`)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-black hover:bg-primary/90 transition cursor-pointer"
+                    >
+                      Manage Event
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                ) : booking.advancePaid > 0 ||
+                  booking.paymentStatus === "PARTIALLY_PAID" ||
+                  booking.paymentStatus === "PAID" ? (
+                  <div className="space-y-3">
+                    <p className="text-xs leading-relaxed text-text-secondary">
+                      Advance payment is received. Create an event to manage this shoot and its programs.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setEventName(
+                          events[0]?.eventType
+                            ? `${client?.name || "Client"} — ${events[0].eventType}`
+                            : ""
+                        );
+                        setIsCreateEventModalOpen(true);
+                      }}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-black hover:bg-primary/90 transition cursor-pointer"
+                    >
+                      <Plus size={14} />
+                      Create Event
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs leading-relaxed text-text-secondary">
+                    Event creation unlocks once the client completes the advance payment.
+                  </p>
+                )}
+              </section>
+            )}
+
             {/* Workflow note */}
             <section className="rounded-2xl border border-white/[0.06] bg-[#0d0d0d] p-5">
               <div className="flex items-start gap-3">
@@ -1105,6 +1220,80 @@ const BookingDetails = () => {
           onClose={() => setIsQuotationModalOpen(false)}
           onSuccess={(newQuo) => setQuotation(newQuo)}
         />
+
+        {isCreateEventModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#101010] p-6 space-y-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                    New Event
+                  </span>
+                  <h3 className="font-heading text-xl text-white mt-0.5">
+                    Create Event
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsCreateEventModalOpen(false)}
+                  className="text-text-secondary hover:text-white transition cursor-pointer"
+                >
+                  <XCircle size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateEvent} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-text-secondary">
+                    Event Name
+                  </label>
+                  <input
+                    type="text"
+                    value={eventName}
+                    onChange={(e) => setEventName(e.target.value)}
+                    placeholder="e.g. Ananya & Rahul Wedding"
+                    maxLength={150}
+                    required
+                    className="w-full rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs text-white placeholder:text-text-secondary/40 focus:border-primary/40 focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-text-secondary">
+                    Description (Optional)
+                  </label>
+                  <textarea
+                    value={eventDescription}
+                    onChange={(e) => setEventDescription(e.target.value)}
+                    rows={3}
+                    maxLength={1000}
+                    placeholder="Brief overview or shoot notes..."
+                    className="w-full rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs text-white placeholder:text-text-secondary/40 focus:border-primary/40 focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateEventModalOpen(false)}
+                    className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-medium text-text-secondary hover:text-white transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creatingEvent}
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-black hover:bg-primary/90 disabled:opacity-60 transition cursor-pointer"
+                  >
+                    {creatingEvent && (
+                      <LoaderCircle size={13} className="animate-spin" />
+                    )}
+                    {creatingEvent ? "Creating..." : "Create Event"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <footer className="mt-12 flex flex-col gap-3 border-t border-white/[0.06] pt-6 text-[10px] text-text-secondary/40 sm:flex-row sm:items-center sm:justify-between">

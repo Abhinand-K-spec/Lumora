@@ -50,6 +50,14 @@ const API_ENDPOINTS = {
       USER_QUOTATIONS: "/quotation/user",
       PHOTOGRAPHER_QUOTATIONS: "/quotation/photographer",
     },
+
+    EVENTS: {
+      BASE: "/event",
+      PHOTOGRAPHER: "/event/photographer",
+      BY_BOOKING: (bookingId: string) => `/event/booking/${bookingId}`,
+      BY_ID: (id: string) => `/event/${id}`,
+      PUBLIC: (publicId: string) => `/event/public/${publicId}`,
+    },
   
     FEED: {
       BASE: "/feed",

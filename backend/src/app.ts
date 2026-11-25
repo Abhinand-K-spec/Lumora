@@ -15,6 +15,7 @@ import quotationRouter from './modules/quotation/routes/quotation.route.js';
 import availabilityRoutes from './modules/availability/routes/availability.routes.js';
 import paymentRoutes from './modules/payment/routes/payment.route.js';
 import chatRoutes from './modules/chat/routes/chat.route.js';
+import eventRoutes from './modules/event/routes/event.route.js';
 import dotenv from "dotenv";
 import { errorHandler } from "./shared/middlewares/error.handler.middleware.js";
 import { COMMON_MESSAGES } from "./shared/constants/message.constant.js";
@@ -55,6 +56,7 @@ app.use('/api/quotation', quotationRouter);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/chat',chatRoutes);
+app.use('/api/event',eventRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({

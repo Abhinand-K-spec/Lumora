@@ -86,7 +86,8 @@ const PhotographerLayout = () => {
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive =
-                item.path === "/photographer/bookings"
+                item.path === "/photographer/bookings" ||
+                item.path === "/photographer/events"
                   ? location.pathname.startsWith(item.path)
                   : location.pathname === item.path;
               return (

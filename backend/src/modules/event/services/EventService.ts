@@ -9,7 +9,7 @@ import { AppError } from "../../../shared/errors/AppError";
 import type { IEvent } from "../../../shared/interfaces/iEvent";
 import type { IBookingRepository } from "../../booking/interfaces/IBookingRepository";
 import type { IPaymentRepository } from "../../payment/interfaces/IPaymentRepository";
-import type { CreateEventDTO } from "../dtos/createEventDto";
+import type { CreateEventDTO, UpdateEventDTO } from "../dtos/createEventDto";
 import type { IEventRepository } from "../interfaces/IEventRepository";
 import type { IEventService } from "../interfaces/IEventService";
 
@@ -115,6 +115,23 @@ export class EventService implements IEventService {
     return event;
   }
 
+  async getEventByBookingId(
+    bookingId: string,
+    photographerId: string
+  ): Promise<IEvent | null> {
+    const event = await this._eventRepository.findByBookingId(bookingId);
+
+    if (!event) {
+      return null;
+    }
+
+    if (event.photographerId.toString() !== photographerId) {
+      throw new AppError(HttpStatus.FORBIDDEN, AUTH_MESSAGES.UNAUTHORIZED);
+    }
+
+    return event;
+  }
+
   async getPublicEvent(publicId: string): Promise<IEvent> {
     const event = await this._eventRepository.findByPublicId(publicId);
 
@@ -132,7 +149,7 @@ export class EventService implements IEventService {
   async updateEvent(
     eventId: string,
     photographerId: string,
-    data: Partial<CreateEventDTO>
+    data: UpdateEventDTO
   ): Promise<IEvent> {
     const event = await this.getEventById(eventId, photographerId);
 
@@ -144,6 +161,9 @@ export class EventService implements IEventService {
         }),
         ...(data.description !== undefined && {
           description: data.description.trim(),
+        }),
+        ...(data.status !== undefined && {
+          status: data.status,
         }),
       }
     );
