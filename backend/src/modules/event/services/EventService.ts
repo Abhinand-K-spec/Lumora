@@ -179,9 +179,9 @@ export class EventService implements IEventService {
     return updatedEvent;
   }
 
-  async generateQRCode(eventId: string, photographerId:string): Promise<Buffer> {
+  async generateQRCode(eventId: string, photographerId: string): Promise<Buffer> {
     if (!eventId) {
-      throw new AppError(HttpStatus.NOT_FOUND, EVENT_MESSAGES.NOT_FOUND);
+      throw new AppError(HttpStatus.BAD_REQUEST, EVENT_MESSAGES.ID_REQUIRED);
     }
 
     const event = await this._eventRepository.findById(eventId);
@@ -191,10 +191,16 @@ export class EventService implements IEventService {
     }
 
     if (event.photographerId.toString() !== photographerId) {
-      throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
+      throw new AppError(HttpStatus.FORBIDDEN, AUTH_MESSAGES.UNAUTHORIZED);
     }
 
-    const frontendUrl = process.env.CLIENT_URL;
+    const frontendUrl = (process.env.CLIENT_URL ?? "").replace(/\/+$/, "");
+    if (!frontendUrl) {
+      throw new AppError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Client URL is not configured"
+      );
+    }
 
     const eventUrl = `${frontendUrl}/events/${event.publicId}`;
 

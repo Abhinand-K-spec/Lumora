@@ -18,7 +18,9 @@ export class EventRepository extends BaseRepository<IEvent> implements IEventRep
       async findByPublicId(
         publicId: string
       ): Promise<IEvent | null> {
-        return await this._model.findOne({ publicId });
+        return await this._model
+          .findOne({ publicId })
+          .populate("photographerId", "name email");
       }
     
       async findByPhotographerId(

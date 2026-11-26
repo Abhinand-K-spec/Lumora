@@ -11,10 +11,16 @@ export interface EventProgram {
     | "COMPLETED"
     | "CANCELLED";
   
+  export interface EventPhotographerInfo {
+    _id: string;
+    name: string;
+    email?: string;
+  }
+
   export interface EventItem {
     _id: string;
     bookingId: string;
-    photographerId: string;
+    photographerId: string | EventPhotographerInfo;
     userId: string;
     name: string;
     description?: string;

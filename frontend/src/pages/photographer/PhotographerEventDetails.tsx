@@ -10,6 +10,9 @@ import {
   Save,
   ExternalLink,
   Layers,
+  QrCode,
+  Download,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +70,17 @@ export default function PhotographerEventDetails() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<EventStatus>("UPCOMING");
 
+  const [qrUrl, setQrUrl] = useState("");
+  const [qrLoading, setQrLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (qrUrl) {
+        URL.revokeObjectURL(qrUrl);
+      }
+    };
+  }, [qrUrl]);
+
   const fetchEvent = useCallback(async () => {
     if (!eventId) return;
     try {
@@ -115,6 +129,34 @@ export default function PhotographerEventDetails() {
       toast.error(getErrorMessage(err, "Failed to update event."));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleGenerateQr = async () => {
+    if (!eventId || qrLoading) return;
+    try {
+      setQrLoading(true);
+      const response = await eventService.getEventQR(eventId);
+      const url = URL.createObjectURL(response.data);
+      setQrUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to generate event QR code."));
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const handleCopyEventLink = async () => {
+    if (!event) return;
+    const shareUrl = `${window.location.origin}/events/${event.publicId}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Event link copied to clipboard.");
+    } catch {
+      toast.error("Failed to copy link.");
     }
   };
 
@@ -226,20 +268,24 @@ export default function PhotographerEventDetails() {
                   {program.location && (
                     <div className="flex items-center justify-between gap-2 text-xs text-text-secondary">
                       <span className="inline-flex items-center gap-1.5">
-                        <MapPin size={13} className="text-text-secondary/70 shrink-0" />
+                        <MapPin
+                          size={13}
+                          className="text-text-secondary/70 shrink-0"
+                        />
                         {program.location}
                       </span>
 
-                      {program.coordinates && program.coordinates.length === 2 && (
-                        <a
-                          href={`https://www.google.com/maps?q=${program.coordinates[1]},${program.coordinates[0]}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline shrink-0"
-                        >
-                          Map <ExternalLink size={11} />
-                        </a>
-                      )}
+                      {program.coordinates &&
+                        program.coordinates.length === 2 && (
+                          <a
+                            href={`https://www.google.com/maps?q=${program.coordinates[1]},${program.coordinates[0]}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline shrink-0"
+                          >
+                            Map <ExternalLink size={11} />
+                          </a>
+                        )}
                     </div>
                   )}
                 </div>
@@ -247,83 +293,150 @@ export default function PhotographerEventDetails() {
             </div>
           </section>
 
-          {/* Edit Event Form */}
-          <section className="lg:col-span-5 rounded-2xl border border-white/[0.07] bg-[#101010] p-6 space-y-5 self-start">
-            <div className="border-b border-white/[0.08] pb-4">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
-                Settings
-              </span>
-              <h2 className="font-heading text-lg text-white mt-0.5">
-                Update Event
-              </h2>
-            </div>
-
-            <form onSubmit={handleSave} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-text-secondary">
-                  Event Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  maxLength={150}
-                  required
-                  className="w-full rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs text-white focus:border-primary/40 focus:outline-none"
-                />
+          {/* Right Column: Update Event & QR Code */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Edit Event Form */}
+            <section className="rounded-2xl border border-white/[0.07] bg-[#101010] p-6 space-y-5">
+              <div className="border-b border-white/[0.08] pb-4">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                  Settings
+                </span>
+                <h2 className="font-heading text-lg text-white mt-0.5">
+                  Update Event
+                </h2>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-text-secondary">
-                  Description
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  maxLength={1000}
-                  placeholder="Add notes or overview for this event..."
-                  className="w-full rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs text-white placeholder:text-text-secondary/40 focus:border-primary/40 focus:outline-none resize-none"
-                />
-              </div>
+              <form onSubmit={handleSave} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-text-secondary">
+                    Event Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={150}
+                    required
+                    className="w-full rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs text-white focus:border-primary/40 focus:outline-none"
+                  />
+                </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-text-secondary">
-                  Status
-                </label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as EventStatus)}
-                  className="w-full rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs text-white focus:border-primary/40 focus:outline-none"
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-text-secondary">
+                    Description
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={4}
+                    maxLength={1000}
+                    placeholder="Add notes or overview for this event..."
+                    className="w-full rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs text-white placeholder:text-text-secondary/40 focus:border-primary/40 focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-text-secondary">
+                    Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as EventStatus)}
+                    className="w-full rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs text-white focus:border-primary/40 focus:outline-none"
+                  >
+                    <option value="UPCOMING">Upcoming</option>
+                    <option value="ONGOING">Ongoing</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-black hover:bg-primary/90 disabled:opacity-60 transition cursor-pointer"
                 >
-                  <option value="UPCOMING">Upcoming</option>
-                  <option value="ONGOING">Ongoing</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
+                  {saving ? (
+                    <LoaderCircle size={14} className="animate-spin" />
+                  ) : (
+                    <Save size={14} />
+                  )}
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </form>
+
+              <div className="rounded-xl border border-white/[0.06] bg-[#070708] p-3.5 flex items-center gap-2.5 text-[11px] text-text-secondary">
+                <CheckCircle2 size={14} className="text-primary shrink-0" />
+                <span>Created on {formatDate(event.createdAt)}</span>
+              </div>
+            </section>
+
+            {/* Event QR Code */}
+            <section className="rounded-2xl border border-white/[0.07] bg-[#101010] p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                    Share Access
+                  </span>
+                  <h2 className="font-heading text-lg text-white mt-0.5">
+                    Event QR Code
+                  </h2>
+                </div>
+                <QrCode size={18} className="text-primary/70" />
               </div>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-black hover:bg-primary/90 disabled:opacity-60 transition cursor-pointer"
-              >
-                {saving ? (
-                  <LoaderCircle size={14} className="animate-spin" />
-                ) : (
-                  <Save size={14} />
-                )}
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </form>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Generate a scannable QR code for guests to access this event.
+              </p>
 
-            <div className="rounded-xl border border-white/[0.06] bg-[#070708] p-3.5 flex items-center gap-2.5 text-[11px] text-text-secondary">
-              <CheckCircle2 size={14} className="text-primary shrink-0" />
-              <span>
-                Created on {formatDate(event.createdAt)}
-              </span>
-            </div>
-          </section>
+              {qrUrl ? (
+                <div className="space-y-4">
+                  <div className="flex justify-center rounded-xl border border-white/[0.08] bg-[#070708] p-4">
+                    <div className="rounded-xl bg-white p-3">
+                      <img
+                        src={qrUrl}
+                        alt="Event QR Code"
+                        className="h-44 w-44 object-contain"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <a
+                      href={qrUrl}
+                      download={`${event.name.trim().replace(/\s+/g, "-").toLowerCase() || "event"}-qr.png`}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3.5 py-2.5 text-xs font-bold text-black hover:bg-primary/90 transition"
+                    >
+                      <Download size={14} />
+                      Download
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => void handleCopyEventLink()}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] bg-[#070708] px-3.5 py-2.5 text-xs font-medium text-text-secondary hover:border-primary/30 hover:text-white transition cursor-pointer"
+                    >
+                      <Copy size={14} />
+                      Copy Link
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleGenerateQr()}
+                  disabled={qrLoading}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-xs font-semibold text-primary hover:bg-primary/20 disabled:opacity-60 transition cursor-pointer"
+                >
+                  {qrLoading ? (
+                    <LoaderCircle size={14} className="animate-spin" />
+                  ) : (
+                    <QrCode size={14} />
+                  )}
+                  {qrLoading ? "Generating QR..." : "Generate QR Code"}
+                </button>
+              )}
+            </section>
+          </div>
         </div>
       </div>
     </div>

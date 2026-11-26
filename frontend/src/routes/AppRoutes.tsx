@@ -31,6 +31,7 @@ import PhotographerBookings from "../pages/photographer/PhotographerBookings";
 import BookingDetails from "../pages/photographer/PhotographerBookingDetails";
 import PhotographerEvents from "../pages/photographer/PhotographerEvents";
 import PhotographerEventDetails from "../pages/photographer/PhotographerEventDetails";
+import PublicEventPage from "../pages/public/PublicEventPage";
 import PhotographerFinancials from "../pages/photographer/PhotographerFinancials";
 import ChatPage from "../pages/chat/ChatPage";
 
@@ -75,6 +76,7 @@ const AppRoutes = () => {
         <Route path="/verifyEmail" element={<VerifyEmailPage />} />
         <Route path="/resetPassword" element={<ResetPasswordPage />} />
         <Route path="/forgotPassword" element={<ForgetPassword />} />
+        <Route path="/events/:publicId" element={<PublicEventPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<RoleBasedLayout />}>

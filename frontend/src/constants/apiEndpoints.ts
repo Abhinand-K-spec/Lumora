@@ -57,6 +57,7 @@ const API_ENDPOINTS = {
       BY_BOOKING: (bookingId: string) => `/event/booking/${bookingId}`,
       BY_ID: (id: string) => `/event/${id}`,
       PUBLIC: (publicId: string) => `/event/public/${publicId}`,
+      QR : (id:string) => `/event/${id}/qr`
     },
   
     FEED: {

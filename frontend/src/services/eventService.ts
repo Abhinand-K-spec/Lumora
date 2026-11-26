@@ -45,6 +45,10 @@ const eventService = {
       API_ENDPOINTS.EVENTS.BY_ID(eventId),
       payload
     ),
+  getEventQR: (eventId: string) =>
+    api.get<Blob>(API_ENDPOINTS.EVENTS.QR(eventId), {
+      responseType: "blob",
+    }),
 };
 
 export default eventService;
