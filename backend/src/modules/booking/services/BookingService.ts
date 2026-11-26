@@ -159,6 +159,10 @@ export class BookingService implements IBookingService {
         throw new AppError(HttpStatus.UNAUTHORIZED, AUTH_MESSAGES.UNAUTHORIZED);
       }
     }
+
+    if(booking.status === "REJECTED"){
+      throw new AppError(HttpStatus.BAD_REQUEST,"Booking has already rejected");
+    }
     const updated = await this._bookingRepository.updateStatus(
       bookingId,
       status,
